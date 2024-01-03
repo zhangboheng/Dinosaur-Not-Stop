@@ -27,9 +27,14 @@ export default class Scene2 {
     this.roadHeight = 60; // 道路的高度
     // 陷阱
     this.traps = [];
-    this.trapWidth = 10; // 陷阱的宽度
+    this.trapWidth = 24; // 陷阱的宽度
     this.trapInterval = 30; // 陷阱间的最小间隔
     this.nextTrapAt = this.randomInterval(this.trapInterval, this.trapInterval * 2); // 下一个陷阱的初始位置
+    // 加载陷阱图片
+    this.trapImage = new Image();
+    this.trapImage.src = 'image/spikes.png'
+    this.trapTimer = 0; // 陷阱生成计时器
+    this.trapInterval = 200; // 陷阱生成的间隔（以帧计）
     // 创建返回按钮
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top - 15, 'image/reply.png', () => {
       this.game.switchScene(new this.game.scene1(this.game));
@@ -43,12 +48,31 @@ export default class Scene2 {
     this.jumpHeight = -10; // 跳跃的初始速度
     this.velocityY = 0; // 纵向速度
     this.canDoubleJump = true; // 添加二段跳的标志
+    this.dinoImages = [];
+    for (let i = 0; i <= 4; i++) { // 假设有 n 帧动画
+      const img = new Image();
+      img.src = `image/dino_${i}.png`;
+      this.dinoImages.push(img);
+    }
+    this.currentDinoFrame = 0;
+    this.dinoFrameInterval = 5; // 控制帧切换速度
+    this.dinoFrameTimer = 0;
     // 初始化分数
     this.score = 0;
     this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
     this.speedIncreasedStageSecond = false; // 标志游戏速度是否已经加快
     // 游戏状态
     this.gameOver = false;
+  }
+  // 绘制道路
+  drawRoad() {
+    if (this.roadImage.complete) {
+      const roadY = this.canvas.height - this.roadHeight - 10;
+      this.context.drawImage(this.roadImage, this.roadX, roadY);
+      if (this.roadX < 0) {
+        this.context.drawImage(this.roadImage, this.roadX + this.roadWidth, roadY);
+      }
+    }
   }
   // 更新道路状态
   updateRoad() {
@@ -65,23 +89,23 @@ export default class Scene2 {
       }
       // 检查分数是否达到12000分，并且尚未加速
       if (this.score >= 10000 && !this.speedIncreasedStageSecond) {
-        this.roadSpeed += 0.5; // 增加道路速度
+        this.roadSpeed += 1; // 增加道路速度
         this.speedIncreasedStageSecond = true; // 标记已经加速
-      }
-    }
-  }
-  // 绘制道路
-  drawRoad() {
-    if (this.roadImage.complete) {
-      const roadY = this.canvas.height - this.roadHeight - 10;
-      this.context.drawImage(this.roadImage, this.roadX, roadY);
-      if (this.roadX < 0) {
-        this.context.drawImage(this.roadImage, this.roadX + this.roadWidth, roadY);
       }
     }
   }
   randomInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+  // 绘制陷阱位置
+  drawTraps() {
+    const trapBaseY = this.canvas.height - this.roadHeight - this.trapImage.height;
+    this.traps.forEach(trap => {
+      // 绘制陷阱图片
+      if (this.trapImage.complete) {
+        this.context.drawImage(this.trapImage, trap.x, trapBaseY);
+      }
+    });
   }
   // 更新陷阱位置
   updateTraps() {
@@ -92,23 +116,25 @@ export default class Scene2 {
       // 移除已经离开屏幕的陷阱
       this.traps = this.traps.filter(trap => trap.x + this.trapWidth > 0);
       // 根据道路位置和间隔添加新陷阱
-      if (this.roadX <= -this.nextTrapAt) {
-        // 生成 10 到 30 之间的随机间隔
-        const randomGap = Math.floor(Math.random() * 30) + 30; // 产生 10 到 30 之间的数
-        const randomNumber = [1.2, 2, 3, 4][Math.floor(Math.random() * 4)]
-        this.traps.push({
-          x: this.canvas.width
-        }); // 陷阱从屏幕右侧出现
-        this.nextTrapAt = this.canvas.width - this.randomInterval(randomGap, randomGap * randomNumber);
+      // 更新计时器
+      this.trapTimer++;
+      // 当计时器达到间隔时，生成新的陷阱
+      if (this.trapTimer >= this.trapInterval) {
+        const numberOfTraps = Math.floor(Math.random() * 6) + 1;
+        let lastTrapX = this.canvas.width;
+        for (let i = 0; i < numberOfTraps; i++) {
+          // 为每个陷阱计算随机间隔
+          const gap = Math.floor(Math.random() * 60) + 150; // 间隔（50到200像素之间）
+          lastTrapX += gap;
+          // 添加陷阱
+          this.traps.push({
+            x: lastTrapX
+          });
+        }
+        // 重置计时器
+        this.trapTimer = 0;
       }
     }
-  }
-  // 绘制陷阱位置
-  drawTraps() {
-    this.context.fillStyle = 'black';
-    this.traps.forEach(trap => {
-      this.context.fillRect(trap.x, this.canvas.height - this.roadHeight, this.trapWidth, this.roadHeight);
-    });
   }
   // 画面全部绘制
   draw() {
@@ -130,17 +156,17 @@ export default class Scene2 {
     this.drawRoad();
     // 绘制移动的陷阱
     this.drawTraps();
-    // 绘制圆球
+    // 绘制小恐龙
     if (!this.gameOver) {
-      this.context.beginPath();
-      this.context.arc(this.circleX, this.circleY, this.circleRadius, 0, Math.PI * 2);
-      this.context.fillStyle = 'blue';
-      this.context.fill();
+      const dinoImg = this.dinoImages[this.currentDinoFrame];
+      if (dinoImg.complete) {
+        this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
+      }
     } else {
-      this.context.beginPath();
-      this.context.arc(this.circleX, this.circleY, this.circleRadius, 0, Math.PI * 2);
-      this.context.fillStyle = 'blue';
-      this.context.fill();
+      const dinoImg = this.dinoImages[this.currentDinoFrame];
+      if (dinoImg.complete) {
+        this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
+      }
     }
     // 绘制分数
     this.context.fillStyle = 'black';
@@ -149,8 +175,8 @@ export default class Scene2 {
     this.context.textBaseline = 'middle'; // 垂直居中
     this.context.fillText('分数: ' + this.score, this.canvas.width / 2, menuButtonInfo.top + 20);
   }
+  // 游戏更新事件
   update() {
-    // 更新圆球位置
     if (!this.gameOver) {
       this.backgroundX -= this.backgroundSpeed;
       if (this.backgroundX <= -this.canvas.width) {
@@ -162,6 +188,12 @@ export default class Scene2 {
         this.roadX = 0;
       }
       this.updateTraps();
+      // 更新小恐龙图片切换
+      this.dinoFrameTimer++;
+      if (this.dinoFrameTimer >= this.dinoFrameInterval) {
+        this.currentDinoFrame = (this.currentDinoFrame + 1) % this.dinoImages.length;
+        this.dinoFrameTimer = 0;
+      }
       this.velocityY += this.gravity;
       this.circleY += this.velocityY;
       // 检测与道路的碰撞
@@ -175,24 +207,54 @@ export default class Scene2 {
       }
       // 检测与陷阱的碰撞
       this.traps.forEach(trap => {
-        if (this.circleX + this.circleRadius - 10 > trap.x &&
-          this.circleX - this.circleRadius + 10 < trap.x + this.trapWidth && this.circleY + this.circleRadius >= this.canvas.height - this.roadHeight) {
+        // 定义三角形尖刺的三个顶点
+        const p1 = {
+          x: trap.x,
+          y: this.canvas.height - this.roadHeight
+        };
+        const p2 = {
+          x: trap.x + this.trapWidth / 2,
+          y: this.canvas.height - this.roadHeight - 20
+        };
+        const p3 = {
+          x: trap.x + this.trapWidth,
+          y: this.canvas.height - this.roadHeight
+        };
+        // 检查小恐龙是否与三角形的每条边发生碰撞
+        if (this.pointToLineDistance(this.circleX + 10, this.circleY, p1.x, p1.y, p2.x, p2.y) < this.circleRadius ||
+          this.pointToLineDistance(this.circleX, this.circleY, p2.x, p2.y, p3.x, p3.y) < this.circleRadius ||
+          this.pointToLineDistance(this.circleX - 3, this.circleY, p3.x, p3.y, p1.x, p1.y) < this.circleRadius) {
           this.gameOver = true;
         }
       });
     }
     // 如果游戏结束，显示 Game Over
     if (this.gameOver) {
-      // 设置文本样式
-      this.context.fillStyle = 'red';
-      this.context.font = '30px Arial';
+      // 定义矩形框的尺寸和位置
+      const rectWidth = 200;
+      const rectHeight = 60;
+      const rectX = (this.canvas.width - rectWidth) / 2;
+      const rectY = (this.canvas.height - rectHeight) / 2;
 
-      // 计算文本的位置
+      // 绘制黄色矩形框
+      this.context.fillStyle = '#f5d659';
+      this.context.fillRect(rectX, rectY, rectWidth, rectHeight);
+
+      // 绘制黑色描边
+      this.context.strokeStyle = 'black';
+      this.context.lineWidth = 3;
+      this.context.strokeRect(rectX, rectY, rectWidth, rectHeight);
+
+      // 设置文本样式
+      this.context.fillStyle = 'black';
+      this.context.font = 'bold 30px';
+
+      // 计算文本的位置（矩形框中心）
       const textX = this.canvas.width / 2;
-      const textY = this.canvas.height / 2;
+      const textY = rectY + rectHeight / 2 + 2;
 
       // 绘制文本
-      this.context.fillText('Game Over', textX, textY);
+      this.context.fillText('游戏结束', textX, textY);
     }
   }
   touchHandler(e) {
@@ -200,17 +262,11 @@ export default class Scene2 {
     const canvasRect = this.canvas.getBoundingClientRect();
     const touchX = touch.clientX - canvasRect.left;
     const touchY = touch.clientY - canvasRect.top;
-
     const btn = this.backButton;
     if (touchX >= btn.x && touchX <= btn.x + btn.width &&
       touchY >= btn.y && touchY <= btn.y + btn.height) {
       btn.onClick();
       this.gameOver = false;
-    }
-    // 游戏结束，点击屏幕重置游戏
-    if (this.gameOver) {
-      this.resetGame();
-      return; // 返回，不再执行后续代码
     }
     if (!this.gameOver && (this.isOnGround || this.canDoubleJump)) {
       this.velocityY = this.jumpHeight;
@@ -226,7 +282,6 @@ export default class Scene2 {
     // 重置道路和陷阱位置
     this.roadX = 0;
     this.traps = [];
-
     // 重置圆球位置和状态
     this.circleY = this.canvas.height - this.roadHeight - 50;
     this.velocityY = 0;
@@ -242,5 +297,32 @@ export default class Scene2 {
   destroy() {
     // 清理资源，如图片
     this.backButton.image.src = '';
+  }
+  // 点到线距离公共方法
+  pointToLineDistance(x, y, x1, y1, x2, y2) {
+    const A = x - x1;
+    const B = y - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
+    if (lenSq !== 0) { // 线段长度不为零
+      param = dot / lenSq;
+    }
+    let xx, yy;
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    } else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    } else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+    const dx = x - xx;
+    const dy = y - yy;
+    return Math.sqrt(dx * dx + dy * dy);
   }
 }
