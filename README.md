@@ -1,2 +1,2 @@
 # DinosaurNotStop
- A interesting Dinosaur Game
+ An Interesting Dinosaur Game
