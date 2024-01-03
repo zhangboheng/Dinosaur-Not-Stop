@@ -11,7 +11,7 @@ export default class Scene1 {
     this.context = game.context;
     this.context.scale(devicePixelRatio, devicePixelRatio);
     this.backgroundImage = new Image();
-    this.backgroundImage.src = 'image/background.png'; // 替换为你的背景图片路径
+    this.backgroundImage.src = 'image/background.jpg'; // 替换为你的背景图片路径
     // 设置开始按钮的基础设置
     this.buttonWidth = 180;
     this.buttonHeight = 50;
@@ -23,7 +23,6 @@ export default class Scene1 {
     this.secondButtonX = this.buttonX;
     this.secondButtonY = this.buttonY + this.buttonHeight + 10; // 20 像素的间距
   }
-
   draw() {
     // 白色背景
     this.context.fillStyle = 'white';
@@ -35,13 +34,11 @@ export default class Scene1 {
     // 开始按钮
     drawRoundedRect(this.context, this.buttonX, this.buttonY, this.buttonWidth, this.buttonHeight, 10, '#f5d659', 'black', 3);
     drawRoundedRect(this.context, this.secondButtonX, this.secondButtonY, this.secondButtonWidth, this.secondButtonHeight, 10, '#f5d659', 'black', 3);
-
     // 按钮文字
     this.context.fillStyle = 'black';
     this.context.font = 'bold 16px Arial';
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
-
     // 将文本的y坐标设置为按钮的垂直中心
     this.context.fillText('开始游戏', this.buttonX + this.buttonWidth / 2, this.buttonY + this.buttonHeight / 2 + 2);
     this.context.fillText('玩法说明', this.secondButtonX + this.secondButtonWidth / 2, this.secondButtonY + this.secondButtonHeight / 2 + 2);

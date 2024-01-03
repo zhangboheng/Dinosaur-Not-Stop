@@ -23,8 +23,8 @@ export default class Scene2 {
     this.backgroundSpeed = 2; // 背景移动速度，可以调整以匹配道路速度
     // 加载道路图片
     this.roadImage = new Image();
-    this.roadImage.src = 'image/yard.png'; // 替换为你的道路图片路径
-    this.roadHeight = 60; // 道路的高度
+    this.roadImage.src = 'image/yard.jpg'; // 替换为你的道路图片路径
+    this.roadHeight = 300; // 道路的高度
     // 陷阱
     this.traps = [];
     this.trapWidth = 24; // 陷阱的宽度
@@ -39,11 +39,11 @@ export default class Scene2 {
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top - 15, 'image/reply.png', () => {
       this.game.switchScene(new this.game.scene1(this.game));
     });
-    // 圆球属性
+    // 小恐龙属性
     this.isOnGround = true; // 添加地面接触标志
-    this.circleX = 50; // 圆球的初始横坐标
-    this.circleY = this.canvas.height - this.roadHeight - 50; // 圆球的初始纵坐标
-    this.circleRadius = 15; // 圆球的半径
+    this.circleX = 50; // 小恐龙的初始横坐标
+    this.circleY = this.canvas.height - this.roadHeight - 50; // 小恐龙的初始纵坐标
+    this.circleRadius = 15; // 小恐龙的半径
     this.gravity = 0.5; // 重力加速度
     this.jumpHeight = -10; // 跳跃的初始速度
     this.velocityY = 0; // 纵向速度
@@ -57,10 +57,18 @@ export default class Scene2 {
     this.currentDinoFrame = 0;
     this.dinoFrameInterval = 5; // 控制帧切换速度
     this.dinoFrameTimer = 0;
+    this.dinoJumpUpImage = new Image();
+    this.dinoJumpUpImage.src = 'image/dino_jump_up.png';
+    this.dinoJumpDownImage = new Image();
+    this.dinoJumpDownImage.src = 'image/dino_jump_down.png';
     // 初始化分数
     this.score = 0;
     this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
     this.speedIncreasedStageSecond = false; // 标志游戏速度是否已经加快
+    // 消息提示
+    this.speedIncreaseMessage = "Speed + 1";
+    this.messageDisplayTime = 0; // 消息显示的持续时间（以帧计）
+    this.messageDuration = 180;
     // 游戏状态
     this.gameOver = false;
   }
@@ -86,6 +94,11 @@ export default class Scene2 {
       if (this.score >= 6000 && !this.speedIncreasedStageFirst) {
         this.roadSpeed += 1; // 增加道路速度
         this.speedIncreasedStageFirst = true; // 标记已经加速
+        this.messageDisplayTime = this.messageDuration;
+      }
+      // 如果消息正在显示，减少显示时间
+      if (this.messageDisplayTime > 0) {
+        this.messageDisplayTime--;
       }
       // 检查分数是否达到12000分，并且尚未加速
       if (this.score >= 10000 && !this.speedIncreasedStageSecond) {
@@ -152,28 +165,32 @@ export default class Scene2 {
     if (this.backButton.image.complete) {
       this.context.drawImage(this.backButton.image, this.backButton.x, this.backButton.y);
     }
-    // 绘制移动的道路
-    this.drawRoad();
-    // 绘制移动的陷阱
-    this.drawTraps();
-    // 绘制小恐龙
-    if (!this.gameOver) {
-      const dinoImg = this.dinoImages[this.currentDinoFrame];
-      if (dinoImg.complete) {
-        this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
-      }
-    } else {
-      const dinoImg = this.dinoImages[this.currentDinoFrame];
-      if (dinoImg.complete) {
-        this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
-      }
-    }
     // 绘制分数
     this.context.fillStyle = 'black';
     this.context.font = '20px Arial';
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle'; // 垂直居中
     this.context.fillText('分数: ' + this.score, this.canvas.width / 2, menuButtonInfo.top + 20);
+    // 绘制移动的道路
+    this.drawRoad();
+    // 绘制移动的陷阱
+    this.drawTraps();
+    // 绘制小恐龙
+    let dinoImg;
+    if (!this.isOnGround) {
+      dinoImg = this.isJumpingUp ? this.dinoJumpUpImage : this.dinoJumpDownImage;
+    } else {
+      dinoImg = this.dinoImages[this.currentDinoFrame];
+    }
+    if (dinoImg.complete) {
+      this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
+    }
+    // 如果消息需要显示
+    if (this.messageDisplayTime > 0) {
+      this.context.fillStyle = 'black';
+      this.context.font = '20px Arial';
+      this.context.fillText(this.speedIncreaseMessage, this.canvas.width / 2, 100); // 100为提示信息显示的垂直位置
+    }
   }
   // 游戏更新事件
   update() {
@@ -196,14 +213,20 @@ export default class Scene2 {
       }
       this.velocityY += this.gravity;
       this.circleY += this.velocityY;
+      // 根据速度判断小恐龙是在跳起还是在下落
+      if (this.velocityY < 0) {
+        this.isJumpingUp = true;
+      } else if (this.velocityY > 0) {
+        this.isJumpingUp = false;
+      }
       // 检测与道路的碰撞
       if (this.circleY > this.canvas.height - this.roadHeight - this.circleRadius) {
         this.circleY = this.canvas.height - this.roadHeight - this.circleRadius;
         this.velocityY = 0;
-        this.isOnGround = true; // 圆球在地面上
+        this.isOnGround = true; // 小恐龙在地面上
         this.canDoubleJump = true; // 重置二段跳标志
       } else {
-        this.isOnGround = false; // 圆球在空中
+        this.isOnGround = false; // 小恐龙在空中
       }
       // 检测与陷阱的碰撞
       this.traps.forEach(trap => {
@@ -282,15 +305,15 @@ export default class Scene2 {
     // 重置道路和陷阱位置
     this.roadX = 0;
     this.traps = [];
-    // 重置圆球位置和状态
+    // 重置小恐龙位置和状态
     this.circleY = this.canvas.height - this.roadHeight - 50;
     this.velocityY = 0;
     this.isOnGround = true;
     this.gameOver = false;
     // 重置分数
     this.score = 0;
-    this.roadSpeed = 2; // 重置道路速度为初始值
-    this.speedIncreasedStageFirst = false; // 重置速度增加标志
+    this.roadSpeed = 2;
+    this.speedIncreasedStageFirst = false;
     this.speedIncreasedStageSecond = false;
   }
   // 页面销毁机制
