@@ -12,7 +12,18 @@ export default class Game {
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
     });
-
+    // 启用分享菜单
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeLine']
+    });
+    // 设置默认分享信息
+    wx.onShareAppMessage(() => {
+      return {
+        title: '小恐龙不要停！太难了吧',
+        imageUrl: 'image/background.jpg' // 分享图片的路径
+      };
+    });
     this.loop()
   }
 
