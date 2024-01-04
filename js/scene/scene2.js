@@ -71,7 +71,7 @@ export default class Scene2 {
     // 道具显示
     this.powerUp = {
       x: this.canvas.width, // 道具的初始横坐标
-      y: 100, // 道具的初始纵坐标
+      y: this.canvas.height - this.roadHeight - 150, // 道具的初始纵坐标
       width: 30, // 道具的宽度
       height: 30, // 道具的高度
       visible: false, // 道具是否可见
