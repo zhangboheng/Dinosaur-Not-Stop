@@ -26,7 +26,14 @@ export function drawRoundedRect(context, x, y, width, height, radius, fillColor,
 export function createBackButton(context, x, y, imagePath, callback) {
   const image = new Image();
   image.src = imagePath;
-  const button = { x, y, width: 0, height: 0, image, onClick: callback };
+  const button = {
+    x,
+    y,
+    width: 0,
+    height: 0,
+    image,
+    onClick: callback
+  };
 
   image.onload = () => {
     button.width = image.width;
@@ -35,4 +42,30 @@ export function createBackButton(context, x, y, imagePath, callback) {
   };
 
   return button;
+}
+// 带有图标的返回按钮公共方法
+export function drawIconButton(context, text, x, y, callback) {
+  // 设置文本样式
+  context.fillStyle = '#f5d659';
+  context.strokeStyle = 'black';
+  context.lineWidth = 3;
+  context.font = 'bold 20px';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  // 绘制文本背景
+  const padding = 60; // 边距宽度
+  const textWidth = context.measureText(text).width + padding * 2;
+  const textHeight = 60; // 提示框的高度，可以根据需要调整
+  context.fillRect(x - textWidth / 2, y - textHeight / 2, textWidth, textHeight);
+  context.strokeRect(x - textWidth / 2, y - textHeight / 2, textWidth, textHeight);
+  // 绘制文本
+  context.fillStyle = 'black';
+  context.fillText(text, x, y + 2);
+  // 返回按钮尺寸信息
+  return {
+    x: x - (textWidth + padding * 2)/ 2,
+    y: y - 60 / 2,
+    width: textWidth + padding * 2,
+    height: 60
+  };
 }

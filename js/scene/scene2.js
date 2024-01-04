@@ -1,6 +1,13 @@
 import {
-  createBackButton
+  createBackButton,
+  drawIconButton
 } from '../../utils/button';
+import {
+  pointToLineDistance
+} from '../../utils/algorithm';
+import {
+  showBoxMessage
+} from '../../utils/dialog'
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 
@@ -66,9 +73,10 @@ export default class Scene2 {
     this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
     this.speedIncreasedStageSecond = false; // 标志游戏速度是否已经加快
     // 消息提示
-    this.speedIncreaseMessage = "Speed + 1";
+    this.speedIncreaseMessage = "Speed+1";
     this.messageDisplayTime = 0; // 消息显示的持续时间（以帧计）
-    this.messageDuration = 180;
+    this.messageDuration = 30;
+    this.buttonInfo = "";
     // 游戏状态
     this.gameOver = false;
   }
@@ -96,14 +104,21 @@ export default class Scene2 {
         this.speedIncreasedStageFirst = true; // 标记已经加速
         this.messageDisplayTime = this.messageDuration;
       }
+      // 检查分数是否达到10000分，并且尚未加速
+      if (this.score >= 10000 && !this.speedIncreasedStageSecond) {
+        this.roadSpeed += 1; // 增加道路速度
+        this.speedIncreasedStageSecond = true;
+        this.messageDisplayTime = this.messageDuration;
+      }
+      // 检查分数是否达到18000分，并且尚未加速
+      if (this.score >= 18000 && !this.speedIncreasedStageSecond) {
+        this.roadSpeed += 1; // 增加道路速度
+        this.speedIncreasedStageSecond = true;
+        this.messageDisplayTime = this.messageDuration;
+      }
       // 如果消息正在显示，减少显示时间
       if (this.messageDisplayTime > 0) {
         this.messageDisplayTime--;
-      }
-      // 检查分数是否达到12000分，并且尚未加速
-      if (this.score >= 10000 && !this.speedIncreasedStageSecond) {
-        this.roadSpeed += 1; // 增加道路速度
-        this.speedIncreasedStageSecond = true; // 标记已经加速
       }
     }
   }
@@ -187,9 +202,7 @@ export default class Scene2 {
     }
     // 如果消息需要显示
     if (this.messageDisplayTime > 0) {
-      this.context.fillStyle = 'black';
-      this.context.font = '20px Arial';
-      this.context.fillText(this.speedIncreaseMessage, this.canvas.width / 2, 100); // 100为提示信息显示的垂直位置
+      showBoxMessage(this.context, this.speedIncreaseMessage, this.canvas.width / 2, this.canvas.height / 2);
     }
   }
   // 游戏更新事件
@@ -244,40 +257,17 @@ export default class Scene2 {
           y: this.canvas.height - this.roadHeight
         };
         // 检查小恐龙是否与三角形的每条边发生碰撞
-        if (this.pointToLineDistance(this.circleX + 10, this.circleY, p1.x, p1.y, p2.x, p2.y) < this.circleRadius ||
-          this.pointToLineDistance(this.circleX, this.circleY, p2.x, p2.y, p3.x, p3.y) < this.circleRadius ||
-          this.pointToLineDistance(this.circleX - 3, this.circleY, p3.x, p3.y, p1.x, p1.y) < this.circleRadius) {
+        if (pointToLineDistance(this.circleX + 10, this.circleY, p1.x, p1.y, p2.x, p2.y) < this.circleRadius ||
+          pointToLineDistance(this.circleX, this.circleY, p2.x, p2.y, p3.x, p3.y) < this.circleRadius ||
+          pointToLineDistance(this.circleX - 3, this.circleY, p3.x, p3.y, p1.x, p1.y) < this.circleRadius) {
           this.gameOver = true;
         }
       });
     }
     // 如果游戏结束，显示 Game Over
     if (this.gameOver) {
-      // 定义矩形框的尺寸和位置
-      const rectWidth = 200;
-      const rectHeight = 60;
-      const rectX = (this.canvas.width - rectWidth) / 2;
-      const rectY = (this.canvas.height - rectHeight) / 2;
-
-      // 绘制黄色矩形框
-      this.context.fillStyle = '#f5d659';
-      this.context.fillRect(rectX, rectY, rectWidth, rectHeight);
-
-      // 绘制黑色描边
-      this.context.strokeStyle = 'black';
-      this.context.lineWidth = 3;
-      this.context.strokeRect(rectX, rectY, rectWidth, rectHeight);
-
-      // 设置文本样式
-      this.context.fillStyle = 'black';
-      this.context.font = 'bold 30px';
-
-      // 计算文本的位置（矩形框中心）
-      const textX = this.canvas.width / 2;
-      const textY = rectY + rectHeight / 2 + 2;
-
-      // 绘制文本
-      this.context.fillText('游戏结束', textX, textY);
+      showBoxMessage(this.context, "游戏结束", this.canvas.width / 2, this.canvas.height / 2 - 70);
+      this.buttonInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2);
     }
   }
   touchHandler(e) {
@@ -298,6 +288,12 @@ export default class Scene2 {
         this.canDoubleJump = false;
       }
       this.isOnGround = false; // 球体起跳，不再在地面上
+    }
+    if(this.gameOver){
+      if (touchX >= this.buttonInfo.x && touchX <= this.buttonInfo.x + this.buttonInfo.width &&
+        touchY >= this.buttonInfo.y && touchY <= this.buttonInfo.y + btn.height) {
+        this.resetGame()
+      }
     }
   }
   // 游戏重制
@@ -320,32 +316,5 @@ export default class Scene2 {
   destroy() {
     // 清理资源，如图片
     this.backButton.image.src = '';
-  }
-  // 点到线距离公共方法
-  pointToLineDistance(x, y, x1, y1, x2, y2) {
-    const A = x - x1;
-    const B = y - y1;
-    const C = x2 - x1;
-    const D = y2 - y1;
-    const dot = A * C + B * D;
-    const lenSq = C * C + D * D;
-    let param = -1;
-    if (lenSq !== 0) { // 线段长度不为零
-      param = dot / lenSq;
-    }
-    let xx, yy;
-    if (param < 0) {
-      xx = x1;
-      yy = y1;
-    } else if (param > 1) {
-      xx = x2;
-      yy = y2;
-    } else {
-      xx = x1 + param * C;
-      yy = y1 + param * D;
-    }
-    const dx = x - xx;
-    const dy = y - yy;
-    return Math.sqrt(dx * dx + dy * dy);
   }
 }

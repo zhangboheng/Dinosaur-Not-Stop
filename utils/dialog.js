@@ -34,3 +34,23 @@ export function drawDialog(context, text, options = {}) {
     closeButtonSize
   };
 }
+
+// 矩形提示框
+export function showBoxMessage(context, message, x, y) {
+  // 设置文本样式
+  context.fillStyle = '#f5d659';
+  context.strokeStyle = 'black';
+  context.lineWidth = 3;
+  context.font = 'bold 20px';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  // 绘制文本背景
+  const padding = 60; // 边距宽度
+  const textWidth = context.measureText(message).width + padding * 2;
+  const textHeight = 60; // 提示框的高度，可以根据需要调整
+  context.fillRect(x - textWidth / 2, y - textHeight / 2, textWidth, textHeight);
+  context.strokeRect(x - textWidth / 2, y - textHeight / 2, textWidth, textHeight);
+  // 绘制文本
+  context.fillStyle = 'black';
+  context.fillText(message, x, y + 2);
+}
