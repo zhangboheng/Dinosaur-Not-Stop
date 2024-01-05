@@ -55,6 +55,7 @@ export default class Scene2 {
     this.jumpHeight = -10; // 跳跃的初始速度
     this.velocityY = 0; // 纵向速度
     this.canDoubleJump = true; // 添加二段跳的标志
+    this.canTripleJump = false; // 添加三级跳的标志
     this.dinoImages = [];
     for (let i = 0; i <= 4; i++) { // 假设有 n 帧动画
       const img = new Image();
@@ -78,6 +79,9 @@ export default class Scene2 {
       obtained: false, // 道具是否已被获取
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
+    this.powerUpCount = 0;
+    this.lastPowerUpScore = 0; // 记录上次道具出现时的分数
+    this.powerUpScoreInterval = 3000; // 每隔10000分出现一次道具
     this.powerUpImage = new Image();
     this.powerUpImage.src = 'image/improve.png';
     // 初始化分数
@@ -223,6 +227,77 @@ export default class Scene2 {
       this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
     }
   }
+  // 更新小恐龙
+  updateDino() {
+    this.dinoFrameTimer++;
+    if (this.dinoFrameTimer >= this.dinoFrameInterval) {
+      this.currentDinoFrame = (this.currentDinoFrame + 1) % this.dinoImages.length;
+      this.dinoFrameTimer = 0;
+    }
+    this.velocityY += this.gravity;
+    this.circleY += this.velocityY;
+    // 根据速度判断小恐龙是在跳起还是在下落
+    if (this.velocityY < 0) {
+      this.isJumpingUp = true;
+    } else if (this.velocityY > 0) {
+      this.isJumpingUp = false;
+    }
+    // 检测与道路的碰撞
+    if (this.circleY > this.canvas.height - this.roadHeight - this.circleRadius) {
+      this.circleY = this.canvas.height - this.roadHeight - this.circleRadius;
+      this.velocityY = 0;
+      this.isOnGround = true; // 小恐龙在地面上
+      this.canDoubleJump = true; // 重置二段跳标志
+    } else {
+      this.isOnGround = false; // 小恐龙在空中
+    }
+    // 检测与陷阱的碰撞
+    this.traps.forEach(trap => {
+      // 定义三角形尖刺的三个顶点
+      const p1 = {
+        x: trap.x,
+        y: this.canvas.height - this.roadHeight
+      };
+      const p2 = {
+        x: trap.x + this.trapWidth / 2,
+        y: this.canvas.height - this.roadHeight - 20
+      };
+      const p3 = {
+        x: trap.x + this.trapWidth,
+        y: this.canvas.height - this.roadHeight
+      };
+      // 检查小恐龙是否与三角形的每条边发生碰撞
+      if (pointToLineDistance(this.circleX + 10, this.circleY, p1.x, p1.y, p2.x, p2.y) < this.circleRadius ||
+        pointToLineDistance(this.circleX, this.circleY, p2.x, p2.y, p3.x, p3.y) < this.circleRadius ||
+        pointToLineDistance(this.circleX - 3, this.circleY, p3.x, p3.y, p1.x, p1.y) < this.circleRadius) {
+        this.gameOver = true;
+      }
+    });
+    // 检查小恐龙是否与道具碰撞
+    if (this.powerUp.visible && !this.powerUp.obtained) {
+      const dinoRect = {
+        x: this.circleX - this.circleRadius,
+        y: this.circleY - this.circleRadius,
+        width: this.circleRadius * 2,
+        height: this.circleRadius * 2
+      };
+      const powerUpRect = {
+        x: this.powerUp.x,
+        y: this.powerUp.y,
+        width: this.powerUp.width,
+        height: this.powerUp.height
+      };
+      if (dinoRect.x < powerUpRect.x + powerUpRect.width &&
+        dinoRect.x + dinoRect.width > powerUpRect.x &&
+        dinoRect.y < powerUpRect.y + powerUpRect.height &&
+        dinoRect.y + dinoRect.height > powerUpRect.y) {
+        this.powerUp.obtained = true;
+        this.powerUpCount = 1; // 设置道具数量为1
+        this.canTripleJump = true; // 允许三级跳
+        this.lastPowerUpScore = this.score; // 更新上次道具出现的分数
+      }
+    }
+  }
   // 绘制道具
   drawProps() {
     if (this.score > 500 && !this.powerUp.obtained) {
@@ -231,15 +306,29 @@ export default class Scene2 {
         this.context.drawImage(this.powerUpImage, this.powerUp.x, this.powerUp.y, this.powerUp.width, this.powerUp.height);
       }
     }
+    if (this.powerUpCount > 0) {
+      // 绘制道具图片
+      if (this.powerUpImage.complete) {
+        this.context.drawImage(this.powerUpImage, menuButtonInfo.right - this.powerUpImage.width - 40, menuButtonInfo.top + 40, 24, 24);
+      }
+      // 绘制道具数量
+      this.context.fillStyle = 'black';
+      this.context.font = '20px Arial';
+      this.context.fillText(' X' + this.powerUpCount, menuButtonInfo.right - this.powerUpImage.width, menuButtonInfo.top + 55);
+    }
   }
   // 更新道具状态
   updateProps() {
     if (this.score > 500 && !this.powerUp.obtained) {
-      this.powerUp.visible = true;
       this.powerUp.x -= this.powerUp.speed; // 向左移动道具
       if (this.powerUp.x + this.powerUp.width < 0) { // 如果道具完全离开屏幕
         this.powerUp.visible = false; // 可以选择隐藏道具或者重置位置
       }
+    }
+    if (this.score - this.lastPowerUpScore >= this.powerUpScoreInterval && !this.powerUp.obtained) {
+      this.powerUp.visible = true;
+      this.powerUp.x = this.canvas.width; // 重置道具位置到屏幕右边缘
+      this.lastPowerUpScore = this.score; // 更新上次道具出现的分数
     }
   }
   // 绘制消息提示
@@ -277,74 +366,9 @@ export default class Scene2 {
       // 更新陷阱变化
       this.updateTraps();
       // 更新道具变化
-      this.updateProps()
+      this.updateProps();
       // 更新小恐龙图片切换
-      this.dinoFrameTimer++;
-      if (this.dinoFrameTimer >= this.dinoFrameInterval) {
-        this.currentDinoFrame = (this.currentDinoFrame + 1) % this.dinoImages.length;
-        this.dinoFrameTimer = 0;
-      }
-      this.velocityY += this.gravity;
-      this.circleY += this.velocityY;
-      // 根据速度判断小恐龙是在跳起还是在下落
-      if (this.velocityY < 0) {
-        this.isJumpingUp = true;
-      } else if (this.velocityY > 0) {
-        this.isJumpingUp = false;
-      }
-      // 检测与道路的碰撞
-      if (this.circleY > this.canvas.height - this.roadHeight - this.circleRadius) {
-        this.circleY = this.canvas.height - this.roadHeight - this.circleRadius;
-        this.velocityY = 0;
-        this.isOnGround = true; // 小恐龙在地面上
-        this.canDoubleJump = true; // 重置二段跳标志
-      } else {
-        this.isOnGround = false; // 小恐龙在空中
-      }
-      // 检测与陷阱的碰撞
-      this.traps.forEach(trap => {
-        // 定义三角形尖刺的三个顶点
-        const p1 = {
-          x: trap.x,
-          y: this.canvas.height - this.roadHeight
-        };
-        const p2 = {
-          x: trap.x + this.trapWidth / 2,
-          y: this.canvas.height - this.roadHeight - 20
-        };
-        const p3 = {
-          x: trap.x + this.trapWidth,
-          y: this.canvas.height - this.roadHeight
-        };
-        // 检查小恐龙是否与三角形的每条边发生碰撞
-        if (pointToLineDistance(this.circleX + 10, this.circleY, p1.x, p1.y, p2.x, p2.y) < this.circleRadius ||
-          pointToLineDistance(this.circleX, this.circleY, p2.x, p2.y, p3.x, p3.y) < this.circleRadius ||
-          pointToLineDistance(this.circleX - 3, this.circleY, p3.x, p3.y, p1.x, p1.y) < this.circleRadius) {
-          this.gameOver = true;
-        }
-      });
-      // 检查小恐龙是否与道具碰撞
-      if (this.powerUp.visible && !this.powerUp.obtained) {
-        const dinoRect = {
-          x: this.circleX - this.circleRadius,
-          y: this.circleY - this.circleRadius,
-          width: this.circleRadius * 2,
-          height: this.circleRadius * 2
-        };
-        const powerUpRect = {
-          x: this.powerUp.x,
-          y: this.powerUp.y,
-          width: this.powerUp.width,
-          height: this.powerUp.height
-        };
-        if (dinoRect.x < powerUpRect.x + powerUpRect.width &&
-          dinoRect.x + dinoRect.width > powerUpRect.x &&
-          dinoRect.y < powerUpRect.y + powerUpRect.height &&
-          dinoRect.y + dinoRect.height > powerUpRect.y) {
-          this.powerUp.obtained = true;
-          this.canTripleJump = true; // 允许三级跳
-        }
-      }
+      this.updateDino();
     } else {
       showBoxMessage(this.context, "游戏结束", this.canvas.width / 2, this.canvas.height / 2 - 70);
       this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2);
@@ -369,6 +393,10 @@ export default class Scene2 {
           this.canDoubleJump = false; // 标记二段跳已使用
         } else if (this.canTripleJump) {
           this.canTripleJump = false; // 标记三段跳已使用
+          this.powerUpCount = 0; // 使用后将道具数量设为0
+          this.powerUp.obtained = false; // 获得道具
+          this.powerUp.visible = false; // 隐藏道具
+          this.powerUp.x = -80;
         }
       }
       this.isOnGround = false; // 小恐龙起跳，不再在地面上
@@ -412,7 +440,11 @@ export default class Scene2 {
       obtained: false, // 道具是否已被获取
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
-  }
+    this.powerUpCount = 0;
+    this.lastPowerUpScore = 0; // 记录上次道具出现时的分数
+    this.powerUpScoreInterval = 3000; // 每隔10000分出现一次道具
+    this.canTripleJump = false; // 标记三段跳已使用
+    }
   // 页面销毁机制
   destroy() {
     // 清理资源，如图片
