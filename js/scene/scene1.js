@@ -43,8 +43,8 @@ export default class Scene1 {
     this.context.fillText('开始游戏', this.buttonX + this.buttonWidth / 2, this.buttonY + this.buttonHeight / 2 + 2);
     this.context.fillText('玩法说明', this.secondButtonX + this.secondButtonWidth / 2, this.secondButtonY + this.secondButtonHeight / 2 + 2);
     const text = '©行运设计师荣誉出品';
-    const x = this.canvas.width / 2; // 水平居中
-    const y = this.canvas.height - 40; // 距离底部20像素
+    const x = this.canvas.width / 2;
+    const y = this.canvas.height - 40;
 
     this.context.fillText(text, x, y);
   }

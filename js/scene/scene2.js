@@ -73,17 +73,33 @@ export default class Scene2 {
     this.powerUp = {
       x: this.canvas.width, // 道具的初始横坐标
       y: this.canvas.height - this.roadHeight - 150, // 道具的初始纵坐标
-      width: 30, // 道具的宽度
-      height: 30, // 道具的高度
+      width: 42, // 道具的宽度
+      height: 42, // 道具的高度
       visible: false, // 道具是否可见
       obtained: false, // 道具是否已被获取
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
     this.powerUpCount = 0;
     this.lastPowerUpScore = 0; // 记录上次道具出现时的分数
-    this.powerUpScoreInterval = 3000; // 每隔10000分出现一次道具
+    this.powerUpScoreInterval = 10000; // 每隔10000分出现一次道具
     this.powerUpImage = new Image();
-    this.powerUpImage.src = 'image/improve.png';
+    this.powerUpImage.src = 'image/improve-bubble.png';
+    this.getPowerUpImage = new Image();
+    this.getPowerUpImage.src = 'image/improve.png';
+    // 毒蘑菇显示
+    this.poisonMushroom = {
+      x: this.canvas.width, // 道具的初始横坐标
+      y: this.canvas.height - this.roadHeight - 32, // 道具的初始纵坐标
+      width: 32, // 毒蘑菇的宽度
+      height: 32, // 毒蘑菇的高度
+      visible: false, // 毒蘑菇是否可见
+      obtained: false, // 毒蘑菇是否已被获取
+      speed: this.roadSpeed // 道具移动的速度，根据需要调整
+    };
+    // 加载毒蘑菇图片
+    this.poisonMushroomImage = new Image();
+    this.poisonMushroomImage.src = 'image/mushroom.png';
+    this.poisonMushroomEffectDuration = 0;
     // 初始化分数
     this.score = 0;
     this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
@@ -294,7 +310,31 @@ export default class Scene2 {
         this.powerUp.obtained = true;
         this.powerUpCount = 1; // 设置道具数量为1
         this.canTripleJump = true; // 允许三级跳
-        this.lastPowerUpScore = this.score; // 更新上次道具出现的分数
+      }
+    }
+    // 检查小恐龙是否与毒蘑菇碰撞
+    if (this.poisonMushroom.visible && !this.poisonMushroom.obtained) {
+      const dinoRect = {
+        x: this.circleX - this.circleRadius,
+        y: this.circleY - this.circleRadius,
+        width: this.circleRadius * 2,
+        height: this.circleRadius * 2
+      };
+      const mushroomRect = {
+        x: this.poisonMushroom.x,
+        y: this.poisonMushroom.y,
+        width: this.poisonMushroom.width,
+        height: this.poisonMushroom.height
+      };
+      if (dinoRect.x < mushroomRect.x + mushroomRect.width &&
+        dinoRect.x + dinoRect.width > mushroomRect.x &&
+        dinoRect.y < mushroomRect.y + mushroomRect.height &&
+        dinoRect.y + dinoRect.height > mushroomRect.y) {
+        // 碰撞发生
+        this.poisonMushroom.obtained = true;
+        this.originalGravity = this.gravity;
+        this.gravity /= 2; // 举例，将重力加倍
+        this.poisonMushroomEffectDuration = 300; // 毒蘑菇效果持续时间（以帧为单位）
       }
     }
   }
@@ -309,12 +349,12 @@ export default class Scene2 {
     if (this.powerUpCount > 0) {
       // 绘制道具图片
       if (this.powerUpImage.complete) {
-        this.context.drawImage(this.powerUpImage, menuButtonInfo.right - this.powerUpImage.width - 40, menuButtonInfo.top + 40, 24, 24);
+        this.context.drawImage(this.getPowerUpImage, menuButtonInfo.right - this.getPowerUpImage.width - 40, menuButtonInfo.top + 40, 24, 24);
       }
       // 绘制道具数量
       this.context.fillStyle = 'black';
       this.context.font = '20px Arial';
-      this.context.fillText(' X' + this.powerUpCount, menuButtonInfo.right - this.powerUpImage.width, menuButtonInfo.top + 55);
+      this.context.fillText(' X' + this.powerUpCount, menuButtonInfo.right - this.getPowerUpImage.width, menuButtonInfo.top + 55);
     }
   }
   // 更新道具状态
@@ -329,6 +369,45 @@ export default class Scene2 {
       this.powerUp.visible = true;
       this.powerUp.x = this.canvas.width; // 重置道具位置到屏幕右边缘
       this.lastPowerUpScore = this.score; // 更新上次道具出现的分数
+    }
+  }
+  // 绘制毒蘑菇
+  drawMushroom() {
+    if (this.score >= 1000 && !this.poisonMushroom.obtained) {
+      this.poisonMushroom.visible = true;
+      if (this.poisonMushroomImage.complete) {
+        this.context.drawImage(this.poisonMushroomImage, this.poisonMushroom.x, this.poisonMushroom.y, this.poisonMushroom.width, this.poisonMushroom.height);
+      }
+    }
+  }
+  // 更新毒蘑菇状态
+  updateMushroom() {
+    // 监测毒蘑菇向左移动
+    if (this.score >= 1000 && !this.poisonMushroom.obtained) {
+      this.poisonMushroom.x -= this.poisonMushroom.speed;
+      if (this.poisonMushroom.x + this.poisonMushroom.width < 0) {
+        this.poisonMushroom.visible = false;
+      }
+    }
+    // 监测毒蘑菇消失时效时间
+    if (this.poisonMushroomEffectDuration > 0) {
+      this.poisonMushroomEffectDuration--;
+      // 绘制蘑菇图片
+      if (this.poisonMushroomImage.complete) {
+        this.context.drawImage(this.poisonMushroomImage, menuButtonInfo.right - this.poisonMushroomImage.width - 40, menuButtonInfo.top + 70, 24, 24);
+      }
+      // 绘制蘑菇数量
+      this.context.fillStyle = 'black';
+      this.context.font = '20px Arial';
+      this.context.fillText(' X1', menuButtonInfo.right - this.poisonMushroomImage.width, menuButtonInfo.top + 85);
+      if (this.poisonMushroomEffectDuration === 0) {
+        this.gravity = this.originalGravity;
+      }
+    }
+
+    if (this.score % 5000 == 0) {
+      this.poisonMushroom.obtained = false;
+      this.poisonMushroom.x = this.canvas.width
     }
   }
   // 绘制消息提示
@@ -353,6 +432,8 @@ export default class Scene2 {
     this.drawDino();
     // 绘制道具显示
     this.drawProps();
+    // 绘制毒蘑菇
+    this.drawMushroom();
     // 如果消息需要显示
     this.drawMessageBox();
   }
@@ -367,6 +448,8 @@ export default class Scene2 {
       this.updateTraps();
       // 更新道具变化
       this.updateProps();
+      // 更新毒蘑菇
+      this.updateMushroom();
       // 更新小恐龙图片切换
       this.updateDino();
     } else {
@@ -428,23 +511,34 @@ export default class Scene2 {
     // 重置分数
     this.score = 0;
     this.roadSpeed = 2;
+    this.gravity = 0.5;
     this.speedIncreasedStageFirst = false;
     this.speedIncreasedStageSecond = false;
     this.speedIncreasedStageThird = false;
     this.powerUp = {
       x: this.canvas.width, // 道具的初始横坐标
       y: this.canvas.height - this.roadHeight - 150, // 道具的初始纵坐标
-      width: 30, // 道具的宽度
-      height: 30, // 道具的高度
+      width: 42, // 道具的宽度
+      height: 42, // 道具的高度
       visible: false, // 道具是否可见
       obtained: false, // 道具是否已被获取
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
     this.powerUpCount = 0;
     this.lastPowerUpScore = 0; // 记录上次道具出现时的分数
-    this.powerUpScoreInterval = 3000; // 每隔10000分出现一次道具
+    this.powerUpScoreInterval = 10000; // 每隔10000分出现一次道具
     this.canTripleJump = false; // 标记三段跳已使用
-    }
+    this.poisonMushroom = {
+      x: this.canvas.width, // 道具的初始横坐标
+      y: this.canvas.height - this.roadHeight - 32, // 道具的初始纵坐标
+      width: 32, // 毒蘑菇的宽度
+      height: 32, // 毒蘑菇的高度
+      visible: false, // 毒蘑菇是否可见
+      obtained: false, // 毒蘑菇是否已被获取
+      speed: this.roadSpeed // 道具移动的速度，根据需要调整
+    };
+    this.poisonMushroomEffectDuration = 0;
+  }
   // 页面销毁机制
   destroy() {
     // 清理资源，如图片
