@@ -11,7 +11,7 @@ export default class Scene1 {
     this.context = game.context;
     this.context.scale(devicePixelRatio, devicePixelRatio);
     this.backgroundImage = new Image();
-    this.backgroundImage.src = 'image/background.jpg'; // 替换为你的背景图片路径
+    this.backgroundImage.src = 'image/background.jpg';
     // 设置开始按钮的基础设置
     this.buttonWidth = 180;
     this.buttonHeight = 50;
@@ -57,7 +57,7 @@ export default class Scene1 {
     // 检测是否点击了第二个按钮
     if (touch.clientX >= this.secondButtonX && touch.clientX <= this.secondButtonX + this.secondButtonWidth &&
       touch.clientY >= this.secondButtonY && touch.clientY <= this.secondButtonY + this.secondButtonHeight) {
-        
+        this.game.switchScene(new this.game.instruction(this.game));
     }
   }
 }

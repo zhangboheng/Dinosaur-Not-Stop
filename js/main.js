@@ -1,5 +1,6 @@
 import Scene1 from './scene/scene1.js';
 import Scene2 from './scene/scene2.js';
+import Instruction from './scene/instruction.js'
 
 export default class Game {
   constructor() {
@@ -7,8 +8,8 @@ export default class Game {
     this.context = canvas.getContext('2d');
     this.scene1 = Scene1;
     this.scene2 = Scene2;
+    this.instruction = Instruction;
     this.currentScene = new this.scene1(this);
-
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
     });
@@ -41,6 +42,9 @@ export default class Game {
     this.currentScene.draw();
     if (this.currentScene instanceof Scene2) {
       this.currentScene.update();
+    }
+    if (this.currentScene instanceof Instruction) {
+      this.currentScene.draw();
     }
     requestAnimationFrame(this.loop.bind(this));
   }
