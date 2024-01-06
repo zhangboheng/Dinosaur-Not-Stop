@@ -12,6 +12,16 @@ export default class Game {
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
     });
+    // ios端音频不能在静音下播放处理
+    wx.setInnerAudioOption({
+      obeyMuteSwitch: false,
+      success: function (res) {
+        console.log("开启静音模式下播放音乐的功能");
+      },
+      fail: function (err) {
+        console.log("静音设置失败");
+      },
+    });
     // 启用分享菜单
     wx.showShareMenu({
       withShareTicket: true,

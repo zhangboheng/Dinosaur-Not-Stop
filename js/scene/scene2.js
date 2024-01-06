@@ -8,6 +8,8 @@ import {
 import {
   showBoxMessage
 } from '../../utils/dialog'
+import SoundManager from '../../utils/soundManager'
+const soundManager = new SoundManager();
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 
@@ -19,6 +21,11 @@ export default class Scene2 {
     canvas.height = canvas.offsetHeight * devicePixelRatio;
     this.context = game.context;
     this.context.scale(devicePixelRatio, devicePixelRatio);
+    // 加载背景音乐
+    this.backgroundMusic = new Audio('audio/back.mp3');
+    this.backgroundMusic.loop = true; // 设置音乐循环播放
+    // 游戏开始时
+    this.backgroundMusic.play();
     // 道路属性
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
@@ -43,7 +50,7 @@ export default class Scene2 {
     this.trapTimer = 0; // 陷阱生成计时器
     this.trapInterval = 200; // 陷阱生成的间隔（以帧计）
     // 创建返回按钮
-    this.backButton = createBackButton(this.context, 10, menuButtonInfo.top - 15, 'image/reply.png', () => {
+    this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
       this.game.switchScene(new this.game.scene1(this.game));
     });
     // 小恐龙属性
@@ -100,6 +107,9 @@ export default class Scene2 {
     this.poisonMushroomImage = new Image();
     this.poisonMushroomImage.src = 'image/mushroom.png';
     this.poisonMushroomEffectDuration = 0;
+    // 加载脚印图片
+    this.dinoFootprintImage = new Image();
+    this.dinoFootprintImage.src = 'image/footprint.png';
     // 初始化分数
     this.score = 0;
     this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
@@ -141,11 +151,28 @@ export default class Scene2 {
   }
   // 绘制分数
   drawScore() {
+    const iconSize = 24; // 图标大小
+    const iconPadding = 10; // 图标与分数之间的间距
+    // 计算分数文本的宽度
+    this.context.font = '20px Arial'; // 确保设置的字体与绘制时相同
+    const textWidth = this.context.measureText(this.score).width;
+    // 计算总宽度（图标宽度 + 间距 + 文本宽度）
+    const totalWidth = iconSize + iconPadding + textWidth;
+    // 计算起始 x 坐标，使图标和分数组合居中
+    const startX = (this.canvas.width - totalWidth) / 2;
+    const iconX = startX;
+    const scoreX = iconX + iconSize + iconPadding;
+    const iconY = menuButtonInfo.top + 6; // 图标的y坐标
+    const scoreY = menuButtonInfo.top + 20; // 分数的y坐标
+    // 绘制图标
+    if (this.dinoFootprintImage.complete) {
+        this.context.drawImage(this.dinoFootprintImage, iconX, iconY, iconSize, iconSize);
+    }
+    // 绘制分数
     this.context.fillStyle = 'black';
-    this.context.font = '20px Arial';
-    this.context.textAlign = 'center';
-    this.context.textBaseline = 'middle'; // 垂直居中
-    this.context.fillText('分数: ' + this.score, this.canvas.width / 2, menuButtonInfo.top + 20);
+    this.context.textAlign = 'left'; // 文本左对齐
+    this.context.textBaseline = 'middle';
+    this.context.fillText(this.score, scoreX, scoreY);
   }
   // 绘制道路
   drawRoad() {
@@ -286,7 +313,13 @@ export default class Scene2 {
       if (pointToLineDistance(this.circleX + 10, this.circleY, p1.x, p1.y, p2.x, p2.y) < this.circleRadius ||
         pointToLineDistance(this.circleX, this.circleY, p2.x, p2.y, p3.x, p3.y) < this.circleRadius ||
         pointToLineDistance(this.circleX - 3, this.circleY, p3.x, p3.y, p1.x, p1.y) < this.circleRadius) {
+        soundManager.play('crack');
         this.gameOver = true;
+        // 游戏结束时
+        this.backgroundMusic.pause();
+        this.backgroundMusic.currentTime = 0; // 重置音乐到开始位置
+        soundManager.play('end', 200);
+        
       }
     });
     // 检查小恐龙是否与道具碰撞
@@ -310,6 +343,7 @@ export default class Scene2 {
         this.powerUp.obtained = true;
         this.powerUpCount = 1; // 设置道具数量为1
         this.canTripleJump = true; // 允许三级跳
+        soundManager.play('get');
       }
     }
     // 检查小恐龙是否与毒蘑菇碰撞
@@ -335,6 +369,7 @@ export default class Scene2 {
         this.originalGravity = this.gravity;
         this.gravity /= 2; // 举例，将重力加倍
         this.poisonMushroomEffectDuration = 300; // 毒蘑菇效果持续时间（以帧为单位）
+        soundManager.play('get');
       }
     }
   }
@@ -405,7 +440,7 @@ export default class Scene2 {
       }
     }
 
-    if (this.score % 5000 == 0) {
+    if (this.score % 4000 == 0) {
       this.poisonMushroom.obtained = false;
       this.poisonMushroom.x = this.canvas.width
     }
@@ -468,6 +503,10 @@ export default class Scene2 {
       touchY >= btn.y && touchY <= btn.y + btn.height) {
       btn.onClick();
       this.gameOver = false;
+      // 游戏结束时
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0; // 重置音乐到开始位置
+      return
     }
     if (!this.gameOver && (this.isOnGround || this.canDoubleJump || (this.canTripleJump && !this.isOnGround))) {
       this.velocityY = this.jumpHeight;
@@ -482,6 +521,7 @@ export default class Scene2 {
           this.powerUp.x = -80;
         }
       }
+      soundManager.play('jump');
       this.isOnGround = false; // 小恐龙起跳，不再在地面上
     }
     if (this.gameOver) {
@@ -538,6 +578,8 @@ export default class Scene2 {
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
     this.poisonMushroomEffectDuration = 0;
+    // 游戏开始时
+    this.backgroundMusic.play();
   }
   // 页面销毁机制
   destroy() {
