@@ -150,8 +150,8 @@ export default class Settings {
     } else if (this.selectedIndex === 2) {
       const fontSize = 16;
       this.context.font = `${fontSize}px Arial`;
-      const arr = ['企划', '文案', '制图', '音乐', '开发', '测试'];
-      const list = ['伯衡君', '伯衡君&ChatGPT', 'DALL·E 3', 'Suno AI', '伯衡君&ChatGPT', '伯衡君'];
+      const arr = ['企划', '文案', '制图', '音乐', '开发', '测试', '发行'];
+      const list = ['伯衡君', '伯衡君&ChatGPT', 'DALL·E 3', 'Suno AI', '伯衡君&ChatGPT', '伯衡君', '行运设计师荣誉出品'];
       // 计算文本高度和总内容高度
       const textHeight = fontSize * 1.2;
       const contentHeight = arr.length * textHeight + 20;

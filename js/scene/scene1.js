@@ -46,11 +46,19 @@ export default class Scene1 {
     this.context.fillText('开始游戏', this.buttonX + this.buttonWidth / 2, this.buttonY + this.buttonHeight / 2 + 2);
     this.context.fillText('玩法说明', this.secondButtonX + this.secondButtonWidth / 2, this.secondButtonY + this.secondButtonHeight / 2 + 2);
     this.context.fillText('游戏设置', this.thirdButtonX + this.thirdButtonWidth / 2, this.thirdButtonY + this.thirdButtonHeight / 2 + 2);
-    const text = '©行运设计师荣誉出品';
-    const x = this.canvas.width / 2;
-    const y = this.canvas.height - 40;
-
-    this.context.fillText(text, x, y);
+    this.context.font = '10px Arial';
+    const text = '《健康游戏忠告》\n抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。\n适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。';
+    // 将文本按\n分割成多行
+    const lines = text.split('\n');
+    // 计算文本开始绘制的Y坐标
+    const lineHeight = 14; // 行高，根据需要调整
+    const startY = this.canvas.height - 50 // 根据画布高度和文本总高度计算起始Y坐标
+    // 绘制每一行文本
+    lines.forEach((line, index) => {
+      const x = this.canvas.width / 2;
+      const y = startY + lineHeight * index;
+      this.context.fillText(line, x, y);
+    });
   }
   touchHandler(e) {
     const touch = e.touches[0];
