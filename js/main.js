@@ -1,7 +1,11 @@
 import Scene1 from './scene/scene1.js';
 import Scene2 from './scene/scene2.js';
-import Instruction from './scene/instruction.js'
-
+import Instruction from './scene/instruction.js';
+import Settings from './scene/settings.js'
+let getMusicState = wx.getStorageSync('musicEnabled');
+if (getMusicState == '') {
+  wx.setStorageSync('musicEnabled', true)
+}
 export default class Game {
   constructor() {
     this.canvas = wx.createCanvas();
@@ -9,6 +13,7 @@ export default class Game {
     this.scene1 = Scene1;
     this.scene2 = Scene2;
     this.instruction = Instruction;
+    this.settings = Settings;
     this.currentScene = new this.scene1(this);
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
@@ -35,18 +40,18 @@ export default class Game {
         imageUrl: 'image/background.jpg' // 分享图片的路径
       };
     });
+    this.boundLoop = this.loop.bind(this);
     this.loop()
   }
 
   loop() {
+    // 清除整个画布
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.currentScene.draw();
     if (this.currentScene instanceof Scene2) {
       this.currentScene.update();
     }
-    if (this.currentScene instanceof Instruction) {
-      this.currentScene.draw();
-    }
-    requestAnimationFrame(this.loop.bind(this));
+    requestAnimationFrame(this.boundLoop);
   }
   // 切换页面方法
   switchScene(newScene) {

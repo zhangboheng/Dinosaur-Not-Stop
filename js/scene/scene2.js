@@ -17,10 +17,10 @@ export default class Scene2 {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
-    canvas.width = canvas.offsetWidth * devicePixelRatio;
-    canvas.height = canvas.offsetHeight * devicePixelRatio;
     this.context = game.context;
-    this.context.scale(devicePixelRatio, devicePixelRatio);
+    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
+    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
+    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 加载背景音乐
     this.backgroundMusic = new Audio('audio/back.mp3');
     this.backgroundMusic.loop = true; // 设置音乐循环播放
@@ -30,6 +30,8 @@ export default class Scene2 {
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
     this.roadSpeed = 2; // 道路每帧移动的像素数
+    // 获取音效初始状态
+    soundManager.setMusicState(wx.getStorageSync('musicEnabled'));
     // 加载背景图片
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/gamebackground.jpg'; // 替换为你的背景图片路径
@@ -103,6 +105,7 @@ export default class Scene2 {
       obtained: false, // 毒蘑菇是否已被获取
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
+    this.lastMushroomScore = 0;  // 记录上次蘑菇出现时的分数
     // 加载毒蘑菇图片
     this.poisonMushroomImage = new Image();
     this.poisonMushroomImage.src = 'image/mushroom.png';
@@ -439,10 +442,11 @@ export default class Scene2 {
         this.gravity = this.originalGravity;
       }
     }
-
-    if (this.score % 4000 == 0) {
+    if (Math.random() < 0.382 && this.score - this.lastMushroomScore >= 4000) {
       this.poisonMushroom.obtained = false;
-      this.poisonMushroom.x = this.canvas.width
+      this.poisonMushroom.visible = true;  // 确保蘑菇是可见的
+      this.poisonMushroom.x = this.canvas.width;
+      this.lastMushroomScore = this.score; // 更新上次蘑菇出现的分数
     }
   }
   // 绘制消息提示
@@ -488,7 +492,7 @@ export default class Scene2 {
       // 更新小恐龙图片切换
       this.updateDino();
     } else {
-      showBoxMessage(this.context, "游戏结束", this.canvas.width / 2, this.canvas.height / 2 - 70);
+      showBoxMessage(this.context, "游戏结束", this.canvas.width / 2, this.canvas.height / 2 - 70, '#f5ac11');
       this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2);
       this.buttonShareInfo = drawIconButton(this.context, "分享好友", this.canvas.width / 2, this.canvas.height / 2 + 70);
     }
@@ -578,6 +582,7 @@ export default class Scene2 {
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
     this.poisonMushroomEffectDuration = 0;
+    this.lastMushroomScore = 0;
     // 游戏开始时
     this.backgroundMusic.play();
   }

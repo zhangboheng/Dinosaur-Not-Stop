@@ -3,14 +3,15 @@ import {
 } from '../../utils/button';
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+let isAndroid = systemInfo.platform === 'android';
 export default class Instruction {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
-    canvas.width = canvas.offsetWidth * devicePixelRatio;
-    canvas.height = canvas.offsetHeight * devicePixelRatio;
     this.context = game.context;
-    this.context.scale(devicePixelRatio, devicePixelRatio);
+    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
+    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
+    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 绘制背景
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
@@ -26,6 +27,9 @@ export default class Instruction {
     this.improveBubble.src = 'image/improve-bubble.png'
     this.mushroom = new Image();
     this.mushroom.src = 'image/mushroom.png'
+    // 加载操作图片
+    this.clickImage = new Image();
+    this.clickImage.src = 'image/click.png'
     // 定义标签和对应的内容
     this.tabs = [{
         title: "背景",
@@ -41,7 +45,7 @@ export default class Instruction {
       },
       {
         title: "操作",
-        content: "这里是操作指南..."
+        content: "点击即可让小棘龙跳跃\n连点可使出独家秘技\n在陷阱间不落地时\n二级跳效果更好哦"
       }
     ];
     // 当前选中的标签索引
@@ -67,28 +71,51 @@ export default class Instruction {
   drawTabs() {
     const fontSize = 16;
     this.context.font = `bold ${fontSize}px Arial`; // 设置字体
-    this.tabs.forEach((tab, index) => {
-      // 标签的尺寸和位置
-      const tabX = 10;
-      const tabY = menuButtonInfo.top + 50 * index + 50;
-      const tabWidth = this.canvas.width / 4;
-      const tabHeight = 40;
-      // 绘制标签背景
-      this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d659';
-      this.context.fillRect(tabX, tabY, tabWidth, tabHeight);
-      // 绘制标签边框
-      this.context.strokeStyle = 'black';
-      this.context.lineWidth = 3;
-      this.context.strokeRect(tabX, tabY, tabWidth, tabHeight);
-      // 计算文本宽度并水平居中
-      const textWidth = this.context.measureText(tab.title).width;
-      const textX = tabX + (tabWidth - textWidth) / 2; // 水平居中
-      // 文本垂直居中
-      const textY = tabY + tabHeight / 2 + fontSize / 2 - 2; // 调整以实现垂直居中
-      // 绘制文本
-      this.context.fillStyle = 'black';
-      this.context.fillText(tab.title, textX, textY);
-    });
+    if (isAndroid) {
+      this.tabs.forEach((tab, index) => {
+        // 标签的尺寸和位置
+        const tabX = 10;
+        const tabY = menuButtonInfo.top + 50 * index + 50;
+        const tabWidth = this.canvas.width / 4;
+        const tabHeight = 40;
+        // 绘制标签背景
+        this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d659';
+        this.context.fillRect(tabX, tabY, tabWidth, tabHeight);
+        // 绘制标签边框
+        this.context.strokeStyle = 'black';
+        this.context.lineWidth = 3;
+        this.context.strokeRect(tabX, tabY, tabWidth, tabHeight);
+        const textX = tabX + tabWidth / 2; // 水平居中
+        // 文本垂直居中
+        const textY = tabY + tabHeight / 2 + 2; // 调整以实现垂直居中
+        // 绘制文本
+        this.context.fillStyle = 'black';
+        this.context.fillText(tab.title, textX, textY);
+      });
+    } else {
+      this.tabs.forEach((tab, index) => {
+        // 标签的尺寸和位置
+        const tabX = 10;
+        const tabY = menuButtonInfo.top + 50 * index + 50;
+        const tabWidth = this.canvas.width / 4;
+        const tabHeight = 40;
+        // 绘制标签背景
+        this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d659';
+        this.context.fillRect(tabX, tabY, tabWidth, tabHeight);
+        // 绘制标签边框
+        this.context.strokeStyle = 'black';
+        this.context.lineWidth = 3;
+        this.context.strokeRect(tabX, tabY, tabWidth, tabHeight);
+        // 计算文本宽度并水平居中
+        const textWidth = this.context.measureText(tab.title).width;
+        const textX = tabX + (tabWidth - textWidth) / 2; // 水平居中
+        // 文本垂直居中
+        const textY = tabY + tabHeight / 2 + fontSize / 2 - 2; // 调整以实现垂直居中
+        // 绘制文本
+        this.context.fillStyle = 'black';
+        this.context.fillText(tab.title, textX, textY);
+      });
+    }
   }
   // 绘制选中的标签
   drawTabsContent() {
@@ -101,7 +128,7 @@ export default class Instruction {
     let contentX = this.canvas.width / 4 + 20;
     let contentY = menuButtonInfo.top + 50;
     const contentWidth = this.canvas.width - contentX - 10;
-    const contentHeight = lines.length * (fontSize + 10) + padding * 2;
+    const contentHeight = lines.length * (fontSize + 10) + padding * 2 + 2;
     // 根据选中的标签决定是否绘制图片
     if (this.selectedTabIndex === 1) {
       const imageWidth = 32; // 设置图片宽度
@@ -138,6 +165,22 @@ export default class Instruction {
         this.context.drawImage(this.mushroom, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 3 + 42, imageWidth, imageHeight);
       }
       contentY += imageHeight
+    } else if (this.selectedTabIndex === 3) {
+      const imageWidth = 32; // 设置图片宽度
+      const imageHeight = 32; // 设置图片高度
+      const imageX = contentX + (contentWidth - imageWidth) / 2;
+      const imageY = contentY + 10;
+      // 绘制内容背景
+      this.context.fillStyle = '#f5d659';
+      this.context.fillRect(contentX, contentY, contentWidth, contentHeight + imageHeight);
+      // 绘制内容边框
+      this.context.strokeStyle = 'black';
+      this.context.lineWidth = 3;
+      this.context.strokeRect(contentX, contentY, contentWidth, contentHeight + imageHeight);
+      if (this.clickImage.complete) {
+        this.context.drawImage(this.clickImage, imageX, imageY, imageWidth, imageHeight);
+      }
+      contentY += imageHeight
     } else {
       // 绘制内容背景
       this.context.fillStyle = '#f5d659';
@@ -149,14 +192,21 @@ export default class Instruction {
     }
     // 绘制文本内容
     this.context.fillStyle = 'black';
-    lines.forEach((line, index) => {
-      const textWidth = this.context.measureText(line).width;
-      const textX = contentX + (contentWidth - textWidth) / 2; // 左右居中
-      const textY = contentY + padding + fontSize / 2 + (fontSize + 10) * index + 12;
-      this.context.fillText(line, textX, textY);
-    });
+    if (isAndroid) {
+      lines.forEach((line, index) => {
+        const textX = contentX + contentWidth / 2; // 左右居中
+        const textY = contentY + padding + fontSize / 2 + (fontSize + 10) * index + 12;
+        this.context.fillText(line, textX, textY);
+      });
+    } else {
+      lines.forEach((line, index) => {
+        const textWidth = this.context.measureText(line).width;
+        const textX = contentX + (contentWidth - textWidth) / 2; // 左右居中
+        const textY = contentY + padding + fontSize / 2 + (fontSize + 10) * index + 12;
+        this.context.fillText(line, textX, textY);
+      });
+    }
   }
-
   draw() {
     // 绘制背景
     this.drawBackground();
@@ -185,12 +235,16 @@ export default class Instruction {
       const tabY = menuButtonInfo.top + 50 * index + 50;
       const tabWidth = this.canvas.width / 4;
       const tabHeight = 40;
-
       if (touchX >= tabX && touchX <= tabX + tabWidth &&
         touchY >= tabY && touchY <= tabY + tabHeight) {
         // 更新选中的标签索引
         this.selectedTabIndex = index;
       }
     });
+  }
+  // 页面销毁机制
+  destroy() {
+    // 清理资源，如图片
+    this.backButton.image.src = '';
   }
 }

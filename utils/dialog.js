@@ -36,10 +36,10 @@ export function drawDialog(context, text, options = {}) {
 }
 
 // 矩形提示框
-export function showBoxMessage(context, message, x, y) {
+export function showBoxMessage(context, message, x, y, backgroundColor = '#f5d659', strokeColor = 'black', fontSize = 'bold 20px') {
   // 设置文本样式
-  context.fillStyle = '#f5d659';
-  context.strokeStyle = 'black';
+  context.fillStyle = backgroundColor;
+  context.strokeStyle = strokeColor;
   context.lineWidth = 3;
   context.font = 'bold 20px';
   context.textAlign = 'center';
