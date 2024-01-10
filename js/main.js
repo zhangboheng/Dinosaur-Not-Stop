@@ -1,5 +1,6 @@
-import Scene1 from './scene/scene1.js';
-import Scene2 from './scene/scene2.js';
+import StartUp from './scene/startup.js';
+import Choose from './scene/choose.js';
+import Infinite from './scene/infinite.js';
 import Instruction from './scene/instruction.js';
 import Settings from './scene/settings.js'
 let getMusicState = wx.getStorageSync('musicEnabled');
@@ -10,11 +11,12 @@ export default class Game {
   constructor() {
     this.canvas = wx.createCanvas();
     this.context = canvas.getContext('2d');
-    this.scene1 = Scene1;
-    this.scene2 = Scene2;
+    this.startup = StartUp;
+    this.choose = Choose;
+    this.infinite = Infinite;
     this.instruction = Instruction;
     this.settings = Settings;
-    this.currentScene = new this.scene1(this);
+    this.currentScene = new this.startup(this);
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
     });
@@ -48,7 +50,7 @@ export default class Game {
     // 清除整个画布
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.currentScene.draw();
-    if (this.currentScene instanceof Scene2) {
+    if (this.currentScene instanceof Infinite) {
       this.currentScene.update();
     }
     requestAnimationFrame(this.boundLoop);

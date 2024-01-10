@@ -20,7 +20,7 @@ export default class Settings {
     this.backgroundImage.src = 'image/background.jpg';
     // 创建返回按钮
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
-      this.game.switchScene(new this.game.scene1(this.game));
+      this.game.switchScene(new this.game.startup(this.game));
     });
     // 定义标签和对应的内容
     this.tabs = ['设置', '历史', '团队', '关于'];

@@ -64,7 +64,7 @@ export default class Scene1 {
     const touch = e.touches[0];
     if (touch.clientX >= this.buttonX && touch.clientX <= this.buttonX + this.buttonWidth &&
       touch.clientY >= this.buttonY && touch.clientY <= this.buttonY + this.buttonHeight) {
-      this.game.switchScene(new this.game.scene2(this.game));
+      this.game.switchScene(new this.game.choose(this.game));
     }
     // 检测是否点击了第二个按钮
     if (touch.clientX >= this.secondButtonX && touch.clientX <= this.secondButtonX + this.secondButtonWidth &&

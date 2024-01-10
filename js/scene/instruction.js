@@ -17,7 +17,7 @@ export default class Instruction {
     this.backgroundImage.src = 'image/background.jpg';
     // 创建返回按钮
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
-      this.game.switchScene(new this.game.scene1(this.game));
+      this.game.switchScene(new this.game.startup(this.game));
     });
     // 加载角色图片
     this.characterImage = new Image();

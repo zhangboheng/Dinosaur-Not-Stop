@@ -53,7 +53,7 @@ export default class Scene2 {
     this.trapInterval = 200; // 陷阱生成的间隔（以帧计）
     // 创建返回按钮
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
-      this.game.switchScene(new this.game.scene1(this.game));
+      this.game.switchScene(new this.game.startup(this.game));
     });
     // 小恐龙属性
     this.isOnGround = true; // 添加地面接触标志
