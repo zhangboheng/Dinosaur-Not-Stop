@@ -11,6 +11,7 @@ export default class Instruction {
     canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
     canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
     this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
+    this.getGameTwoAccess = wx.getStorageSync('infiniteEnabled');
     // 绘制背景
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
@@ -110,8 +111,10 @@ export default class Instruction {
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
     this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight - 15);
-    this.context.fillStyle = '#00000099';
-    this.context.fillRect(rectX, rectY, rectWidth, rectHeight);
+    if (this.getGameTwoAccess != 'access') {
+      this.context.fillStyle = '#00000099';
+      this.context.fillRect(rectX, rectY, rectWidth, rectHeight);
+    }
   }
   draw() {
     // 绘制背景
@@ -145,11 +148,11 @@ export default class Instruction {
     // 检查触摸点是否在 Game One 内
     if (touchX >= this.rectX && touchX <= this.rectX + this.rectWidth &&
       touchY >= this.rectY && touchY <= this.rectY + this.rectHeight) {
-      //this.game.switchScene(new this.game.infinite(this.game));
+      this.game.switchScene(new this.game.prison(this.game));
     }
     // 检查触摸点是否在 Game Two 内
     if (touchX >= this.rectX && touchX <= this.rectX + this.rectWidth &&
-      touchY >= this.rectY + 200 && touchY <= this.rectY + 200 + this.rectHeight) {
+      touchY >= this.rectY + 200 && touchY <= this.rectY + 200 + this.rectHeight && this.getGameTwoAccess == 'access') {
       this.game.switchScene(new this.game.infinite(this.game));
     }
   }

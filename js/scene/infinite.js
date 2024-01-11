@@ -60,7 +60,7 @@ export default class Scene2 {
     this.circleX = 50; // 小恐龙的初始横坐标
     this.circleY = this.canvas.height - this.roadHeight - 50; // 小恐龙的初始纵坐标
     this.circleRadius = 15; // 小恐龙的半径
-    this.gravity = 0.5; // 重力加速度
+    this.gravity = 0.4; // 重力加速度
     this.jumpHeight = -10; // 跳跃的初始速度
     this.velocityY = 0; // 纵向速度
     this.canDoubleJump = true; // 添加二段跳的标志
@@ -555,7 +555,7 @@ export default class Scene2 {
     // 重置分数
     this.score = 0;
     this.roadSpeed = 2;
-    this.gravity = 0.5;
+    this.gravity = 0.4;
     this.speedIncreasedStageFirst = false;
     this.speedIncreasedStageSecond = false;
     this.speedIncreasedStageThird = false;

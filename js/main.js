@@ -1,5 +1,6 @@
 import StartUp from './scene/startup.js';
 import Choose from './scene/choose.js';
+import Prison from './scene/prison.js';
 import Infinite from './scene/infinite.js';
 import Instruction from './scene/instruction.js';
 import Settings from './scene/settings.js'
@@ -13,6 +14,7 @@ export default class Game {
     this.context = canvas.getContext('2d');
     this.startup = StartUp;
     this.choose = Choose;
+    this.prison = Prison;
     this.infinite = Infinite;
     this.instruction = Instruction;
     this.settings = Settings;
@@ -51,6 +53,9 @@ export default class Game {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.currentScene.draw();
     if (this.currentScene instanceof Infinite) {
+      this.currentScene.update();
+    }
+    if (this.currentScene instanceof Prison) {
       this.currentScene.update();
     }
     requestAnimationFrame(this.boundLoop);
