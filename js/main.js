@@ -5,8 +5,12 @@ import Infinite from './scene/infinite.js';
 import Instruction from './scene/instruction.js';
 import Settings from './scene/settings.js'
 let getMusicState = wx.getStorageSync('musicEnabled');
+let getBackgroundMusic = wx.getStorageSync('backgroundMusicEnabled')
 if (getMusicState == '') {
   wx.setStorageSync('musicEnabled', true)
+}
+if (getBackgroundMusic == ''){
+  wx.setStorageSync('backgroundMusicEnabled', true)  
 }
 export default class Game {
   constructor() {

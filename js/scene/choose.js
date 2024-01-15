@@ -1,5 +1,6 @@
 import {
-  createBackButton
+  createBackButton,
+  drawRoundedRectWithTail
 } from '../../utils/button';
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
@@ -12,6 +13,8 @@ export default class Instruction {
     canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
     this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     this.getGameTwoAccess = wx.getStorageSync('infiniteEnabled');
+    // 设置提示关注
+    this.showTips = wx.getStorageSync('showTips') !== false; // 如果没有设置，默认显示提示
     // 绘制背景
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
@@ -41,6 +44,31 @@ export default class Instruction {
     if (this.backButton.image.complete) {
       this.context.drawImage(this.backButton.image, this.backButton.x, this.backButton.y);
     }
+  }
+  // 绘制加入我的小程序提示
+  drawTips(){
+    if (!this.showTips) return; // 如果用户选择不显示提示，则跳过
+    // 提示框属性
+    const rectWidth = 120;
+    const rectHeight = 30;
+    const rectX = (this.canvas.width - rectWidth - 36) / 2;
+    const rectY = menuButtonInfo.top; // 可以根据需要调整
+    const borderRadius = 10;
+    const tailWidth = 20; // 尾巴的宽度
+    const tailHeight = 28; // 尾巴的高度
+    // 绘制半透明矩形
+    this.context.fillStyle = '#f5d659'; // 增加透明度
+    drawRoundedRectWithTail(this.context, rectX, rectY, rectWidth, rectHeight, borderRadius, tailWidth, tailHeight, 'right');
+    this.context.fill();
+    this.context.strokeStyle = 'black';
+    this.context.lineWidth = 3;
+    drawRoundedRectWithTail(this.context, rectX, rectY, rectWidth, rectHeight, borderRadius, tailWidth, tailHeight, 'right');
+    this.context.stroke();
+    // 绘制提示文本
+    this.context.fillStyle = 'black';
+    this.context.font = '16px Arial';
+    this.context.textAlign = 'center';
+    this.context.fillText('加入我的小程序', rectX + rectWidth / 2, rectY + rectHeight / 2 + 2); 
   }
   // 绘制第一关
   drawGameOne() {
@@ -125,6 +153,8 @@ export default class Instruction {
     this.drawGameOne();
     // 绘制第二关
     this.drawGameTwo();
+    // 绘制加入我的小程序提示
+    this.drawTips();
   }
   touchHandler(e) {
     const touch = e.touches[0];

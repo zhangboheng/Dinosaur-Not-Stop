@@ -7,9 +7,11 @@ import {
 } from '../../utils/algorithm';
 import {
   showBoxMessage
-} from '../../utils/dialog'
-import SoundManager from '../../utils/soundManager'
+} from '../../utils/dialog';
+import SoundManager from '../../utils/soundManager';
+import BackgroundMusic from '../../utils/backgroundMusic';
 const soundManager = new SoundManager();
+const backgroundMusic = new BackgroundMusic();
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 
@@ -22,10 +24,8 @@ export default class Scene2 {
     canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
     this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 加载背景音乐
-    this.backgroundMusic = new Audio('audio/back.mp3');
-    this.backgroundMusic.loop = true; // 设置音乐循环播放
-    // 游戏开始时
-    this.backgroundMusic.play();
+    backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
+    backgroundMusic.playBackgroundMusic();
     // 道路属性
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
@@ -163,8 +163,7 @@ export default class Scene2 {
       this.roadSpeed = 0; // 停止道路移动
       this.gameOver = true;
       this.isLevelCompleted = true;
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0; // 重置音乐到开始位置
+      backgroundMusic.pauseBackgroundMusic();
       soundManager.play('win');
     } else {
       this.score += this.roadSpeed;
@@ -313,8 +312,7 @@ export default class Scene2 {
       if (doPolygonsIntersect(dinoPolygon, trapPolygon)) {
         soundManager.play('crack');
         this.gameOver = true;
-        this.backgroundMusic.pause();
-        this.backgroundMusic.currentTime = 0; // 重置音乐到开始位置
+        backgroundMusic.pauseBackgroundMusic()
         soundManager.play('end', 200);
       }
     });
@@ -377,8 +375,7 @@ export default class Scene2 {
       btn.onClick();
       this.gameOver = false;
       // 游戏结束时
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0; // 重置音乐到开始位置
+      backgroundMusic.pauseBackgroundMusic()
       return
     }
     if (this.isLevelCompleted) {
@@ -429,7 +426,7 @@ export default class Scene2 {
     this.roadSpeed = 2;
     this.speedIncreasedStageFirst = false;
     // 游戏开始时
-    this.backgroundMusic.play();
+    backgroundMusic.playBackgroundMusic()
     this.isLevelCompleted = false;
   }
   // 页面销毁机制

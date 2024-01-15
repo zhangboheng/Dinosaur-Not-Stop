@@ -8,8 +8,10 @@ import {
 import {
   showBoxMessage
 } from '../../utils/dialog'
-import SoundManager from '../../utils/soundManager'
+import SoundManager from '../../utils/soundManager';
+import BackgroundMusic from '../../utils/backgroundMusic';
 const soundManager = new SoundManager();
+const backgroundMusic = new BackgroundMusic();
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 
@@ -22,10 +24,8 @@ export default class Scene2 {
     canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
     this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 加载背景音乐
-    this.backgroundMusic = new Audio('audio/back.mp3');
-    this.backgroundMusic.loop = true; // 设置音乐循环播放
-    // 游戏开始时
-    this.backgroundMusic.play();
+    backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
+    backgroundMusic.playBackgroundMusic();
     // 道路属性
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
@@ -319,8 +319,7 @@ export default class Scene2 {
         soundManager.play('crack');
         this.gameOver = true;
         // 游戏结束时
-        this.backgroundMusic.pause();
-        this.backgroundMusic.currentTime = 0; // 重置音乐到开始位置
+        backgroundMusic.pauseBackgroundMusic();
         soundManager.play('end', 200);
         
       }
@@ -508,8 +507,7 @@ export default class Scene2 {
       btn.onClick();
       this.gameOver = false;
       // 游戏结束时
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0; // 重置音乐到开始位置
+      backgroundMusic.pauseBackgroundMusic();
       return
     }
     if (!this.gameOver && (this.isOnGround || this.canDoubleJump || (this.canTripleJump && !this.isOnGround))) {
@@ -584,7 +582,7 @@ export default class Scene2 {
     this.poisonMushroomEffectDuration = 0;
     this.lastMushroomScore = 0;
     // 游戏开始时
-    this.backgroundMusic.play();
+    backgroundMusic.playBackgroundMusic()
   }
   // 页面销毁机制
   destroy() {

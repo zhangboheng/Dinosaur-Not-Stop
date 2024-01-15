@@ -2,7 +2,8 @@ import {
   createBackButton,
   drawRoundedRectNoStrike
 } from '../../utils/button';
-import SoundManager from '../../utils/soundManager'
+import SoundManager from '../../utils/soundManager';
+import BackgroundMusic from '../../utils/backgroundMusic';
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 export default class Settings {
@@ -13,6 +14,8 @@ export default class Settings {
     canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
     canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
     this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
+    // 创建BackgroundMusic实例
+    this.backgroundMusic = new BackgroundMusic();
     // 创建SoundManager实例
     this.soundManager = new SoundManager();
     // 绘制背景
@@ -30,7 +33,9 @@ export default class Settings {
     // 加载左侧音效图标
     this.iconImage = new Image();
     this.iconImage.src = 'image/music.png';
-    this.switchState = true;
+    // 绘制左侧音乐图标
+    this.iconBack = new Image();
+    this.iconBack.src = 'image/bgm.png';
     // 当前选中的标签索引
     this.selectedIndex = 0;
   }
@@ -85,7 +90,7 @@ export default class Settings {
     this.context.fillStyle = '#f5d659'; // 标签背景颜色
     this.context.strokeStyle = 'black'; // 标签描边颜色
     if (this.selectedIndex === 0) {
-      const contentHeight = 90; // 设置内容区域的高度，可以根据需要调整
+      const contentHeight = 130; // 设置内容区域的高度，可以根据需要调整
       this.context.fillRect(tabX, tabContentY, tabWidth, contentHeight);
       this.context.strokeRect(tabX, tabContentY, tabWidth, contentHeight);
       // 设置版本左侧图标和文字的位置
@@ -100,6 +105,10 @@ export default class Settings {
       if (this.iconImage.complete) {
         this.context.drawImage(this.iconImage, iconX, iconY + 40, iconSize, iconSize);
       }
+      // 绘制音乐左侧图标
+      if (this.iconBack.complete) {
+        this.context.drawImage(this.iconBack, iconX, iconY + 80, iconSize, iconSize);
+      }
       // 绘制音效左侧文字
       const textX = iconX + iconSize + 30;
       const textY = iconY + iconSize / 2;
@@ -107,6 +116,7 @@ export default class Settings {
       this.context.font = '16px Arial';
       this.context.fillText('版本', textX, textY);
       this.context.fillText('音效', textX, textY + 40);
+      this.context.fillText('音乐', textX, textY + 80);
       // 设置并绘制右侧开关按钮
       const switchX = tabX + tabWidth - 60; // 开关的X坐标
       const switchY = tabContentY + 50; // 开关的Y坐标
@@ -114,17 +124,28 @@ export default class Settings {
       const switchHeight = 25; // 开关高度
       const borderRadius = 12.5; // 圆角半径
       // 开关状态
-      const isSwitchOn = wx.getStorageSync('musicEnabled') ? true : wx.getStorageSync('musicEnabled')
+      const isSwitchOn = wx.getStorageSync('musicEnabled') ? true : wx.getStorageSync('musicEnabled');
+      const isBackMusicOn = wx.getStorageSync('backgroundMusicEnabled') ? true : wx.getStorageSync('backgroundMusicEnabled');
       this.context.fillText('V 1.0.0', switchX + 26, textY);
       // 绘制圆角矩形背景
       this.context.fillStyle = isSwitchOn ? '#4CAF50' : '#cccccc';
       drawRoundedRectNoStrike(this.context, switchX, switchY, switchWidth, switchHeight, borderRadius, '#000000', 3);
       this.context.fill();
-      // 绘制开关滑块
+      this.context.fillStyle = isBackMusicOn ? '#4CAF50' : '#cccccc';
+      drawRoundedRectNoStrike(this.context, switchX, switchY + 40, switchWidth, switchHeight, borderRadius, '#000000', 3);
+      this.context.fill();
+      // 绘制音效开关滑块
       const sliderX = isSwitchOn ? switchX + switchWidth - switchHeight : switchX;
       this.context.fillStyle = '#FFFFFF';
       this.context.beginPath();
       this.context.arc(sliderX + switchHeight / 2, switchY + switchHeight / 2, switchHeight / 2, 0, Math.PI * 2);
+      this.context.closePath();
+      this.context.fill();
+      // 绘制音乐开关按钮
+      const MusicX = isBackMusicOn ? switchX + switchWidth - switchHeight : switchX;
+      this.context.fillStyle = '#FFFFFF';
+      this.context.beginPath();
+      this.context.arc(MusicX + switchHeight / 2, switchY + switchHeight / 2 + 40, switchHeight / 2, 0, Math.PI * 2);
       this.context.closePath();
       this.context.fill();
     } else if (this.selectedIndex === 1) {
@@ -244,15 +265,20 @@ export default class Settings {
     const switchY = tabContentY + 55;
     const switchWidth = 50;
     const switchHeight = 25;
-    // 检查是否触摸了开关按钮
+    // 检查是否触摸了音效开关按钮
     if (touchX >= switchX && touchX <= switchX + switchWidth &&
       touchY >= switchY && touchY <= switchY + switchHeight) {
-      // 切换开关状态
-      this.switchState = !this.switchState;
       this.toggleMusic();
       // 重新绘制以显示更新后的开关状态
       this.draw();
-      // 如果需要，这里可以添加更多逻辑来处理开关状态变化
+      return;
+    }
+    // 检查是否触摸了音乐开关按钮
+    if (touchX >= switchX && touchX <= switchX + switchWidth &&
+      touchY >= switchY + 40 && touchY <= switchY + switchHeight + 40) {
+      this.toggleBackgroundMusic();
+      // 重新绘制以显示更新后的开关状态
+      this.draw();
       return;
     }
   }
@@ -265,5 +291,10 @@ export default class Settings {
   toggleMusic() {
     const currentMusicState = this.soundManager.getMusicState();
     this.soundManager.setMusicState(!currentMusicState);
+  }
+  // 管理背景音乐状态
+  toggleBackgroundMusic() {
+    const currentMusicState = this.backgroundMusic.getBackgroundMusicState();
+    this.backgroundMusic.setBackgroundMusicState(!currentMusicState);
   }
 }
