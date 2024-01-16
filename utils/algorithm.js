@@ -1,3 +1,26 @@
+export function updateHighScores(currentScore) {
+  // 尝试从缓存中获取历史排名，如果不存在，则初始化为空数组
+  let highScores = JSON.parse(wx.getStorageSync('historyRank')) || [];
+  // 确保历史排名是一个数组
+  if (!Array.isArray(highScores)) {
+    highScores = [];
+  }
+  // 将当前分数添加到数组中
+  highScores.push(currentScore);
+  // 对数组进行排序，最高分在前
+  highScores.sort((a, b) => b - a);
+  // 如果数组长度超过10，移除最低分（数组最后一个元素）
+  if (highScores.length > 10) {
+    highScores.pop();
+  }
+  // 将更新后的排名保存回缓存
+  try {
+    wx.setStorageSync('historyRank', JSON.stringify(highScores));
+  } catch (e) {
+    console.info(e);
+  }
+}
+
 export function pointToLineDistance(x, y, x1, y1, x2, y2) {
   const A = x - x1;
   const B = y - y1;

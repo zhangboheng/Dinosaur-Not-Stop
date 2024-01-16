@@ -1,7 +1,11 @@
 import {
   drawRoundedRect
 } from '../../utils/button';
+import {
+  drawDialog
+} from '../../utils/dialog';
 let systemInfo = wx.getSystemInfoSync();
+let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 export default class Scene1 {
   constructor(game) {
     this.game = game;
@@ -12,6 +16,9 @@ export default class Scene1 {
     this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
+    // 历史成绩排行图片
+    this.rankImage = new Image();
+    this.rankImage.src = 'image/rank.png';
     // 设置开始按钮的基础设置
     this.buttonWidth = 180;
     this.buttonHeight = 50;
@@ -27,12 +34,49 @@ export default class Scene1 {
     this.thirdButtonHeight = this.buttonHeight;
     this.thirdButtonX = this.buttonX;
     this.thirdButtonY = this.buttonY + this.buttonHeight + this.secondButtonHeight + 20;
+    // 获取历史分数
+    let getHistoryRank = wx.getStorageSync('historyRank');
+    // 调用 drawDialog 函数来绘制对话框
+    this.showDialogOrNot = false;
+    this.dialogOptions = {
+      width: 240,
+      height: 350,
+      backgroundColor: '#f5d659',
+      scores: getHistoryRank
+    };
+    this.closeButton = drawDialog(this.context, '历史成绩榜', this.dialogOptions);
+  }
+  // 绘制排行榜提示框
+  drawRankDialog() {
+    // 获取历史分数
+    let getHistoryRank = wx.getStorageSync('historyRank');
+    this.dialogOptions = {
+      width: 240,
+      height: 350,
+      backgroundColor: '#f5d659',
+      scores: getHistoryRank
+    };
+    if (this.showDialogOrNot) {
+      drawDialog(this.context, '历史成绩榜', this.dialogOptions);
+    }
+  }
+  // 绘制历史成绩图片
+  drawRankImage() {
+    if (this.rankImage.complete) {
+      this.context.drawImage(this.rankImage, menuButtonInfo.right - this.rankImage.width, menuButtonInfo.top + 40, 32, 32);
+    }
+    this.context.fillStyle = 'black';
+    this.context.font = 'bold 10px Arial';
+    this.context.textAlign = 'center';
+    this.context.fillText('成绩榜', menuButtonInfo.right - 16, menuButtonInfo.top + 82);
   }
   draw() {
     // 绘制背景图片
     if (this.backgroundImage.complete) {
       this.context.drawImage(this.backgroundImage, 0, 0, this.canvas.width, this.canvas.height);
     }
+    // 绘制历史成绩图片
+    this.drawRankImage();
     // 开始按钮
     drawRoundedRect(this.context, this.buttonX, this.buttonY, this.buttonWidth, this.buttonHeight, 10, '#f5d659', 'black', 3);
     drawRoundedRect(this.context, this.secondButtonX, this.secondButtonY, this.secondButtonWidth, this.secondButtonHeight, 10, '#f5d659', 'black', 3);
@@ -59,12 +103,25 @@ export default class Scene1 {
       const y = startY + lineHeight * index;
       this.context.fillText(line, x, y);
     });
+    // 绘制排行
+    this.drawRankDialog();
   }
   touchHandler(e) {
     const touch = e.touches[0];
     if (touch.clientX >= this.buttonX && touch.clientX <= this.buttonX + this.buttonWidth &&
       touch.clientY >= this.buttonY && touch.clientY <= this.buttonY + this.buttonHeight) {
       this.game.switchScene(new this.game.choose(this.game));
+    }
+    // 获取图片的位置和尺寸
+    let imgX = menuButtonInfo.right - this.rankImage.width;
+    let imgY = menuButtonInfo.top + 40;
+    let imgWidth = 32;
+    let imgHeight = 42;
+    // 判断点击是否在图片区域内
+    if (touch.clientX >= imgX && touch.clientX <= imgX + imgWidth && touch.clientY >= imgY && touch.clientY <= imgY + imgHeight) {
+      this.showDialogOrNot = true;
+      // 点击在图片区域内
+      this.drawRankDialog();
     }
     // 检测是否点击了第二个按钮
     if (touch.clientX >= this.secondButtonX && touch.clientX <= this.secondButtonX + this.secondButtonWidth &&
@@ -75,6 +132,10 @@ export default class Scene1 {
     if (touch.clientX >= this.thirdButtonX && touch.clientX <= this.thirdButtonX + this.thirdButtonWidth &&
       touch.clientY >= this.thirdButtonY && touch.clientY <= this.thirdButtonY + this.thirdButtonHeight) {
       this.game.switchScene(new this.game.settings(this.game));
+    }
+    // 点击关闭按钮
+    if (touch.clientX >= this.closeButton.closeButtonX && touch.clientX <= this.closeButton.closeButtonX + this.closeButton.closeButtonSize && touch.clientY >= this.closeButton.closeButtonY && touch.clientY <= this.closeButton.closeButtonY + this.closeButton.closeButtonSize) {
+      this.showDialogOrNot = false;
     }
   }
 }

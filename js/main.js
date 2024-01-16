@@ -3,17 +3,10 @@ import Choose from './scene/choose.js';
 import Prison from './scene/prison.js';
 import Infinite from './scene/infinite.js';
 import Instruction from './scene/instruction.js';
-import Settings from './scene/settings.js'
-let getMusicState = wx.getStorageSync('musicEnabled');
-let getBackgroundMusic = wx.getStorageSync('backgroundMusicEnabled')
-if (getMusicState == '') {
-  wx.setStorageSync('musicEnabled', true)
-}
-if (getBackgroundMusic == ''){
-  wx.setStorageSync('backgroundMusicEnabled', true)  
-}
+import Settings from './scene/settings.js';
 export default class Game {
   constructor() {
+    this.initSettings();
     this.canvas = wx.createCanvas();
     this.context = canvas.getContext('2d');
     this.startup = StartUp;
@@ -49,9 +42,24 @@ export default class Game {
       };
     });
     this.boundLoop = this.loop.bind(this);
-    this.loop()
+    this.loop();
   }
-
+  // 初始化信息
+  initSettings() {
+    let getMusicState = wx.getStorageSync('musicEnabled');
+    let getBackgroundMusic = wx.getStorageSync('backgroundMusicEnabled');
+    let getHistoryRank = wx.getStorageSync('historyRank')
+    if (getMusicState == ''){
+      wx.setStorageSync('musicEnabled', true)
+    }
+    if (getBackgroundMusic == ''){
+      wx.setStorageSync('backgroundMusicEnabled', true)  
+    }
+    if (getHistoryRank == ''){
+      let scores = JSON.stringify([0,0,0,0,0,0,0,0,0,0])
+      wx.setStorageSync('historyRank', scores)
+    } 
+  }
   loop() {
     // 清除整个画布
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);

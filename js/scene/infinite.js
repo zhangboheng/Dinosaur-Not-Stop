@@ -3,7 +3,8 @@ import {
   drawIconButton
 } from '../../utils/button';
 import {
-  pointToLineDistance
+  pointToLineDistance,
+  updateHighScores
 } from '../../utils/algorithm';
 import {
   showBoxMessage
@@ -506,6 +507,7 @@ export default class Scene2 {
       touchY >= btn.y && touchY <= btn.y + btn.height) {
       btn.onClick();
       this.gameOver = false;
+      updateHighScores(6000 + this.score);
       // 游戏结束时
       backgroundMusic.pauseBackgroundMusic();
       return
@@ -529,10 +531,12 @@ export default class Scene2 {
     if (this.gameOver) {
       if (touchX >= this.buttonStartInfo.x && touchX <= this.buttonStartInfo.x + this.buttonStartInfo.width &&
         touchY >= this.buttonStartInfo.y && touchY <= this.buttonStartInfo.y + this.buttonStartInfo.height) {
-        this.resetGame()
+        updateHighScores(6000 + this.score);
+        this.resetGame();
       }
       if (touchX >= this.buttonShareInfo.x && touchX <= this.buttonShareInfo.x + this.buttonShareInfo.width &&
         touchY >= this.buttonShareInfo.y && touchY <= this.buttonShareInfo.y + this.buttonShareInfo.height) {
+        updateHighScores(6000 + this.score);
         wx.shareAppMessage({
           title: '小恐龙不要停！太难了吧',
           imageUrl: 'image/background.jpg' // 分享图片的路径

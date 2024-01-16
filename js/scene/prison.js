@@ -3,7 +3,8 @@ import {
   drawIconButton
 } from '../../utils/button';
 import {
-  doPolygonsIntersect
+  doPolygonsIntersect,
+  updateHighScores
 } from '../../utils/algorithm';
 import {
   showBoxMessage
@@ -310,9 +311,9 @@ export default class Scene2 {
       };
       // 使用SAT检测碰撞
       if (doPolygonsIntersect(dinoPolygon, trapPolygon)) {
-        soundManager.play('crack');
         this.gameOver = true;
-        backgroundMusic.pauseBackgroundMusic()
+        backgroundMusic.pauseBackgroundMusic();
+        soundManager.play('crack');
         soundManager.play('end', 200);
       }
     });
@@ -374,6 +375,7 @@ export default class Scene2 {
       touchY >= btn.y && touchY <= btn.y + btn.height) {
       btn.onClick();
       this.gameOver = false;
+      updateHighScores(this.score);
       // 游戏结束时
       backgroundMusic.pauseBackgroundMusic()
       return
@@ -396,10 +398,12 @@ export default class Scene2 {
     if (this.gameOver || this.isLevelCompleted) {
       if (touchX >= this.buttonStartInfo.x && touchX <= this.buttonStartInfo.x + this.buttonStartInfo.width &&
         touchY >= this.buttonStartInfo.y && touchY <= this.buttonStartInfo.y + this.buttonStartInfo.height) {
-        this.resetGame()
+        updateHighScores(this.score);
+        this.resetGame();
       }
       if (touchX >= this.buttonShareInfo.x && touchX <= this.buttonShareInfo.x + this.buttonShareInfo.width &&
         touchY >= this.buttonShareInfo.y && touchY <= this.buttonShareInfo.y + this.buttonShareInfo.height) {
+          updateHighScores(this.score);
           if(this.isLevelCompleted) {
             this.game.switchScene(new this.game.infinite(this.game));
           } else {
