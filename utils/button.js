@@ -87,20 +87,15 @@ export function drawRoundedRectNoStrike(ctx, x, y, width, height, radius, stroke
   ctx.stroke();
 }
 
-export function drawRoundedRectWithTail(context, x, y, width, height, borderRadius, tailWidth, tailHeight, tailDirection) {
+export function drawRoundedRectWithTail(context, x, y, width, height, borderRadius, tailWidth, tailHeight) {
   // 绘制圆角矩形的基本部分
   context.beginPath();
-  // 绘制尾巴
-  if (tailDirection === 'right') {
-    context.lineTo(x + width - 4, y + height / 2 - tailHeight / 2);
-    context.lineTo(x + width + tailWidth - 4, y + height / 2);
-    context.lineTo(x + width - 4, y + height / 2 + tailHeight / 2);
-  }
   context.moveTo(x + borderRadius, y);
   context.lineTo(x + width - borderRadius, y);
-  context.arcTo(x + width, y, x + width, y + borderRadius, borderRadius);
+  context.lineTo(x + width - 4, y + height / 2 - tailHeight / 2);
+  context.lineTo(x + width + tailWidth - 4, y + height / 2);
   context.lineTo(x + width, y + height - borderRadius);
-  context.arcTo(x + width, y + height, x + width - borderRadius, y + height, borderRadius);
+  context.lineTo(x + width - 4, y + height / 2 + tailHeight / 2);
   context.lineTo(x + borderRadius, y + height);
   context.arcTo(x, y + height, x, y + height - borderRadius, borderRadius);
   context.lineTo(x, y + borderRadius);

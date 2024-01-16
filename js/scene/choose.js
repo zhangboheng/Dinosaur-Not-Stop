@@ -49,26 +49,26 @@ export default class Instruction {
   drawTips(){
     if (!this.showTips) return; // 如果用户选择不显示提示，则跳过
     // 提示框属性
-    const rectWidth = 120;
+    const rectWidth = 140;
     const rectHeight = 30;
-    const rectX = (this.canvas.width - rectWidth - 36) / 2;
-    const rectY = menuButtonInfo.top; // 可以根据需要调整
     const borderRadius = 10;
     const tailWidth = 20; // 尾巴的宽度
     const tailHeight = 28; // 尾巴的高度
+    const rectX = menuButtonInfo.right - menuButtonInfo.width - rectWidth - tailWidth;
+    const rectY = menuButtonInfo.top; // 可以根据需要调整
     // 绘制半透明矩形
     this.context.fillStyle = '#f5d659'; // 增加透明度
     drawRoundedRectWithTail(this.context, rectX, rectY, rectWidth, rectHeight, borderRadius, tailWidth, tailHeight, 'right');
     this.context.fill();
     this.context.strokeStyle = 'black';
     this.context.lineWidth = 3;
-    drawRoundedRectWithTail(this.context, rectX, rectY, rectWidth, rectHeight, borderRadius, tailWidth, tailHeight, 'right');
+    drawRoundedRectWithTail(this.context, rectX, rectY, rectWidth, rectHeight, borderRadius, tailWidth, tailHeight);
     this.context.stroke();
     // 绘制提示文本
     this.context.fillStyle = 'black';
-    this.context.font = '16px Arial';
+    this.context.font = '14px Arial';
     this.context.textAlign = 'center';
-    this.context.fillText('加入我的小程序', rectX + rectWidth / 2, rectY + rectHeight / 2 + 2); 
+    this.context.fillText('点击加入我的小程序', rectX + rectWidth / 2, rectY + rectHeight / 2 + 2); 
   }
   // 绘制第一关
   drawGameOne() {
