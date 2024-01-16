@@ -26,7 +26,7 @@ export default class Settings {
       this.game.switchScene(new this.game.startup(this.game));
     });
     // 定义标签和对应的内容
-    this.tabs = ['设置', '历史', '团队', '关于'];
+    this.tabs = ['设置', '历史', '团队', '关于', '产品'];
     // 加载左侧版本图标
     this.iconVersion = new Image();
     this.iconVersion.src = 'image/version.png'
@@ -197,6 +197,30 @@ export default class Settings {
       this.context.font = `${fontSize}px Arial`;
       const arr = ['官网', '微信', 'Youtube', '邮箱', 'Github'];
       const list = ['https://luckydesigner.space/', 'Nosense-history', '@LuckyDesigner', 'zhangboheng827@gmail.com', 'https://github.com/zhagnboheng'];
+      // 计算文本高度和总内容高度
+      const textHeight = fontSize * 1.2;
+      const contentHeight = arr.length * textHeight + 20;
+      // 绘制矩形
+      this.context.fillStyle = '#f5d659';
+      this.context.strokeStyle = 'black';
+      this.context.fillRect(tabX, tabContentY, tabWidth, contentHeight);
+      this.context.strokeRect(tabX, tabContentY, tabWidth, contentHeight);
+      // 遍历数组并绘制文本
+      this.context.fillStyle = '#000000';
+      for (let i = 0; i < arr.length; i++) {
+        const textY = tabContentY + 15 + textHeight * i + fontSize / 2;
+        // 左侧文本
+        this.context.textAlign = 'left';
+        this.context.fillText(arr[i], tabX + 10, textY);
+        // 右侧文本
+        this.context.textAlign = 'right';
+        this.context.fillText(list[i], tabX + tabWidth - 10, textY);
+      }
+    } else if (this.selectedIndex === 4) {
+      const fontSize = 16;
+      this.context.font = `${fontSize}px Arial`;
+      const arr = ['浏览器插件', '微信小程序', '微信小游戏'];
+      const list = ['LuckyNews Box', '英语大富翁', '小恐龙不要停'];
       // 计算文本高度和总内容高度
       const textHeight = fontSize * 1.2;
       const contentHeight = arr.length * textHeight + 20;
