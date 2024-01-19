@@ -42,15 +42,23 @@ export default class Scene2 {
     this.roadImage = new Image();
     this.roadImage.src = 'image/prison.jpg'; // 替换为你的道路图片路径
     this.roadHeight = 290; // 道路的高度
-    // 陷阱
-    this.traps = [];
-    this.trapWidth = 32; // 陷阱的宽度
-    this.trapHeight = 32; // 陷阱的高度
-    this.trapInterval = 48; // 陷阱间的最小间隔
-    this.nextTrapAt = this.randomInterval(this.trapInterval, this.trapInterval * 2); // 下一个陷阱的初始位置
     // 加载陷阱图片
     this.trapImage = new Image();
     this.trapImage.src = 'image/woodenbox.png'
+    this.trapImages = [
+      'image/woodenbox.png',
+      'image/woodenstackbox.png',
+      'image/prisonbarrier.png',
+      'image/barrier.png',
+    ].map(src => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
+    // 陷阱
+    this.traps = [];
+    this.trapInterval = 48; // 陷阱间的最小间隔
+    this.nextTrapAt = this.randomInterval(this.trapInterval, this.trapInterval * 2); // 下一个陷阱的初始位置
     this.trapTimer = 0; // 陷阱生成计时器
     this.trapInterval = 200; // 陷阱生成的间隔（以帧计）
     // 创建返回按钮
@@ -195,11 +203,12 @@ export default class Scene2 {
   }
   // 绘制陷阱位置
   drawTraps() {
-    const trapBaseY = this.canvas.height - this.roadHeight - this.trapImage.height;
+    const trapBaseY = this.canvas.height - this.roadHeight
     this.traps.forEach(trap => {
+      const trapImg = this.trapImages[trap.imageIndex];
       // 绘制陷阱图片
-      if (this.trapImage.complete) {
-        this.context.drawImage(this.trapImage, trap.x, trapBaseY);
+      if (trapImg.complete) {
+        this.context.drawImage(trapImg, trap.x, trapBaseY - trap.height, trap.width, trap.height);
       }
     });
   }
@@ -214,21 +223,26 @@ export default class Scene2 {
         trap.x -= this.roadSpeed;
       });
       // 移除已经离开屏幕的陷阱
-      this.traps = this.traps.filter(trap => trap.x + this.trapWidth > 0);
+      this.traps = this.traps.filter(trap => trap.x + trap.width > 0);
       // 根据道路位置和间隔添加新陷阱
       // 更新计时器
       this.trapTimer++;
       // 当计时器达到间隔时，生成新的陷阱
-      if (this.trapTimer >= this.trapInterval) {
+      if (this.trapTimer >= this.trapInterval && this.score <= 5250) {
         const numberOfTraps = Math.floor(Math.random() * 6) + 1;
         let lastTrapX = this.canvas.width;
         for (let i = 0; i < numberOfTraps; i++) {
           // 为每个陷阱计算随机间隔
           const gap = Math.floor(Math.random() * 60) + 150; // 间隔（50到200像素之间）
           lastTrapX += gap;
+          const imageIndex = Math.floor(Math.random() * this.trapImages.length);
+          const trapImg = this.trapImages[imageIndex];
           // 添加陷阱
           this.traps.push({
-            x: lastTrapX
+            x: lastTrapX,
+            imageIndex: imageIndex,
+            width: trapImg.width,  // 为陷阱设置宽度
+            height: trapImg.height // 为陷阱设置高度
           });
         }
         // 重置计时器
@@ -305,16 +319,16 @@ export default class Scene2 {
             y: this.canvas.height - this.roadHeight
           },
           {
-            x: trap.x + this.trapWidth,
+            x: trap.x + trap.width,
             y: this.canvas.height - this.roadHeight
           },
           {
-            x: trap.x + this.trapWidth,
-            y: this.canvas.height - this.roadHeight - this.trapHeight
+            x: trap.x + trap.width,
+            y: this.canvas.height - this.roadHeight - trap.height
           },
           {
             x: trap.x,
-            y: this.canvas.height - this.roadHeight - this.trapHeight
+            y: this.canvas.height - this.roadHeight - trap.height
           }
         ]
       };
@@ -448,6 +462,8 @@ export default class Scene2 {
     // 游戏开始时
     backgroundMusic.playBackgroundMusic()
     this.isLevelCompleted = false;
+    // 重置定时
+    this.trapTimer = 0;
   }
   // 页面销毁机制
   destroy() {

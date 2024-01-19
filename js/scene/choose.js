@@ -149,12 +149,12 @@ export default class Instruction {
     this.drawBackground();
     // 绘制返回按钮
     this.drawBack();
+    // 绘制加入我的小程序提示
+    this.drawTips();
     // 绘制第一关
     this.drawGameOne();
     // 绘制第二关
     this.drawGameTwo();
-    // 绘制加入我的小程序提示
-    this.drawTips();
   }
   touchHandler(e) {
     const touch = e.touches[0];
