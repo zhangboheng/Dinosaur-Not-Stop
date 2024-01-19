@@ -54,7 +54,7 @@ export default class Scene2 {
     this.trapInterval = 200; // 陷阱生成的间隔（以帧计）
     // 创建返回按钮
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
-      this.game.switchScene(new this.game.startup(this.game));
+      this.game.switchScene(new this.game.choose(this.game));
     });
     // 小恐龙属性
     this.isOnGround = true; // 添加地面接触标志
@@ -125,6 +125,9 @@ export default class Scene2 {
     this.messageDuration = 30;
     // 重新开始按钮
     this.buttonStartInfo = "";
+    // 加载失败图片
+    this.failTipsImage = new Image();
+    this.failTipsImage.src = 'image/gameovertips.png'
     // 分享好友按钮
     this.buttonShareInfo = "";
     // 游戏状态
@@ -492,9 +495,11 @@ export default class Scene2 {
       // 更新小恐龙图片切换
       this.updateDino();
     } else {
-      showBoxMessage(this.context, "游戏结束", this.canvas.width / 2, this.canvas.height / 2 - 70, '#f5ac11');
-      this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2);
-      this.buttonShareInfo = drawIconButton(this.context, "分享好友", this.canvas.width / 2, this.canvas.height / 2 + 70);
+      if (this.failTipsImage.complete) {
+        this.context.drawImage(this.failTipsImage, (this.canvas.width - this.failTipsImage.width)/ 2, (this.canvas.height -  this.failTipsImage.height)/ 2 - this.failTipsImage.height/2);
+      }
+      this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2 + 40);
+      this.buttonShareInfo = drawIconButton(this.context, "分享好友", this.canvas.width / 2, this.canvas.height / 2 + 110);
     }
   }
   touchHandler(e) {

@@ -55,7 +55,7 @@ export default class Scene2 {
     this.trapInterval = 200; // 陷阱生成的间隔（以帧计）
     // 创建返回按钮
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
-      this.game.switchScene(new this.game.startup(this.game));
+      this.game.switchScene(new this.game.choose(this.game));
     });
     // 小恐龙属性
     this.isOnGround = true; // 添加地面接触标志
@@ -93,6 +93,12 @@ export default class Scene2 {
     this.buttonStartInfo = "";
     // 分享好友按钮
     this.buttonShareInfo = "";
+    // 加载成功图片
+    this.successTipsImage = new Image();
+    this.successTipsImage.src = 'image/gamecompletetips.png'
+    // 加载失败图片
+    this.failTipsImage = new Image();
+    this.failTipsImage.src = 'image/gameovertips.png'
     // 游戏状态
     this.gameOver = false;
     // 游戏通关状态
@@ -251,6 +257,9 @@ export default class Scene2 {
       this.currentDinoFrame = (this.currentDinoFrame + 1) % this.dinoImages.length;
       this.dinoFrameTimer = 0;
     }
+    if (this.isLevelCompleted) {
+      this.circleX += 1;
+    }
     this.velocityY += this.gravity;
     this.circleY += this.velocityY;
     // 根据速度判断小恐龙是在跳起还是在下落
@@ -354,14 +363,20 @@ export default class Scene2 {
       this.updateDino();
     } else {
       if (!this.isLevelCompleted) {
-        showBoxMessage(this.context, "游戏结束", this.canvas.width / 2, this.canvas.height / 2 - 70, '#f5ac11');
-        this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2);
-        this.buttonShareInfo = drawIconButton(this.context, "分享好友", this.canvas.width / 2, this.canvas.height / 2 + 70);
+        if (this.failTipsImage.complete) {
+          this.context.drawImage(this.failTipsImage, (this.canvas.width - this.failTipsImage.width) / 2, (this.canvas.height - this.failTipsImage.height) / 2 - this.failTipsImage.height / 2);
+        }
+        this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2 + 40);
+        this.buttonShareInfo = drawIconButton(this.context, "分享好友", this.canvas.width / 2, this.canvas.height / 2 + 110);
       } else {
-        showBoxMessage(this.context, "恭喜过关", this.canvas.width / 2, this.canvas.height / 2 - 70, '#f5ac11');
-        this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2);
-        this.buttonShareInfo = drawIconButton(this.context, "前往下关", this.canvas.width / 2, this.canvas.height / 2 + 70);
+
+        if (this.successTipsImage.complete) {
+          this.context.drawImage(this.successTipsImage, (this.canvas.width - this.successTipsImage.width) / 2, (this.canvas.height - this.successTipsImage.height) / 2 - this.successTipsImage.height / 2);
+        }
+        this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2 + 40);
+        this.buttonShareInfo = drawIconButton(this.context, "前往下关", this.canvas.width / 2, this.canvas.height / 2 + 110);
         wx.setStorageSync('infiniteEnabled', 'access')
+        this.updateDino();
       }
     }
   }
@@ -381,7 +396,7 @@ export default class Scene2 {
       return
     }
     if (this.isLevelCompleted) {
-      this.velocityY = this.jumpHeight;
+      this.canDoubleJump = false;
       this.isOnGround = false;
     } else {
       if (!this.gameOver && (this.isOnGround || this.canDoubleJump)) {
@@ -403,15 +418,15 @@ export default class Scene2 {
       }
       if (touchX >= this.buttonShareInfo.x && touchX <= this.buttonShareInfo.x + this.buttonShareInfo.width &&
         touchY >= this.buttonShareInfo.y && touchY <= this.buttonShareInfo.y + this.buttonShareInfo.height) {
-          updateHighScores(this.score);
-          if(this.isLevelCompleted) {
-            this.game.switchScene(new this.game.infinite(this.game));
-          } else {
-            wx.shareAppMessage({
-              title: '小恐龙不要停！太难了吧',
-              imageUrl: 'image/background.jpg' // 分享图片的路径
-            });
-          }
+        updateHighScores(this.score);
+        if (this.isLevelCompleted) {
+          this.game.switchScene(new this.game.infinite(this.game));
+        } else {
+          wx.shareAppMessage({
+            title: '小恐龙不要停！太难了吧',
+            imageUrl: 'image/background.jpg' // 分享图片的路径
+          });
+        }
       }
     }
   }
@@ -421,6 +436,7 @@ export default class Scene2 {
     this.roadX = 0;
     this.traps = [];
     // 重置小恐龙位置和状态
+    this.circleX = 50;
     this.circleY = this.canvas.height - this.roadHeight - 50;
     this.velocityY = 0;
     this.isOnGround = true;
