@@ -126,7 +126,7 @@ export default class Settings {
       // 开关状态
       const isSwitchOn = wx.getStorageSync('musicEnabled') ? true : wx.getStorageSync('musicEnabled');
       const isBackMusicOn = wx.getStorageSync('backgroundMusicEnabled') ? true : wx.getStorageSync('backgroundMusicEnabled');
-      this.context.fillText('V 1.0.0', switchX + 26, textY);
+      this.context.fillText('V 1.0.1', switchX + 26, textY);
       // 绘制圆角矩形背景
       this.context.fillStyle = isSwitchOn ? '#4CAF50' : '#cccccc';
       drawRoundedRectNoStrike(this.context, switchX, switchY, switchWidth, switchHeight, borderRadius, '#000000', 3);
@@ -150,24 +150,28 @@ export default class Settings {
       this.context.fill();
     } else if (this.selectedIndex === 1) {
       const fontSize = 16;
-      const textHeight = (fontSize * 1.2) * 2;
-      const contentHeight = textHeight + 20; // 设置内容区域的高度，可以根据需要调整
-      // 绘制音效左侧文字
+      this.context.font = `${fontSize}px Arial`;
+      const arr = ['版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '完善玩法说明内容', '', '版本 1.0.0', 'Demo 版本发布'];
+      const list = ['2024-01-22', '', '', '', '2024-01-08', ''];
+      // 计算文本高度和总内容高度
+      const textHeight = fontSize * 1.2;
+      const contentHeight = arr.length * textHeight + 20;
+      // 绘制矩形
+      this.context.fillStyle = '#f5d659';
+      this.context.strokeStyle = 'black';
       this.context.fillRect(tabX, tabContentY, tabWidth, contentHeight);
       this.context.strokeRect(tabX, tabContentY, tabWidth, contentHeight);
-      // 绘制版本信息
-      const versionText = '版本 1.0.0';
-      const updateTimeText = '2024-01-08';
-      const textY = tabContentY + fontSize + 5;
+      // 遍历数组并绘制文本
       this.context.fillStyle = '#000000';
-      this.context.font = '16px Arial';
-      // 左侧文字
-      this.context.textAlign = 'left';
-      this.context.fillText(versionText, tabX + 10, textY);
-      this.context.fillText('Demo 发布', tabX + 10, textY + 20);
-      // 右侧文字
-      this.context.textAlign = 'right';
-      this.context.fillText(updateTimeText, tabX + tabWidth - 10, textY);
+      for (let i = 0; i < arr.length; i++) {
+        const textY = tabContentY + 15 + textHeight * i + fontSize / 2;
+        // 左侧文本
+        this.context.textAlign = 'left';
+        this.context.fillText(arr[i], tabX + 10, textY);
+        // 右侧文本
+        this.context.textAlign = 'right';
+        this.context.fillText(list[i], tabX + tabWidth - 10, textY);
+      }
     } else if (this.selectedIndex === 2) {
       const fontSize = 16;
       this.context.font = `${fontSize}px Arial`;

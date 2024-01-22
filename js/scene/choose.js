@@ -22,10 +22,10 @@ export default class Instruction {
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
       this.game.switchScene(new this.game.startup(this.game));
     });
-    // 绘制Game One封面
+    // 绘制逃出监牢封面
     this.rectImage = new Image();
     this.rectImage.src = 'image/gameone.jpg';
-    // 绘制Game Two封面
+    // 绘制逃出乐园封面
     this.rectImageTwo = new Image();
     this.rectImageTwo.src = 'image/gametwo.jpg';
   }
@@ -98,12 +98,12 @@ export default class Instruction {
     this.context.lineWidth = 3; // 描边宽度，根据需要调整
     this.context.strokeRect(imageX, imageY, imageWidth, imageHeight);
     // 在图片下方绘制文字
-    const text = 'Game One 逃出监牢';
+    const text = '逃出监牢';
     this.context.fillStyle = 'black';
     this.context.font = 'bold 16px Arial';
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
-    this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight - 15);
+    this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight - 12);
   }
   // 绘制第二关
   drawGameTwo() {
@@ -133,12 +133,12 @@ export default class Instruction {
     this.context.lineWidth = 3; // 描边宽度，根据需要调整
     this.context.strokeRect(imageX, imageY, imageWidth, imageHeight);
     // 在图片下方绘制文字
-    const text = 'Game Two 逃出乐园';
+    const text = '逃出乐园';
     this.context.fillStyle = 'black';
     this.context.font = 'bold 16px Arial';
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
-    this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight - 15);
+    this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight - 12);
     if (this.getGameTwoAccess != 'access') {
       this.context.fillStyle = '#00000099';
       this.context.fillRect(rectX, rectY, rectWidth, rectHeight);
@@ -175,12 +175,12 @@ export default class Instruction {
     this.rectX = (this.canvas.width - this.rectWidth) / 2; // 矩形的X坐标
     this.rectY = this.backButton.y + this.backButton.height + rectMargin; // 矩形的Y坐标
     this.rectHeight = 190; // 矩形的高度
-    // 检查触摸点是否在 Game One 内
+    // 检查触摸点是否在逃出监牢内
     if (touchX >= this.rectX && touchX <= this.rectX + this.rectWidth &&
       touchY >= this.rectY && touchY <= this.rectY + this.rectHeight) {
       this.game.switchScene(new this.game.prison(this.game));
     }
-    // 检查触摸点是否在 Game Two 内
+    // 检查触摸点是否在逃出乐园内
     if (touchX >= this.rectX && touchX <= this.rectX + this.rectWidth &&
       touchY >= this.rectY + 200 && touchY <= this.rectY + 200 + this.rectHeight && this.getGameTwoAccess == 'access') {
       this.game.switchScene(new this.game.infinite(this.game));

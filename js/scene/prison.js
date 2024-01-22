@@ -93,6 +93,9 @@ export default class Scene2 {
     // 初始化分数
     this.score = 0;
     this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
+    // 屏幕全黑遮照标志
+    this.screenDarkness = 0;
+    this.isScreenDark = false;
     // 消息提示
     this.speedIncreaseMessage = "Speed+1";
     this.messageDisplayTime = 0; // 消息显示的持续时间（以帧计）
@@ -129,6 +132,23 @@ export default class Scene2 {
       if (this.backgroundX <= -this.canvas.width) {
         this.backgroundX = 0;
       }
+    }
+  }
+  // 绘制黑色遮罩
+  drawBlackScreen(){
+    if (this.isScreenDark) {
+      this.context.fillStyle = `rgba(0, 0, 0, ${this.screenDarkness})`;
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
+  updateDrawBlackScreen(){
+    if (this.score >= 3000 && this.score < 3300) {
+      this.isScreenDark = true;
+      this.screenDarkness = Math.min((this.score - 3000) / (3300 - 3000), 1);
+    } else if (this.score >= 3350 && this.score < 3650) {
+      this.screenDarkness = Math.max(1 - (this.score - 3350) / (3650 - 3350), 0);
+    } else if (this.score >= 3650) {
+      this.screenDarkness = 0;
     }
   }
   // 绘制返回按钮
@@ -363,6 +383,8 @@ export default class Scene2 {
     this.drawDino();
     // 如果消息需要显示
     this.drawMessageBox();
+    // 绘制黑色遮罩
+    this.drawBlackScreen();
   }
   // 游戏更新事件
   update() {
@@ -375,6 +397,8 @@ export default class Scene2 {
       this.updateTraps();
       // 更新小恐龙图片切换
       this.updateDino();
+      // 更新黑色遮罩
+      this.updateDrawBlackScreen();
     } else {
       if (!this.isLevelCompleted) {
         if (this.failTipsImage.complete) {
@@ -454,6 +478,8 @@ export default class Scene2 {
     this.circleY = this.canvas.height - this.roadHeight - 50;
     this.velocityY = 0;
     this.isOnGround = true;
+    this.screenDarkness = 0;
+    this.isScreenDark = false;
     this.gameOver = false;
     // 重置分数
     this.score = 0;
