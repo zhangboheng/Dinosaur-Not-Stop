@@ -43,8 +43,6 @@ export default class Scene2 {
     this.roadImage.src = 'image/prison.jpg'; // 替换为你的道路图片路径
     this.roadHeight = 290; // 道路的高度
     // 加载陷阱图片
-    this.trapImage = new Image();
-    this.trapImage.src = 'image/woodenbox.png'
     this.trapImages = [
       'image/woodenbox.png',
       'image/woodenstackbox.png',
