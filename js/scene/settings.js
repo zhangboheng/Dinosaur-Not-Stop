@@ -312,8 +312,12 @@ export default class Settings {
   }
   // 页面销毁机制
   destroy() {
-    // 清理资源，如图片
+    // 清理图像资源
     this.backButton.image.src = '';
+    this.backgroundImage.src = '';
+    this.iconVersion.src = '';
+    this.iconImage.src = '';
+    this.iconBack.src = '';
   }
   // 管理音效状态
   toggleMusic() {

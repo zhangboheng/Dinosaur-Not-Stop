@@ -63,12 +63,14 @@ export default class Game {
   loop() {
     // 清除整个画布
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.currentScene.draw();
     if (this.currentScene instanceof Infinite) {
+      this.currentScene.draw();
       this.currentScene.update();
-    }
-    if (this.currentScene instanceof Prison) {
+    }else if (this.currentScene instanceof Prison) {
+      this.currentScene.draw();
       this.currentScene.update();
+    }else{
+      this.currentScene.draw();
     }
     requestAnimationFrame(this.boundLoop);
   }

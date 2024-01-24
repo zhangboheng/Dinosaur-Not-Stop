@@ -45,6 +45,10 @@ export default class Instruction {
     this.dinosaurBarrier.src = 'image/prisonbarrier.png';
     this.roadSpike = new Image();
     this.roadSpike.src = 'image/spikes.png';
+    this.cobblestoneImage = new Image();
+    this.cobblestoneImage.src = 'image/cobblestone.png';
+    this.doublestoneImage = new Image();
+    this.doublestoneImage.src = 'image/doublestone.png';
     // 加载操作图片
     this.clickImage = new Image();
     this.clickImage.src = 'image/click.png'
@@ -63,7 +67,7 @@ export default class Instruction {
       },
       {
         title: "陷阱",
-        content: "木箱\n\n\n双层木箱\n\n\n拦路虎\n\n\n捕龙夹\n\n\n三角锥"
+        content: "木箱\n\n\n双层木箱\n\n\n拦路虎\n\n\n捕龙夹\n\n\n三角锥\n\n\n拦路石\n\n\n大型拦路石"
       },
       {
         title: "操作",
@@ -197,6 +201,12 @@ export default class Instruction {
       if (this.roadSpike.complete) {
         this.context.drawImage(this.roadSpike, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 12 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
       }
+      if (this.cobblestoneImage.complete) {
+        this.context.drawImage(this.cobblestoneImage, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 15 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
+      }
+      if (this.doublestoneImage.complete) {
+        this.context.drawImage(this.doublestoneImage, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 18 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
+      }
       contentY += imageHeight
     } else if (this.selectedTabIndex === 4) {
       if (this.clickImage.complete) {
@@ -269,8 +279,6 @@ export default class Instruction {
     if (deltaY < 0) {
       this.scrollOffsetY += deltaY;
       this.touchStartY = touchY;
-      // 重绘画面
-      this.draw();
     }
   }
   // 触摸结束，可以在这里添加额外的逻辑
@@ -279,7 +287,26 @@ export default class Instruction {
   }
   // 页面销毁机制
   destroy() {
-    // 清理资源，如图片
+    // 移除触摸事件监听器
+    wx.offTouchStart(this.handleTouchStart.bind(this));
+    wx.offTouchMove(this.handleTouchMove.bind(this));
+    wx.offTouchEnd(this.handleTouchEnd.bind(this));
+    // 清理图像资源
     this.backButton.image.src = '';
+    this.backgroundImage.src = '';
+    this.characterImage.src = '';
+    this.improveBubble.src = '';
+    this.mushroom.src = '';
+    this.packageBox.src = '';
+    this.packageStackBox.src = '';
+    this.barrierCustom.src = '';
+    this.dinosaurBarrier.src = '';
+    this.roadSpike.src = '';
+    this.cobblestoneImage.src = '';
+    this.doublestoneImage.src = '';
+    this.clickImage.src = '';
+    // 重置状态
+    this.scrollOffsetY = 0;
+    this.selectedTabIndex = 0;
   }
 }

@@ -51,6 +51,8 @@ export default class Scene2 {
     this.trapImages = [
       'image/spikes.png',
       'image/prisonbarrier.png',
+      'image/cobblestone.png',
+      'image/doublestone.png'
     ].map(src => {
       const img = new Image();
       img.src = src;
@@ -358,7 +360,7 @@ export default class Scene2 {
           backgroundMusic.pauseBackgroundMusic();
           soundManager.play('end', 200);
         }
-      } else if (trap.imageIndex === 1) {
+      } else if (trap.imageIndex >= 1) {
         // 创建陷阱的矩形表示
         const trapPolygon = {
           vertices: [{
