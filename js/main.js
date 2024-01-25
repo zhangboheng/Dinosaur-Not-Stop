@@ -4,6 +4,7 @@ import Prison from './scene/prison.js';
 import Infinite from './scene/infinite.js';
 import Instruction from './scene/instruction.js';
 import Settings from './scene/settings.js';
+import Tools from './scene/tools.js'
 export default class Game {
   constructor() {
     this.initSettings();
@@ -15,6 +16,7 @@ export default class Game {
     this.infinite = Infinite;
     this.instruction = Instruction;
     this.settings = Settings;
+    this.tools = Tools;
     this.currentScene = new this.startup(this);
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);

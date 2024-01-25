@@ -19,6 +19,9 @@ export default class Scene1 {
     // 历史成绩排行图片
     this.rankImage = new Image();
     this.rankImage.src = 'image/rank.png';
+    // 道具屋子图片
+    this.storeImage = new Image();
+    this.storeImage.src = 'image/primitive.png';
     // 设置开始按钮的基础设置
     this.buttonWidth = 180;
     this.buttonHeight = 50;
@@ -63,12 +66,22 @@ export default class Scene1 {
   // 绘制历史成绩图片
   drawRankImage() {
     if (this.rankImage.complete) {
-      this.context.drawImage(this.rankImage, menuButtonInfo.right - this.rankImage.width, menuButtonInfo.top + 40, 32, 32);
+      this.context.drawImage(this.rankImage, 10, menuButtonInfo.top, 32, 32);
     }
     this.context.fillStyle = 'black';
     this.context.font = 'bold 10px Arial';
     this.context.textAlign = 'center';
-    this.context.fillText('成绩榜', menuButtonInfo.right - 16, menuButtonInfo.top + 82);
+    this.context.fillText('成绩榜', 26, menuButtonInfo.top + 40);
+  }
+  // 绘制道具屋图片
+  drawToolsImage() {
+    if (this.storeImage.complete) {
+      this.context.drawImage(this.storeImage, 10, menuButtonInfo.top + 50, 32, 32);
+    }
+    this.context.fillStyle = 'black';
+    this.context.font = 'bold 10px Arial';
+    this.context.textAlign = 'center';
+    this.context.fillText('道具屋', 26, menuButtonInfo.top + 90);  
   }
   draw() {
     // 绘制背景图片
@@ -77,6 +90,8 @@ export default class Scene1 {
     }
     // 绘制历史成绩图片
     this.drawRankImage();
+    // 绘制道具屋图片
+    this.drawToolsImage();
     // 开始按钮
     drawRoundedRect(this.context, this.buttonX, this.buttonY, this.buttonWidth, this.buttonHeight, 10, '#f5d659', 'black', 3);
     drawRoundedRect(this.context, this.secondButtonX, this.secondButtonY, this.secondButtonWidth, this.secondButtonHeight, 10, '#f5d659', 'black', 3);
@@ -112,16 +127,20 @@ export default class Scene1 {
       touch.clientY >= this.buttonY && touch.clientY <= this.buttonY + this.buttonHeight) {
       this.game.switchScene(new this.game.choose(this.game));
     }
-    // 获取图片的位置和尺寸
-    let imgX = menuButtonInfo.right - this.rankImage.width;
-    let imgY = menuButtonInfo.top + 40;
+    // 获取成绩榜图片的位置和尺寸
+    let imgX = 10;
+    let imgY = menuButtonInfo.top;
     let imgWidth = 32;
     let imgHeight = 42;
-    // 判断点击是否在图片区域内
+    // 判断点击是否在成绩榜区域内
     if (touch.clientX >= imgX && touch.clientX <= imgX + imgWidth && touch.clientY >= imgY && touch.clientY <= imgY + imgHeight) {
       this.showDialogOrNot = true;
       // 点击在图片区域内
       this.drawRankDialog();
+    }
+    // 判断点击是否在道具屋区域内
+    if (touch.clientX >= imgX && touch.clientX <= imgX + imgWidth && touch.clientY >= imgY + 50 && touch.clientY <= imgY + 50 + imgHeight) {
+      this.game.switchScene(new this.game.tools(this.game));
     }
     // 检测是否点击了第二个按钮
     if (touch.clientX >= this.secondButtonX && touch.clientX <= this.secondButtonX + this.secondButtonWidth &&
