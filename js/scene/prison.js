@@ -1,6 +1,7 @@
 import {
   createBackButton,
-  drawIconButton
+  drawIconButton,
+  drawRoundedRect
 } from '../../utils/button';
 import {
   doPolygonsIntersect,
@@ -91,6 +92,25 @@ export default class Scene2 {
     // 初始化分数
     this.score = 0;
     this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
+    // 加载道具图片
+    this.wingImage = new Image();
+    this.wingImage.src = 'image/wing.png';
+    this.moonImage = new Image();
+    this.moonImage.src = 'image/moon.png';
+    this.drugImage = new Image();
+    this.drugImage.src = 'image/drug.png';
+    // 道具数量区
+    this.wingCount = 0;
+    this.getWingAccess = wx.getStorageSync('wingCount');
+    this.moonCount = 0;
+    this.getMoonAccess = wx.getStorageSync('moonCount');
+    this.drugCount = 0;
+    this.getDrugAccess = wx.getStorageSync('drugCount');
+    // 是否使用了道具
+    this.useWing = false;
+    this.useMoon = false;
+    this.distanceMoon = 0;
+    this.useDrug = false;
     // 屏幕全黑遮照标志
     this.screenDarkness = 0;
     this.isScreenDark = false;
@@ -133,13 +153,13 @@ export default class Scene2 {
     }
   }
   // 绘制黑色遮罩
-  drawBlackScreen(){
+  drawBlackScreen() {
     if (this.isScreenDark) {
       this.context.fillStyle = `rgba(0, 0, 0, ${this.screenDarkness})`;
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
   }
-  updateDrawBlackScreen(){
+  updateDrawBlackScreen() {
     if (this.score >= 3000 && this.score < 3300) {
       this.isScreenDark = true;
       this.screenDarkness = Math.min((this.score - 3000) / (3300 - 3000), 1);
@@ -259,7 +279,7 @@ export default class Scene2 {
           this.traps.push({
             x: lastTrapX,
             imageIndex: imageIndex,
-            width: trapImg.width,  // 为陷阱设置宽度
+            width: trapImg.width, // 为陷阱设置宽度
             height: trapImg.height // 为陷阱设置高度
           });
         }
@@ -291,6 +311,10 @@ export default class Scene2 {
     }
     if (this.isLevelCompleted) {
       this.circleX += 1;
+    }else{
+      if(this.score - this.distanceMoon > 1000 && this.useMoon){
+        this.gravity = 0.4;
+      }
     }
     this.velocityY += this.gravity;
     this.circleY += this.velocityY;
@@ -359,6 +383,63 @@ export default class Scene2 {
       }
     });
   }
+  // 绘制隐身药道具显示
+  drawDrug() {
+    if(this.useDrug == false){
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 20, 120, 40, 10, '#f5d659', 'black', 3);
+      if (this.drugImage.complete) {
+        this.context.drawImage(this.drugImage, 10, this.canvas.height - this.roadHeight + 28, 24, 24);
+      }
+      this.context.fillStyle = 'black';
+      this.context.font = '16px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      if (typeof this.getDrugAccess == 'string') {
+        this.drugCount = 0;
+      } else {
+        this.drugCount = this.getDrugAccess;
+      }
+      this.context.fillText(this.drugCount, 100, this.canvas.height - this.roadHeight + 42);
+    }
+  }
+  // 绘制月球药道具显示
+  drawMoon() {
+    if (this.useMoon == false) {
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 70, 120, 40, 10, '#f5d659', 'black', 3);
+      if (this.moonImage.complete) {
+        this.context.drawImage(this.moonImage, 10, this.canvas.height - this.roadHeight + 78, 24, 24);
+      }
+      this.context.fillStyle = 'black';
+      this.context.font = '16px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      if (typeof this.getMoonAccess == 'string') {
+        this.moonCount = 0;
+      } else {
+        this.moonCount = this.getMoonAccess;
+      }
+      this.context.fillText(this.moonCount, 100, this.canvas.height - this.roadHeight + 92);
+    }
+  }
+  // 绘制飞天翼道具显示
+  drawWing() {
+    if (this.score <= 800 && this.useWing == false) {
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 120, 120, 40, 10, '#f5d659', 'black', 3);
+      if (this.wingImage.complete) {
+        this.context.drawImage(this.wingImage, 10, this.canvas.height - this.roadHeight + 128, 24, 24);
+      }
+      this.context.fillStyle = 'black';
+      this.context.font = '16px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      if (typeof this.getWingAccess == 'string') {
+        this.wingCount = 0;
+      } else {
+        this.wingCount = this.getWingAccess;
+      }
+      this.context.fillText(this.wingCount, 100, this.canvas.height - this.roadHeight + 142);
+    }
+  }
   // 绘制消息提示
   drawMessageBox() {
     if (this.messageDisplayTime > 0) {
@@ -379,6 +460,12 @@ export default class Scene2 {
     this.drawTraps();
     // 绘制小恐龙
     this.drawDino();
+    // 绘制隐身药道具
+    this.drawDrug();
+    // 绘制月球药道具
+    this.drawMoon();
+    // 绘制飞天翼道具
+    this.drawWing();
     // 如果消息需要显示
     this.drawMessageBox();
     // 绘制黑色遮罩
@@ -405,7 +492,6 @@ export default class Scene2 {
         this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2 + 40);
         this.buttonShareInfo = drawIconButton(this.context, "分享好友", this.canvas.width / 2, this.canvas.height / 2 + 110);
       } else {
-
         if (this.successTipsImage.complete) {
           this.context.drawImage(this.successTipsImage, (this.canvas.width - this.successTipsImage.width) / 2, (this.canvas.height - this.successTipsImage.height) / 2 - this.successTipsImage.height / 2);
         }
@@ -435,6 +521,33 @@ export default class Scene2 {
       this.canDoubleJump = false;
       this.isOnGround = false;
     } else {
+      // 使用隐身药道具点击识别
+      if (touchX >= 0 && touchX <= 110 &&
+        touchY >= this.canvas.height - this.roadHeight + 20 && touchY <= this.canvas.height - this.roadHeight + 60 && this.drugCount >= 1 && this.useDrug == false) {
+        this.useDrug = true;
+        this.drugCount--;
+        this.getDrugAccess = this.drugCount;
+        wx.setStorageSync('drugCount', this.drugCount);
+      }
+      // 使用月球药道具点击识别
+      if (touchX >= 0 && touchX <= 110 &&
+        touchY >= this.canvas.height - this.roadHeight + 70 && touchY <= this.canvas.height - this.roadHeight + 110 && this.moonCount >= 1 && this.useMoon == false) {
+          this.useMoon = true;
+          this.gravity = this.gravity/6;
+          this.distanceMoon = this.score;
+          this.moonCount--;
+          this.getMoonAccess = this.moonCount;
+          wx.setStorageSync('moonCount', this.moonCount)
+      }
+      // 使用天使翼道具点击识别
+      if (touchX >= 0 && touchX <= 110 &&
+        touchY >= this.canvas.height - this.roadHeight + 120 && touchY <= this.canvas.height - this.roadHeight + 160 && this.wingCount >= 1 && this.useWing == false) {
+        this.useWing = true;
+        this.wingCount--;
+        this.getWingAccess = this.wingCount;
+        wx.setStorageSync('wingCount', this.wingCount)
+      }
+      // 二极跳识别
       if (!this.gameOver && (this.isOnGround || this.canDoubleJump)) {
         this.velocityY = this.jumpHeight;
         if (!this.isOnGround) {
@@ -475,8 +588,12 @@ export default class Scene2 {
     this.circleX = 50;
     this.circleY = this.canvas.height - this.roadHeight - 50;
     this.velocityY = 0;
+    this.gravity = 0.4;
     this.isOnGround = true;
     this.screenDarkness = 0;
+    this.useWing = false;
+    this.useMoon = false;
+    this.useDrug = false;
     this.isScreenDark = false;
     this.gameOver = false;
     // 重置分数

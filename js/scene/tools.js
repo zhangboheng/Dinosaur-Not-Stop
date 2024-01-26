@@ -27,8 +27,17 @@ export default class Instruction {
     // 图片区
     this.wingImage = new Image();
     this.wingImage.src = 'image/wing.png';
-    // 飞天翼数量
+    this.moonImage = new Image();
+    this.moonImage.src = 'image/moon.png';
+    this.drugImage = new Image();
+    this.drugImage.src = 'image/drug.png';
+    // 道具数量区
     this.wingCount = 0;
+    this.getWingAccess = wx.getStorageSync('wingCount');
+    this.moonCount = 0;
+    this.getMoonAccess = wx.getStorageSync('moonCount');
+    this.drugCount = 0;
+    this.getDrugAccess = wx.getStorageSync('drugCount');
   }
   // 绘制背景
   drawBackground() {
@@ -56,25 +65,75 @@ export default class Instruction {
     this.context.textBaseline = 'middle';
     this.context.fillText('道具列表', this.buttonX + this.buttonWidth / 2, this.buttonY + 20);
     this.context.font = '12px Arial';
-    this.context.fillText('通过观看广告兑换后，可在关卡中开局使用一次', this.buttonX + this.buttonWidth / 2, this.buttonY + 36);
+    this.context.fillText('通过观看广告兑换后，可在关卡中使用一次', this.buttonX + this.buttonWidth / 2, this.buttonY + 36);
   }
-  // 绘制第一个道具
-  drawFirstTool() {
-    drawRoundedRect(this.context, this.buttonX, this.buttonY + 70, this.buttonWidth, 80, 10, '#f5d659', 'black', 3);
+  // 绘制道具区域
+  drawToolsArea() {
+    // 飞天翼道具绘制
+    drawRoundedRect(this.context, this.buttonX, this.buttonY + 60, this.buttonWidth, 80, 10, '#f5d659', 'black', 3);
     if (this.wingImage.complete) {
-      this.context.drawImage(this.wingImage, this.buttonX + 10, this.buttonY + 78, 64, 64);
+      this.context.drawImage(this.wingImage, this.buttonX + 10, this.buttonY + 68, 64, 64);
       this.context.fillStyle = 'black';
       this.context.font = 'bold 16px Arial';
       this.context.textAlign = 'left';
       this.context.textBaseline = 'middle';
-      this.context.fillText(`x${this.wingCount}`,  this.buttonX + this.wingImage.width + 20, this.buttonY + 90);
+      if (typeof this.getWingAccess == 'string'){
+        this.wingCount = 0;
+      } else {
+        this.wingCount = this.getWingAccess;
+      }
+      this.context.fillText(`x${this.wingCount}`,  this.buttonX + this.wingImage.width + 20, this.buttonY + 80);
       this.context.textAlign = 'right';
       this.context.textBaseline = 'middle';
-      this.context.fillText('飞天翼',  this.buttonWidth, this.buttonY + 70 + this.wingImage.height/2);
+      this.context.fillText('飞天翼',  this.buttonWidth, this.buttonY + 60 + this.wingImage.height/2);
       this.context.font = '12px Arial';
       this.context.textAlign = 'right';
       this.context.textBaseline = 'middle';
-      this.context.fillText('获得短暂飞行能力，施放可飞2000米',  this.buttonWidth, this.buttonY + 90 + this.wingImage.height/2);
+      this.context.fillText('短暂飞行能力，开局施放可飞2000米',  this.buttonWidth, this.buttonY + 80 + this.wingImage.height/2);
+    }
+    // 月球药道具绘制
+    drawRoundedRect(this.context, this.buttonX, this.buttonY + 150, this.buttonWidth, 80, 10, '#f5d659', 'black', 3);
+    if (this.moonImage.complete) {
+      this.context.drawImage(this.moonImage, this.buttonX + 10, this.buttonY + 158, 64, 64);
+      this.context.fillStyle = 'black';
+      this.context.font = 'bold 16px Arial';
+      this.context.textAlign = 'left';
+      this.context.textBaseline = 'middle';
+      if (typeof this.getMoonAccess == 'string'){
+        this.moonCount = 0;
+      } else {
+        this.moonCount = this.getMoonAccess;
+      }
+      this.context.fillText(`x${this.moonCount}`,  this.buttonX + this.moonImage.width + 20, this.buttonY + 170);
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      this.context.fillText('月球药',  this.buttonWidth, this.buttonY + 150 + this.wingImage.height/2);
+      this.context.font = '12px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      this.context.fillText('得到地球重力的1/6，1000步内有效',  this.buttonWidth, this.buttonY + 170 + this.wingImage.height/2);
+    }
+    // 隐身药道具绘制
+    drawRoundedRect(this.context, this.buttonX, this.buttonY + 240, this.buttonWidth, 80, 10, '#f5d659', 'black', 3);
+    if (this.drugImage.complete) {
+      this.context.drawImage(this.drugImage, this.buttonX + 10, this.buttonY + 248, 64, 64);
+      this.context.fillStyle = 'black';
+      this.context.font = 'bold 16px Arial';
+      this.context.textAlign = 'left';
+      this.context.textBaseline = 'middle';
+      if (typeof this.getDrugAccess == 'string'){
+        this.drugCount = 0;
+      } else {
+        this.drugCount = this.getDrugAccess;
+      }
+      this.context.fillText(`x${this.drugCount}`,  this.buttonX + this.drugImage.width + 20, this.buttonY + 260);
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      this.context.fillText('隐身药',  this.buttonWidth, this.buttonY + 240 + this.wingImage.height/2);
+      this.context.font = '12px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      this.context.fillText('得到隐身能力，可规避一次撞击',  this.buttonWidth, this.buttonY + 260 + this.wingImage.height/2);
     }
   }
   draw() {
@@ -84,8 +143,8 @@ export default class Instruction {
     this.drawBack();
     // 绘制标题
     this.drawTitle();
-    // 绘制第一个道具
-    this.drawFirstTool();
+    // 绘制道具区域
+    this.drawToolsArea();
   }
   touchHandler(e) {
     const touch = e.touches[0];
@@ -102,7 +161,26 @@ export default class Instruction {
     // 点击飞天翼区域
     if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
       touchY >= this.buttonY + 70 && touchY <= this.buttonY + 150) {
+      // 后续增加激励广告区域 
       this.wingCount++;
+      this.getWingAccess = this.wingCount;
+      wx.setStorageSync('wingCount', this.wingCount)
+    }
+    // 点击月球药区域
+    if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
+      touchY >= this.buttonY + 160 && touchY <= this.buttonY + 240) {
+      // 后续增加激励广告区域 
+      this.moonCount++;
+      this.getMoonAccess = this.moonCount;
+      wx.setStorageSync('moonCount', this.moonCount)
+    }
+    // 点击隐身药区域
+    if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
+      touchY >= this.buttonY + 250 && touchY <= this.buttonY + 330) {
+      // 后续增加激励广告区域 
+      this.drugCount++;
+      this.getDrugAccess = this.drugCount;
+      wx.setStorageSync('drugCount', this.drugCount)
     }
   }
   // 页面销毁机制

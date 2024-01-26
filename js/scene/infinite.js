@@ -457,6 +457,8 @@ export default class Scene2 {
       // 绘制道具数量
       this.context.fillStyle = 'black';
       this.context.font = '20px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
       this.context.fillText(' X' + this.powerUpCount, menuButtonInfo.right - this.getPowerUpImage.width, menuButtonInfo.top + 55);
     }
   }
