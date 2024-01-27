@@ -108,9 +108,11 @@ export default class Scene2 {
     this.getDrugAccess = wx.getStorageSync('drugCount');
     // 是否使用了道具
     this.useWing = false;
+    this.distanceWing = 0;
     this.useMoon = false;
     this.distanceMoon = 0;
     this.useDrug = false;
+    this.distanceDrug = 0;
     // 屏幕全黑遮照标志
     this.screenDarkness = 0;
     this.isScreenDark = false;
@@ -311,9 +313,13 @@ export default class Scene2 {
     }
     if (this.isLevelCompleted) {
       this.circleX += 1;
-    }else{
-      if(this.score - this.distanceMoon > 1000 && this.useMoon){
+    } else {
+      if (this.score - this.distanceMoon > 1000 && this.useMoon) {
         this.gravity = 0.4;
+        this.useMoon = false;
+      }
+      if (this.score - this.distanceWing >= 2000 && this.useWing) {
+        this.useWing = false;
       }
     }
     this.velocityY += this.gravity;
@@ -376,16 +382,20 @@ export default class Scene2 {
       };
       // 使用SAT检测碰撞
       if (doPolygonsIntersect(dinoPolygon, trapPolygon)) {
-        this.gameOver = true;
-        backgroundMusic.pauseBackgroundMusic();
-        soundManager.play('crack');
-        soundManager.play('end', 200);
+        if(this.useDrug == false && this.score - this.distanceDrug >= 300){
+          this.gameOver = true;
+          backgroundMusic.pauseBackgroundMusic();
+          soundManager.play('crack');
+          soundManager.play('end', 200);
+        }else{
+          this.useDrug = false;
+        }
       }
     });
   }
   // 绘制隐身药道具显示
   drawDrug() {
-    if(this.useDrug == false){
+    if (this.useDrug == false && this.distanceDrug == 0 && typeof this.getDrugAccess != 'string' && this.getDrugAccess != 0) {
       drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 20, 120, 40, 10, '#f5d659', 'black', 3);
       if (this.drugImage.complete) {
         this.context.drawImage(this.drugImage, 10, this.canvas.height - this.roadHeight + 28, 24, 24);
@@ -404,7 +414,7 @@ export default class Scene2 {
   }
   // 绘制月球药道具显示
   drawMoon() {
-    if (this.useMoon == false) {
+    if (this.useMoon == false && typeof this.getMoonAccess != 'string' && this.getMoonAccess != 0) {
       drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 70, 120, 40, 10, '#f5d659', 'black', 3);
       if (this.moonImage.complete) {
         this.context.drawImage(this.moonImage, 10, this.canvas.height - this.roadHeight + 78, 24, 24);
@@ -423,7 +433,7 @@ export default class Scene2 {
   }
   // 绘制飞天翼道具显示
   drawWing() {
-    if (this.score <= 800 && this.useWing == false) {
+    if (this.score <= 800 && this.useWing == false && typeof this.getWingAccess != 'string' && this.getWingAccess != 0) {
       drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 120, 120, 40, 10, '#f5d659', 'black', 3);
       if (this.wingImage.complete) {
         this.context.drawImage(this.wingImage, 10, this.canvas.height - this.roadHeight + 128, 24, 24);
@@ -521,42 +531,46 @@ export default class Scene2 {
       this.canDoubleJump = false;
       this.isOnGround = false;
     } else {
-      // 使用隐身药道具点击识别
-      if (touchX >= 0 && touchX <= 110 &&
-        touchY >= this.canvas.height - this.roadHeight + 20 && touchY <= this.canvas.height - this.roadHeight + 60 && this.drugCount >= 1 && this.useDrug == false) {
-        this.useDrug = true;
-        this.drugCount--;
-        this.getDrugAccess = this.drugCount;
-        wx.setStorageSync('drugCount', this.drugCount);
-      }
-      // 使用月球药道具点击识别
-      if (touchX >= 0 && touchX <= 110 &&
-        touchY >= this.canvas.height - this.roadHeight + 70 && touchY <= this.canvas.height - this.roadHeight + 110 && this.moonCount >= 1 && this.useMoon == false) {
+      if (this.gameOver == false) {
+        // 使用隐身药道具点击识别
+        if (touchX >= 0 && touchX <= 110 &&
+          touchY >= this.canvas.height - this.roadHeight + 20 && touchY <= this.canvas.height - this.roadHeight + 60 && this.drugCount >= 1 && this.useDrug == false && this.distanceDrug == 0) {
+          this.useDrug = true;
+          this.distanceDrug = this.score;
+          this.drugCount--;
+          this.getDrugAccess = this.drugCount;
+          wx.setStorageSync('drugCount', this.drugCount);
+        }
+        // 使用月球药道具点击识别
+        if (touchX >= 0 && touchX <= 110 &&
+          touchY >= this.canvas.height - this.roadHeight + 70 && touchY <= this.canvas.height - this.roadHeight + 110 && this.moonCount >= 1 && this.useMoon == false && this.distanceMoon == 0) {
           this.useMoon = true;
-          this.gravity = this.gravity/6;
+          this.gravity = this.gravity / 6;
           this.distanceMoon = this.score;
           this.moonCount--;
           this.getMoonAccess = this.moonCount;
           wx.setStorageSync('moonCount', this.moonCount)
-      }
-      // 使用天使翼道具点击识别
-      if (touchX >= 0 && touchX <= 110 &&
-        touchY >= this.canvas.height - this.roadHeight + 120 && touchY <= this.canvas.height - this.roadHeight + 160 && this.wingCount >= 1 && this.useWing == false) {
-        this.useWing = true;
-        this.wingCount--;
-        this.getWingAccess = this.wingCount;
-        wx.setStorageSync('wingCount', this.wingCount)
-      }
-      // 二极跳识别
-      if (!this.gameOver && (this.isOnGround || this.canDoubleJump)) {
-        this.velocityY = this.jumpHeight;
-        if (!this.isOnGround) {
-          if (this.canDoubleJump) {
-            this.canDoubleJump = false; // 标记二段跳已使用
-          }
         }
-        soundManager.play('jump');
-        this.isOnGround = false; // 小恐龙起跳，不再在地面上
+        // 使用天使翼道具点击识别
+        if (touchX >= 0 && touchX <= 110 &&
+          touchY >= this.canvas.height - this.roadHeight + 120 && touchY <= this.canvas.height - this.roadHeight + 160 && this.wingCount >= 1 && this.useWing == false && this.distanceWing == 0) {
+          this.useWing = true;
+          this.distanceWing = this.score;
+          this.wingCount--;
+          this.getWingAccess = this.wingCount;
+          wx.setStorageSync('wingCount', this.wingCount)
+        }
+        // 二极跳识别
+        if (this.isOnGround || this.canDoubleJump) {
+          this.velocityY = this.jumpHeight;
+          if (!this.isOnGround) {
+            if (this.canDoubleJump && this.useWing == false) {
+              this.canDoubleJump = false; // 标记二段跳已使用
+            }
+          }
+          soundManager.play('jump');
+          this.isOnGround = false; // 小恐龙起跳，不再在地面上
+        }
       }
     }
     if (this.gameOver || this.isLevelCompleted) {
@@ -592,8 +606,11 @@ export default class Scene2 {
     this.isOnGround = true;
     this.screenDarkness = 0;
     this.useWing = false;
+    this.distanceWing = 0;
     this.useMoon = false;
+    this.distanceMoon = 0;
     this.useDrug = false;
+    this.distanceDrug = 0;
     this.isScreenDark = false;
     this.gameOver = false;
     // 重置分数

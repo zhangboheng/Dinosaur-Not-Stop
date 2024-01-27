@@ -89,7 +89,7 @@ export default class Instruction {
       this.context.font = '12px Arial';
       this.context.textAlign = 'right';
       this.context.textBaseline = 'middle';
-      this.context.fillText('短暂飞行能力，开局施放可飞2000米',  this.buttonWidth, this.buttonY + 80 + this.wingImage.height/2);
+      this.context.fillText('无限连跳，开局施放可连跳2000米',  this.buttonWidth, this.buttonY + 80 + this.wingImage.height/2);
     }
     // 月球药道具绘制
     drawRoundedRect(this.context, this.buttonX, this.buttonY + 150, this.buttonWidth, 80, 10, '#f5d659', 'black', 3);

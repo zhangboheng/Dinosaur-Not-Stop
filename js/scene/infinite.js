@@ -1,6 +1,7 @@
 import {
   createBackButton,
-  drawIconButton
+  drawIconButton,
+  drawRoundedRect
 } from '../../utils/button';
 import {
   pointToLineDistance,
@@ -127,6 +128,27 @@ export default class Scene2 {
     this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
     this.speedIncreasedStageSecond = false; // 标志游戏速度是否已经加快
     this.speedIncreasedStageThird = false; // 标志游戏速度是否已经加快
+    // 加载道具图片
+    this.wingImage = new Image();
+    this.wingImage.src = 'image/wing.png';
+    this.moonImage = new Image();
+    this.moonImage.src = 'image/moon.png';
+    this.drugImage = new Image();
+    this.drugImage.src = 'image/drug.png';
+    // 道具数量区
+    this.wingCount = 0;
+    this.getWingAccess = wx.getStorageSync('wingCount');
+    this.moonCount = 0;
+    this.getMoonAccess = wx.getStorageSync('moonCount');
+    this.drugCount = 0;
+    this.getDrugAccess = wx.getStorageSync('drugCount');
+    // 是否使用了道具
+    this.useWing = false;
+    this.distanceWing = 0;
+    this.useMoon = false;
+    this.distanceMoon = 0;
+    this.useDrug = false;
+    this.distanceDrug = 0;
     // 消息提示
     this.speedIncreaseMessage = "Speed+1";
     this.messageDisplayTime = 0; // 消息显示的持续时间（以帧计）
@@ -300,6 +322,13 @@ export default class Scene2 {
     }
     this.velocityY += this.gravity;
     this.circleY += this.velocityY;
+    if (this.score - this.distanceMoon > 1000 && this.useMoon) {
+      this.gravity = 0.4;
+      this.useMoon = false;
+    }
+    if (this.score - this.distanceWing >= 2000 && this.useWing) {
+      this.useWing = false;
+    }
     // 根据速度判断小恐龙是在跳起还是在下落
     if (this.velocityY < 0) {
       this.isJumpingUp = true;
@@ -354,11 +383,15 @@ export default class Scene2 {
         if (pointToLineDistance(this.circleX + 10, this.circleY, p1.x, p1.y, p2.x, p2.y) < this.circleRadius ||
           pointToLineDistance(this.circleX, this.circleY, p2.x, p2.y, p3.x, p3.y) < this.circleRadius ||
           pointToLineDistance(this.circleX - 3, this.circleY, p3.x, p3.y, p1.x, p1.y) < this.circleRadius) {
-          soundManager.play('crack');
-          this.gameOver = true;
-          // 游戏结束时
-          backgroundMusic.pauseBackgroundMusic();
-          soundManager.play('end', 200);
+          if (this.useDrug == false && this.score - this.distanceDrug >= 300) {
+            soundManager.play('crack');
+            this.gameOver = true;
+            // 游戏结束时
+            backgroundMusic.pauseBackgroundMusic();
+            soundManager.play('end', 200);
+          } else {
+            this.useDrug = false;
+          }
         }
       } else if (trap.imageIndex >= 1) {
         // 创建陷阱的矩形表示
@@ -383,10 +416,14 @@ export default class Scene2 {
         };
         // 使用SAT检测碰撞
         if (doPolygonsIntersect(dinoPolygon, trapPolygon)) {
-          soundManager.play('crack');
-          this.gameOver = true;
-          backgroundMusic.pauseBackgroundMusic();
-          soundManager.play('end', 200);
+          if (this.useDrug == false && this.score - this.distanceDrug >= 300) {
+            soundManager.play('crack');
+            this.gameOver = true;
+            backgroundMusic.pauseBackgroundMusic();
+            soundManager.play('end', 200);
+          } else {
+            this.useDrug = false;
+          }
         }
       }
     });
@@ -459,7 +496,7 @@ export default class Scene2 {
       this.context.font = '20px Arial';
       this.context.textAlign = 'right';
       this.context.textBaseline = 'middle';
-      this.context.fillText(' X' + this.powerUpCount, menuButtonInfo.right - this.getPowerUpImage.width, menuButtonInfo.top + 55);
+      this.context.fillText(' x1', menuButtonInfo.right, menuButtonInfo.top + 55);
     }
   }
   // 更新道具状态
@@ -484,6 +521,18 @@ export default class Scene2 {
         this.context.drawImage(this.poisonMushroomImage, this.poisonMushroom.x, this.poisonMushroom.y, this.poisonMushroom.width, this.poisonMushroom.height);
       }
     }
+    if (this.poisonMushroomEffectDuration > 0) {
+      // 绘制蘑菇图片
+      if (this.poisonMushroomImage.complete) {
+        this.context.drawImage(this.poisonMushroomImage, menuButtonInfo.right - this.poisonMushroomImage.width - 40, menuButtonInfo.top + 70, 24, 24);
+      }
+      // 绘制蘑菇数量
+      this.context.fillStyle = 'black';
+      this.context.font = '20px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      this.context.fillText(' x1', menuButtonInfo.right, menuButtonInfo.top + 85);
+    }
   }
   // 更新毒蘑菇状态
   updateMushroom() {
@@ -497,15 +546,7 @@ export default class Scene2 {
     // 监测毒蘑菇消失时效时间
     if (this.poisonMushroomEffectDuration > 0) {
       this.poisonMushroomEffectDuration--;
-      // 绘制蘑菇图片
-      if (this.poisonMushroomImage.complete) {
-        this.context.drawImage(this.poisonMushroomImage, menuButtonInfo.right - this.poisonMushroomImage.width - 40, menuButtonInfo.top + 70, 24, 24);
-      }
-      // 绘制蘑菇数量
-      this.context.fillStyle = 'black';
-      this.context.font = '20px Arial';
-      this.context.fillText(' X1', menuButtonInfo.right - this.poisonMushroomImage.width, menuButtonInfo.top + 85);
-      if (this.poisonMushroomEffectDuration === 0) {
+      if(this.poisonMushroomEffectDuration === 0) {
         this.gravity = this.originalGravity;
       }
     }
@@ -522,6 +563,63 @@ export default class Scene2 {
       showBoxMessage(this.context, this.speedIncreaseMessage, this.canvas.width / 2, this.canvas.height / 2);
     }
   }
+  // 绘制隐身药道具显示
+  drawDrug() {
+    if (this.useDrug == false && this.distanceDrug == 0 && typeof this.getDrugAccess != 'string' && this.getDrugAccess != 0) {
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 20, 120, 40, 10, '#f5d659', 'black', 3);
+      if (this.drugImage.complete) {
+        this.context.drawImage(this.drugImage, 10, this.canvas.height - this.roadHeight + 28, 24, 24);
+      }
+      this.context.fillStyle = 'black';
+      this.context.font = '16px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      if (typeof this.getDrugAccess == 'string') {
+        this.drugCount = 0;
+      } else {
+        this.drugCount = this.getDrugAccess;
+      }
+      this.context.fillText(this.drugCount, 100, this.canvas.height - this.roadHeight + 42);
+    }
+  }
+  // 绘制月球药道具显示
+  drawMoon() {
+    if (this.useMoon == false && this.distanceMoon == 0 && typeof this.getMoonAccess != 'string' && this.getMoonAccess != 0) {
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 70, 120, 40, 10, '#f5d659', 'black', 3);
+      if (this.moonImage.complete) {
+        this.context.drawImage(this.moonImage, 10, this.canvas.height - this.roadHeight + 78, 24, 24);
+      }
+      this.context.fillStyle = 'black';
+      this.context.font = '16px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      if (typeof this.getMoonAccess == 'string') {
+        this.moonCount = 0;
+      } else {
+        this.moonCount = this.getMoonAccess;
+      }
+      this.context.fillText(this.moonCount, 100, this.canvas.height - this.roadHeight + 92);
+    }
+  }
+  // 绘制飞天翼道具显示
+  drawWing() {
+    if (this.score <= 800 && this.useWing == false && typeof this.getWingAccess != 'string' && this.getWingAccess != 0) {
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 120, 120, 40, 10, '#f5d659', 'black', 3);
+      if (this.wingImage.complete) {
+        this.context.drawImage(this.wingImage, 10, this.canvas.height - this.roadHeight + 128, 24, 24);
+      }
+      this.context.fillStyle = 'black';
+      this.context.font = '16px Arial';
+      this.context.textAlign = 'right';
+      this.context.textBaseline = 'middle';
+      if (typeof this.getWingAccess == 'string') {
+        this.wingCount = 0;
+      } else {
+        this.wingCount = this.getWingAccess;
+      }
+      this.context.fillText(this.wingCount, 100, this.canvas.height - this.roadHeight + 142);
+    }
+  }
   // 画面全部绘制
   draw() {
     // 绘制背景
@@ -536,6 +634,12 @@ export default class Scene2 {
     this.drawTraps();
     // 绘制小恐龙
     this.drawDino();
+    // 绘制隐身药道具
+    this.drawDrug();
+    // 绘制月球药道具
+    this.drawMoon();
+    // 绘制飞天翼道具
+    this.drawWing();
     // 绘制道具显示
     this.drawProps();
     // 绘制毒蘑菇
@@ -581,23 +685,52 @@ export default class Scene2 {
       backgroundMusic.pauseBackgroundMusic();
       return
     }
-    if (!this.gameOver && (this.isOnGround || this.canDoubleJump || (this.canTripleJump && !this.isOnGround))) {
-      this.velocityY = this.jumpHeight;
-      if (!this.isOnGround) {
-        if (this.canDoubleJump) {
-          this.canDoubleJump = false; // 标记二段跳已使用
-        } else if (this.canTripleJump) {
-          this.canTripleJump = false; // 标记三段跳已使用
-          this.powerUpCount = 0; // 使用后将道具数量设为0
-          this.powerUp.obtained = false; // 获得道具
-          this.powerUp.visible = false; // 隐藏道具
-          this.powerUp.x = -80;
-        }
+    if (this.gameOver == false) {
+      // 使用隐身药道具点击识别
+      if (touchX >= 0 && touchX <= 110 &&
+        touchY >= this.canvas.height - this.roadHeight + 20 && touchY <= this.canvas.height - this.roadHeight + 60 && this.drugCount >= 1 && this.useDrug == false && this.distanceDrug == 0) {
+        this.useDrug = true;
+        this.distanceDrug = this.score;
+        this.drugCount--;
+        this.getDrugAccess = this.drugCount;
+        wx.setStorageSync('drugCount', this.drugCount);
       }
-      soundManager.play('jump');
-      this.isOnGround = false; // 小恐龙起跳，不再在地面上
-    }
-    if (this.gameOver) {
+      // 使用月球药道具点击识别
+      if (touchX >= 0 && touchX <= 110 &&
+        touchY >= this.canvas.height - this.roadHeight + 70 && touchY <= this.canvas.height - this.roadHeight + 110 && this.moonCount >= 1 && this.useMoon == false && this.distanceMoon == 0) {
+        this.useMoon = true;
+        this.gravity = this.gravity / 6;
+        this.distanceMoon = this.score;
+        this.moonCount--;
+        this.getMoonAccess = this.moonCount;
+        wx.setStorageSync('moonCount', this.moonCount)
+      }
+      // 使用天使翼道具点击识别
+      if (touchX >= 0 && touchX <= 110 &&
+        touchY >= this.canvas.height - this.roadHeight + 120 && touchY <= this.canvas.height - this.roadHeight + 160 && this.wingCount >= 1 && this.useWing == false && this.distanceWing == 0) {
+        this.useWing = true;
+        this.distanceWing = this.score;
+        this.wingCount--;
+        this.getWingAccess = this.wingCount;
+        wx.setStorageSync('wingCount', this.wingCount)
+      }
+      if (this.isOnGround || this.canDoubleJump || (this.canTripleJump && !this.isOnGround)) {
+        this.velocityY = this.jumpHeight;
+        if (!this.isOnGround) {
+          if (this.canDoubleJump && this.useWing == false) {
+            this.canDoubleJump = false; // 标记二段跳已使用
+          } else if (this.canTripleJump && this.useWing == false) {
+            this.canTripleJump = false; // 标记三段跳已使用
+            this.powerUpCount = 0; // 使用后将道具数量设为0
+            this.powerUp.obtained = false; // 获得道具
+            this.powerUp.visible = false; // 隐藏道具
+            this.powerUp.x = -80;
+          }
+        }
+        soundManager.play('jump');
+        this.isOnGround = false; // 小恐龙起跳，不再在地面上
+      }
+    } else {
       if (touchX >= this.buttonStartInfo.x && touchX <= this.buttonStartInfo.x + this.buttonStartInfo.width &&
         touchY >= this.buttonStartInfo.y && touchY <= this.buttonStartInfo.y + this.buttonStartInfo.height) {
         updateHighScores(6000 + this.score);
@@ -619,8 +752,10 @@ export default class Scene2 {
     this.roadX = 0;
     this.traps = [];
     // 重置小恐龙位置和状态
+    this.circleX = 50; // 小恐龙的初始横坐标
     this.circleY = this.canvas.height - this.roadHeight - 50;
     this.velocityY = 0;
+    this.gravity = 0.4;
     this.isOnGround = true;
     this.gameOver = false;
     // 重置分数
@@ -652,6 +787,12 @@ export default class Scene2 {
       obtained: false, // 毒蘑菇是否已被获取
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
+    this.useWing = false;
+    this.distanceWing = 0;
+    this.useMoon = false;
+    this.distanceMoon = 0;
+    this.useDrug = false;
+    this.distanceDrug = 0;
     this.poisonMushroomEffectDuration = 0;
     this.lastMushroomScore = 0;
     // 游戏开始时
