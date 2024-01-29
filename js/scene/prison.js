@@ -616,6 +616,7 @@ export default class Scene2 {
     // 重置分数
     this.score = 0;
     this.roadSpeed = 2;
+    this.messageDisplayTime = 0;
     this.speedIncreasedStageFirst = false;
     // 游戏开始时
     backgroundMusic.playBackgroundMusic()

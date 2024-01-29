@@ -48,7 +48,7 @@ export default class Scene2 {
     this.traps = [];
     this.trapWidth = 24; // 陷阱的宽度
     this.trapInterval = 30; // 陷阱间的最小间隔
-    this.nextTrapAt = this.randomInterval(this.trapInterval, this.trapInterval * 2); // 下一个陷阱的初始位置
+    this.nextTrapAt = this.randomInterval(this.trapInterval, this.trapInterval * 2);
     this.trapImages = [
       'image/spikes.png',
       'image/prisonbarrier.png',
@@ -109,10 +109,10 @@ export default class Scene2 {
     this.poisonMushroom = {
       x: this.canvas.width, // 道具的初始横坐标
       y: this.canvas.height - this.roadHeight - 32, // 道具的初始纵坐标
-      width: 32, // 毒蘑菇的宽度
-      height: 32, // 毒蘑菇的高度
-      visible: false, // 毒蘑菇是否可见
-      obtained: false, // 毒蘑菇是否已被获取
+      width: 32,
+      height: 32,
+      visible: false,
+      obtained: false,
       speed: this.roadSpeed // 道具移动的速度，根据需要调整
     };
     this.lastMushroomScore = 0; // 记录上次蘑菇出现时的分数
@@ -125,9 +125,22 @@ export default class Scene2 {
     this.dinoFootprintImage.src = 'image/footprint.png';
     // 初始化分数
     this.score = 0;
-    this.speedIncreasedStageFirst = false; // 标志游戏速度是否已经加快
-    this.speedIncreasedStageSecond = false; // 标志游戏速度是否已经加快
-    this.speedIncreasedStageThird = false; // 标志游戏速度是否已经加快
+    // 加载 UFO 显示
+    this.ufoflying = {
+      x: this.canvas.width,
+      y: this.canvas.height - this.roadHeight - 210,
+      width: 32,
+      height: 32,
+      speed: this.roadSpeed,
+      visible: false
+    };
+    // 加载 UFO 图片
+    this.ufoImage = new Image();
+    this.ufoImage.src = 'image/ufo.png';
+    // 标志游戏速度是否已经加快
+    this.speedIncreasedStageFirst = false;
+    this.speedIncreasedStageSecond = false;
+    this.speedIncreasedStageThird = false;
     // 加载道具图片
     this.wingImage = new Image();
     this.wingImage.src = 'image/wing.png';
@@ -546,7 +559,7 @@ export default class Scene2 {
     // 监测毒蘑菇消失时效时间
     if (this.poisonMushroomEffectDuration > 0) {
       this.poisonMushroomEffectDuration--;
-      if(this.poisonMushroomEffectDuration === 0) {
+      if (this.poisonMushroomEffectDuration === 0) {
         this.gravity = this.originalGravity;
       }
     }
@@ -555,6 +568,27 @@ export default class Scene2 {
       this.poisonMushroom.visible = true; // 确保蘑菇是可见的
       this.poisonMushroom.x = this.canvas.width;
       this.lastMushroomScore = this.score; // 更新上次蘑菇出现的分数
+    }
+  }
+  // 绘制 UFO
+  drawUFO() {
+    if (this.ufoImage.complete) {
+      this.context.drawImage(this.ufoImage, this.ufoflying.x, this.ufoflying.y, this.ufoflying.width, this.ufoflying.height);
+    }
+  }
+  // 更新 UFO 显示位置
+  updateUFO() {
+    if (this.score % 6000 == 0) {
+      this.ufoflying.visible = false;
+    }
+    if (this.score >= 6000 && !this.ufoflying.visible) {
+      this.ufoflying.x -= this.ufoflying.speed + 5;
+      // 处理 UFO 出界，重新放置到屏幕右侧
+      if (this.ufoflying.x + this.ufoflying.width < 0) {
+        this.ufoflying.x = this.canvas.width;
+        this.ufoflying.y = this.canvas.height - this.roadHeight - 180;
+        this.ufoflying.visible = true;
+      }
     }
   }
   // 绘制消息提示
@@ -644,6 +678,8 @@ export default class Scene2 {
     this.drawProps();
     // 绘制毒蘑菇
     this.drawMushroom();
+    // 绘制 UFO
+    this.drawUFO()
     // 如果消息需要显示
     this.drawMessageBox();
   }
@@ -660,6 +696,8 @@ export default class Scene2 {
       this.updateProps();
       // 更新毒蘑菇
       this.updateMushroom();
+      // 更新 UFO
+      this.updateUFO();
       // 更新小恐龙图片切换
       this.updateDino();
     } else {
@@ -762,6 +800,7 @@ export default class Scene2 {
     this.score = 0;
     this.roadSpeed = 2;
     this.gravity = 0.4;
+    this.messageDisplayTime = 0;
     this.speedIncreasedStageFirst = false;
     this.speedIncreasedStageSecond = false;
     this.speedIncreasedStageThird = false;
@@ -795,6 +834,15 @@ export default class Scene2 {
     this.distanceDrug = 0;
     this.poisonMushroomEffectDuration = 0;
     this.lastMushroomScore = 0;
+    // 加载 UFO 显示
+    this.ufoflying = {
+      x: this.canvas.width,
+      y: this.canvas.height - this.roadHeight - 210,
+      width: 32,
+      height: 32,
+      speed: this.roadSpeed,
+      visible: false
+    };
     // 游戏开始时
     backgroundMusic.playBackgroundMusic()
   }

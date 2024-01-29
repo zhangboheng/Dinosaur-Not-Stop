@@ -126,7 +126,7 @@ export default class Settings {
       // 开关状态
       const isSwitchOn = wx.getStorageSync('musicEnabled') ? true : wx.getStorageSync('musicEnabled');
       const isBackMusicOn = wx.getStorageSync('backgroundMusicEnabled') ? true : wx.getStorageSync('backgroundMusicEnabled');
-      this.context.fillText('V 1.0.1', switchX + 26, textY);
+      this.context.fillText('V 1.0.2', switchX + 26, textY);
       // 绘制圆角矩形背景
       this.context.fillStyle = isSwitchOn ? '#4CAF50' : '#cccccc';
       drawRoundedRectNoStrike(this.context, switchX, switchY, switchWidth, switchHeight, borderRadius, '#000000', 3);
@@ -151,8 +151,8 @@ export default class Settings {
     } else if (this.selectedIndex === 1) {
       const fontSize = 16;
       this.context.font = `${fontSize}px Arial`;
-      const arr = ['版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '完善玩法说明内容', '', '版本 1.0.0', 'Demo 版本发布'];
-      const list = ['2024-01-22', '', '', '', '2024-01-08', ''];
+      const arr = ['版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
+      const list = ['2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
       // 计算文本高度和总内容高度
       const textHeight = fontSize * 1.2;
       const contentHeight = arr.length * textHeight + 20;
