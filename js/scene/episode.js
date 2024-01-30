@@ -60,5 +60,6 @@ export default class Instruction {
   destroy() {
     // 清理图像资源
     clearInterval(this.timerId);
+    this.backgroundImage.src = '';
   }
 }

@@ -88,6 +88,8 @@ export default class Scene2 {
     this.dinoJumpUpImage.src = 'image/dino_jump_up.png';
     this.dinoJumpDownImage = new Image();
     this.dinoJumpDownImage.src = 'image/dino_jump_down.png';
+    this.dinoDeadImage = new Image();
+    this.dinoDeadImage.src = 'image/dead.png'
     // 道具显示
     this.powerUp = {
       x: this.canvas.width, // 道具的初始横坐标
@@ -342,13 +344,17 @@ export default class Scene2 {
   // 绘制小恐龙
   drawDino() {
     let dinoImg;
-    if (!this.isOnGround) {
-      dinoImg = this.isJumpingUp ? this.dinoJumpUpImage : this.dinoJumpDownImage;
-    } else {
-      dinoImg = this.dinoImages[this.currentDinoFrame];
+    if (this.gameOver) {
+        dinoImg = this.dinoDeadImage
+    }else{
+      if (!this.isOnGround) { 
+        dinoImg = this.isJumpingUp ? this.dinoJumpUpImage : this.dinoJumpDownImage;
+      } else {
+        dinoImg = this.dinoImages[this.currentDinoFrame];
+      }
     }
     if (dinoImg.complete) {
-      this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
+      this.gameOver ? this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2) : this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
     }
   }
   // 更新小恐龙
@@ -883,7 +889,24 @@ export default class Scene2 {
   }
   // 页面销毁机制
   destroy() {
+
     // 清理资源，如图片
     this.backButton.image.src = '';
+    this.backgroundImage.src = '';
+    this.trapImages.forEach(img => img = null);
+    this.dinoImages.forEach(img => img = null);
+    this.roadImage.src = '';
+    this.dinoJumpUpImage.src = '';
+    this.dinoJumpDownImage.src = '';
+    this.dinoDeadImage.src = '';
+    this.dinoFootprintImage.src = '';
+    this.powerUpImage.src = '';
+    this.getPowerUpImage.src = '';
+    this.poisonMushroomImage.src = '';
+    this.wingImage.src = '';
+    this.moonImage.src = '';
+    this.drugImage.src = '';
+    this.ufoImage.src = '';
+    this.failTipsImage.src = '';
   }
 }
