@@ -113,7 +113,7 @@ export default class Scene2 {
     this.distanceMoon = 0;
     this.useDrug = false;
     this.distanceDrug = 0;
-    // 屏幕全黑遮照标志
+    // 屏幕变黑遮照标志
     this.screenDarkness = 0;
     this.isScreenDark = false;
     // 消息提示
@@ -138,10 +138,10 @@ export default class Scene2 {
   // 绘制背景
   drawBackground() {
     if (this.backgroundImage.complete) {
-      this.context.drawImage(this.backgroundImage, this.backgroundX, 0, this.canvas.width, this.canvas.height);
+      this.context.drawImage(this.backgroundImage, this.backgroundX, 0, this.backgroundImage.width, this.canvas.height);
       // 绘制第二张图片以实现循环滚动效果
       if (this.backgroundX < 0) {
-        this.context.drawImage(this.backgroundImage, this.backgroundX + this.canvas.width, 0, this.canvas.width, this.canvas.height);
+        this.context.drawImage(this.backgroundImage, this.backgroundX + this.backgroundImage.width, 0, this.backgroundImage.width, this.canvas.height);
       }
     }
   }
@@ -149,7 +149,7 @@ export default class Scene2 {
   updateBackground() {
     if (!this.isLevelCompleted) {
       this.backgroundX -= this.backgroundSpeed;
-      if (this.backgroundX <= -this.canvas.width) {
+      if (this.backgroundX <= -this.backgroundImage.width) {
         this.backgroundX = 0;
       }
     }
@@ -157,11 +157,14 @@ export default class Scene2 {
   // 绘制黑色遮罩
   drawBlackScreen() {
     if (this.isScreenDark) {
-      this.context.fillStyle = `rgba(0, 0, 0, ${this.screenDarkness})`;
+      this.context.fillStyle = `rgba(0, 0, 0, ${this.screenDarkness * 0.8})`;
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
   }
   updateDrawBlackScreen() {
+    if (this.score == 3000) {
+      soundManager.play('break');
+    }
     if (this.score >= 3000 && this.score < 3300) {
       this.isScreenDark = true;
       this.screenDarkness = Math.min((this.score - 3000) / (3300 - 3000), 1);
@@ -595,6 +598,7 @@ export default class Scene2 {
   }
   // 游戏重制
   resetGame() {
+    this.backgroundX = 0;
     // 重置道路和陷阱位置
     this.roadX = 0;
     this.traps = [];
@@ -604,13 +608,14 @@ export default class Scene2 {
     this.velocityY = 0;
     this.gravity = 0.4;
     this.isOnGround = true;
-    this.screenDarkness = 0;
     this.useWing = false;
     this.distanceWing = 0;
     this.useMoon = false;
     this.distanceMoon = 0;
     this.useDrug = false;
     this.distanceDrug = 0;
+    // 屏幕变黑遮罩
+    this.screenDarkness = 0;
     this.isScreenDark = false;
     this.gameOver = false;
     // 重置分数

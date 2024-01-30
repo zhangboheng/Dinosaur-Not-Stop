@@ -96,7 +96,7 @@ export default class Scene2 {
       height: 42, // 道具的高度
       visible: false, // 道具是否可见
       obtained: false, // 道具是否已被获取
-      speed: this.roadSpeed // 道具移动的速度，根据需要调整
+      speed: this.roadSpeed
     };
     this.powerUpCount = 0;
     this.lastPowerUpScore = 0; // 记录上次道具出现时的分数
@@ -128,11 +128,13 @@ export default class Scene2 {
     // 加载 UFO 显示
     this.ufoflying = {
       x: this.canvas.width,
-      y: this.canvas.height - this.roadHeight - 210,
+      y: 60,
       width: 32,
       height: 32,
       speed: this.roadSpeed,
-      visible: false
+      visible: false,
+      amplitude: 3,
+      frequency: 0.1
     };
     // 加载 UFO 图片
     this.ufoImage = new Image();
@@ -162,6 +164,9 @@ export default class Scene2 {
     this.distanceMoon = 0;
     this.useDrug = false;
     this.distanceDrug = 0;
+    // 屏幕变黑遮照标志
+    this.screenDarkness = 0;
+    this.isScreenDark = false;
     // 消息提示
     this.speedIncreaseMessage = "Speed+1";
     this.messageDisplayTime = 0; // 消息显示的持续时间（以帧计）
@@ -179,18 +184,38 @@ export default class Scene2 {
   // 绘制背景
   drawBackground() {
     if (this.backgroundImage.complete) {
-      this.context.drawImage(this.backgroundImage, this.backgroundX, 0, this.canvas.width, this.canvas.height);
+      this.context.drawImage(this.backgroundImage, this.backgroundX, 0, this.backgroundImage.width, this.canvas.height);
       // 绘制第二张图片以实现循环滚动效果
       if (this.backgroundX < 0) {
-        this.context.drawImage(this.backgroundImage, this.backgroundX + this.canvas.width, 0, this.canvas.width, this.canvas.height);
+        this.context.drawImage(this.backgroundImage, this.backgroundX + this.backgroundImage.width, 0, this.backgroundImage.width, this.canvas.height);
       }
     }
   }
   // 更新背景状态
   updateBackground() {
     this.backgroundX -= this.backgroundSpeed;
-    if (this.backgroundX <= -this.canvas.width) {
+    if (this.backgroundX <= -this.backgroundImage.width) {
       this.backgroundX = 0;
+    }
+  }
+  // 绘制黑色遮罩
+  drawBlackScreen() {
+    if (this.isScreenDark) {
+      this.context.fillStyle = `rgba(0, 0, 0, ${this.screenDarkness * 0.8})`;
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
+  updateDrawBlackScreen() {
+    if (this.score > 7000 && this.score <= 7003) {
+      soundManager.play('lightning', 200);
+    }
+    if (this.score >= 7000 && this.score < 7300) {
+      this.isScreenDark = true;
+      this.screenDarkness = Math.min((this.score - 7000) / (7300 - 7000), 1);
+    } else if (this.score >= 7300 && this.score < 7600) {
+      this.screenDarkness = Math.max(1 - (this.score - 7300) / (7600 - 7300), 0);
+    } else if (this.score >= 7600) {
+      this.screenDarkness = 0;
     }
   }
   // 绘制返回按钮
@@ -228,9 +253,9 @@ export default class Scene2 {
   drawRoad() {
     if (this.roadImage.complete) {
       const roadY = this.canvas.height - this.roadHeight - 10;
-      this.context.drawImage(this.roadImage, this.roadX, roadY);
+      this.context.drawImage(this.roadImage, this.roadX, roadY, this.canvas.width, this.roadImage.height);
       if (this.roadX < 0) {
-        this.context.drawImage(this.roadImage, this.roadX + this.roadWidth, roadY);
+        this.context.drawImage(this.roadImage, this.roadX + this.roadWidth, roadY, this.canvas.width, this.roadImage.height);
       }
     }
   }
@@ -238,7 +263,7 @@ export default class Scene2 {
   updateRoad() {
     this.score += this.roadSpeed;
     this.roadX -= this.roadSpeed;
-    if (this.roadX <= -this.roadImage.width) {
+    if (this.roadX <= -this.canvas.width) {
       this.roadX = 0;
     }
     // 检查分数是否达到6000分，并且尚未加速
@@ -578,15 +603,16 @@ export default class Scene2 {
   }
   // 更新 UFO 显示位置
   updateUFO() {
-    if (this.score % 6000 == 0) {
+    if (this.score % 100 == 0 && Math.random() < 0.01) {
       this.ufoflying.visible = false;
     }
-    if (this.score >= 6000 && !this.ufoflying.visible) {
-      this.ufoflying.x -= this.ufoflying.speed + 5;
+    if (this.score > 1000 && !this.ufoflying.visible) {
+      this.ufoflying.x -= this.ufoflying.speed;
+      this.ufoflying.y += this.ufoflying.amplitude * Math.sin(this.ufoflying.frequency * this.ufoflying.x);
       // 处理 UFO 出界，重新放置到屏幕右侧
       if (this.ufoflying.x + this.ufoflying.width < 0) {
         this.ufoflying.x = this.canvas.width;
-        this.ufoflying.y = this.canvas.height - this.roadHeight - 180;
+        this.ufoflying.y = 60;
         this.ufoflying.visible = true;
       }
     }
@@ -682,6 +708,8 @@ export default class Scene2 {
     this.drawUFO()
     // 如果消息需要显示
     this.drawMessageBox();
+    // 绘制黑色遮罩
+    this.drawBlackScreen();
   }
   // 游戏更新事件
   update() {
@@ -700,6 +728,8 @@ export default class Scene2 {
       this.updateUFO();
       // 更新小恐龙图片切换
       this.updateDino();
+      // 更新黑色遮罩
+      this.updateDrawBlackScreen();
     } else {
       if (this.failTipsImage.complete) {
         this.context.drawImage(this.failTipsImage, (this.canvas.width - this.failTipsImage.width) / 2, (this.canvas.height - this.failTipsImage.height) / 2 - this.failTipsImage.height / 2);
@@ -795,6 +825,9 @@ export default class Scene2 {
     this.velocityY = 0;
     this.gravity = 0.4;
     this.isOnGround = true;
+    // 屏幕变黑遮罩
+    this.screenDarkness = 0;
+    this.isScreenDark = false;
     this.gameOver = false;
     // 重置分数
     this.score = 0;
@@ -837,11 +870,13 @@ export default class Scene2 {
     // 加载 UFO 显示
     this.ufoflying = {
       x: this.canvas.width,
-      y: this.canvas.height - this.roadHeight - 210,
+      y: 60,
       width: 32,
       height: 32,
       speed: this.roadSpeed,
-      visible: false
+      visible: false,
+      amplitude: 3,
+      frequency: 0.1
     };
     // 游戏开始时
     backgroundMusic.playBackgroundMusic()

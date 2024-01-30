@@ -5,7 +5,9 @@ class SoundManager {
       jump: new Audio('audio/jump.mp3'),
       crack: new Audio('audio/crack.mp3'),
       end: new Audio('audio/gameover.mp3'),
-      win: new Audio('audio/gamewin.mp3')
+      win: new Audio('audio/gamewin.mp3'),
+      break: new Audio('audio/glass.mp3'),
+      lightning: new Audio('audio/lightning.mp3')
     };
     // 初始化音乐播放状态
     this.musicEnabled = this.getMusicState();
