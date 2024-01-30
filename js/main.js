@@ -1,3 +1,4 @@
+import Episode from './scene/episode.js';
 import StartUp from './scene/startup.js';
 import Choose from './scene/choose.js';
 import Prison from './scene/prison.js';
@@ -10,6 +11,7 @@ export default class Game {
     this.initSettings();
     this.canvas = wx.createCanvas();
     this.context = canvas.getContext('2d');
+    this.episode = Episode;
     this.startup = StartUp;
     this.choose = Choose;
     this.prison = Prison;
@@ -17,7 +19,7 @@ export default class Game {
     this.instruction = Instruction;
     this.settings = Settings;
     this.tools = Tools;
-    this.currentScene = new this.startup(this);
+    this.currentScene = new this.episode(this);
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
     });
