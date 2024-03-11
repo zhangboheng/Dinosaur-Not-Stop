@@ -1,7 +1,7 @@
 let systemInfo = wx.getSystemInfoSync();
 import SoundManager from '../../utils/soundManager';
 const soundManager = new SoundManager();
-export default class Instruction {
+export default class Episode {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;

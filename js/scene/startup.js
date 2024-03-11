@@ -6,7 +6,7 @@ import {
 } from '../../utils/dialog';
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
-export default class Scene1 {
+export default class Startup {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;

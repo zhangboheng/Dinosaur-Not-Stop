@@ -4,7 +4,7 @@ import {
 } from '../../utils/button';
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
-export default class Instruction {
+export default class Tools {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;

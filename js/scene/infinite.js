@@ -18,7 +18,7 @@ const backgroundMusic = new BackgroundMusic();
 let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 
-export default class Scene2 {
+export default class Infinite {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
