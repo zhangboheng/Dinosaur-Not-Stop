@@ -1,14 +1,13 @@
-let systemInfo = wx.getSystemInfoSync();
 import SoundManager from '../../utils/soundManager';
+let systemInfo = wx.getSystemInfoSync();
 const soundManager = new SoundManager();
 export default class Episode {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
-    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
-    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
+    this.canvas.width = systemInfo.screenWidth;
+    this.canvas.height = systemInfo.screenHeight;
     // 获取音效初始状态
     soundManager.setMusicState(wx.getStorageSync('musicEnabled'));
     // 绘制漫画集合
