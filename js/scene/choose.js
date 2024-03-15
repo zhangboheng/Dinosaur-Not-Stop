@@ -136,6 +136,10 @@ export default class Choose {
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
     this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight + rectMargin);
+    if (this.getGameTwoAccess != 'access') {
+      this.context.fillStyle = '#00000099';
+      this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24);
+    }
   }
   draw() {
     // 绘制背景
@@ -177,7 +181,7 @@ export default class Choose {
     // 点击第二关卡
     const rectY2 = rectY + rectHeight + 2 * rectMargin + 24; // 第二关卡的Y坐标
     if (touchX >= rectX && touchX <= rectX + rectWidth &&
-      touchY >= rectY2 && touchY <= rectY2 + rectHeight) {
+      touchY >= rectY2 && touchY <= rectY2 + rectHeight && this.getGameTwoAccess == 'access') {
       this.game.switchScene(new this.game.infinite(this.game));
       return;
     }
