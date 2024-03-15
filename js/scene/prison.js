@@ -28,6 +28,7 @@ export default class Prison {
     // 加载背景音乐
     backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
     backgroundMusic.playBackgroundMusic();
+    this.groundHeight = menuButtonInfo.bottom + this.canvas.height * 0.2 - 29;
     // 道路属性
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
@@ -42,7 +43,7 @@ export default class Prison {
     // 加载道路图片
     this.roadImage = new Image();
     this.roadImage.src = 'image/prison.jpg'; // 替换为你的道路图片路径
-    this.roadHeight = 290; // 道路的高度
+    this.roadHeight = this.groundHeight; // 道路的高度
     // 加载陷阱图片
     this.trapImages = [
       'image/woodenbox.png',
@@ -301,7 +302,15 @@ export default class Prison {
   drawDino() {
     let dinoImg;
     if (this.gameOver) {
-        dinoImg = this.dinoDeadImage
+        if (this.isLevelCompleted) {
+          if (!this.isOnGround) { 
+            dinoImg = this.isJumpingUp ? this.dinoJumpUpImage : this.dinoJumpDownImage;
+          } else {
+            dinoImg = this.dinoImages[this.currentDinoFrame];
+          }
+        }else{
+          dinoImg = this.dinoDeadImage
+        };
     }else{
       if (!this.isOnGround) { 
         dinoImg = this.isJumpingUp ? this.dinoJumpUpImage : this.dinoJumpDownImage;
@@ -310,7 +319,11 @@ export default class Prison {
       }
     }
     if (dinoImg.complete) {
-      this.gameOver ? this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2) : this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20);
+      if (this.gameOver && !this.isLevelCompleted) {
+        this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2)
+      } else{
+        this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20)
+      }
     }
   }
   // 更新小恐龙

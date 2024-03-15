@@ -29,6 +29,7 @@ export default class Infinite {
     // 加载背景音乐
     backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
     backgroundMusic.playBackgroundMusic();
+    this.groundHeight = menuButtonInfo.bottom + this.canvas.height * 0.2 - 29;
     // 道路属性
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
@@ -43,7 +44,7 @@ export default class Infinite {
     // 加载道路图片
     this.roadImage = new Image();
     this.roadImage.src = 'image/yard.jpg'; // 替换为你的道路图片路径
-    this.roadHeight = 300; // 道路的高度
+    this.roadHeight = this.groundHeight; // 道路的高度
     // 陷阱
     this.traps = [];
     this.trapWidth = 24; // 陷阱的宽度
