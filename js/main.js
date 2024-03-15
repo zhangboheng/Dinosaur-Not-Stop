@@ -19,7 +19,7 @@ export default class Game {
     this.instruction = Instruction;
     this.settings = Settings;
     this.tools = Tools;
-    this.currentScene = new this.choose(this);
+    this.currentScene = new this.episode(this);
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
     });
