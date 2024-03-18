@@ -2,16 +2,12 @@ import {
   createBackButton,
   drawRoundedRectWithTail
 } from '../../utils/button';
-let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 export default class Choose {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
-    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
-    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     this.getGameTwoAccess = wx.getStorageSync('infiniteEnabled');
     // 设置提示关注
     this.showTips = wx.getStorageSync('showTips') !== false; // 如果没有设置，默认显示提示
@@ -68,6 +64,7 @@ export default class Choose {
     this.context.fillStyle = 'black';
     this.context.font = '14px Arial';
     this.context.textAlign = 'center';
+    this.context.textBaseline = 'middle';
     this.context.fillText('点击加入我的小程序', rectX + rectWidth / 2, rectY + rectHeight / 2 + 2);
   }
   drawGameOne() {
@@ -142,6 +139,7 @@ export default class Choose {
     }
   }
   draw() {
+    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -152,6 +150,7 @@ export default class Choose {
     this.drawGameOne();
     // 绘制第二关
     this.drawGameTwo();
+    this.context.restore();
   }
   touchHandler(e) {
     const touch = e.touches[0];

@@ -1,17 +1,12 @@
 import {
   createBackButton
 } from '../../utils/button';
-let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
-let isAndroid = systemInfo.platform === 'android';
 export default class Instruction {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
-    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
-    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 初始化触摸位置和滚动偏移量
     this.touchStartY = 0;
     this.scrollOffsetY = 0;
@@ -97,51 +92,28 @@ export default class Instruction {
   drawTabs() {
     const fontSize = 16;
     this.context.font = `bold ${fontSize}px Arial`; // 设置字体
-    if (isAndroid) {
-      this.tabs.forEach((tab, index) => {
-        // 标签的尺寸和位置
-        const tabX = 10;
-        const tabY = menuButtonInfo.top + 50 * index + 50;
-        const tabWidth = this.canvas.width / 4;
-        const tabHeight = 40;
-        // 绘制标签背景
-        this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d659';
-        this.context.fillRect(tabX, tabY, tabWidth, tabHeight);
-        // 绘制标签边框
-        this.context.strokeStyle = 'black';
-        this.context.lineWidth = 3;
-        this.context.strokeRect(tabX, tabY, tabWidth, tabHeight);
-        const textX = tabX + tabWidth / 2; // 水平居中
-        // 文本垂直居中
-        const textY = tabY + tabHeight / 2 + 2; // 调整以实现垂直居中
-        // 绘制文本
-        this.context.fillStyle = 'black';
-        this.context.fillText(tab.title, textX, textY);
-      });
-    } else {
-      this.tabs.forEach((tab, index) => {
-        // 标签的尺寸和位置
-        const tabX = 10;
-        const tabY = menuButtonInfo.top + 50 * index + 50;
-        const tabWidth = this.canvas.width / 4;
-        const tabHeight = 40;
-        // 绘制标签背景
-        this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d659';
-        this.context.fillRect(tabX, tabY, tabWidth, tabHeight);
-        // 绘制标签边框
-        this.context.strokeStyle = 'black';
-        this.context.lineWidth = 3;
-        this.context.strokeRect(tabX, tabY, tabWidth, tabHeight);
-        // 计算文本宽度并水平居中
-        const textWidth = this.context.measureText(tab.title).width;
-        const textX = tabX + (tabWidth - textWidth) / 2; // 水平居中
-        // 文本垂直居中
-        const textY = tabY + tabHeight / 2 + fontSize / 2 - 2; // 调整以实现垂直居中
-        // 绘制文本
-        this.context.fillStyle = 'black';
-        this.context.fillText(tab.title, textX, textY);
-      });
-    }
+    this.tabs.forEach((tab, index) => {
+      // 标签的尺寸和位置
+      const tabX = 10;
+      const tabY = menuButtonInfo.top + 50 * index + 50;
+      const tabWidth = this.canvas.width / 4;
+      const tabHeight = 40;
+      // 绘制标签背景
+      this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d659';
+      this.context.fillRect(tabX, tabY, tabWidth, tabHeight);
+      // 绘制标签边框
+      this.context.strokeStyle = 'black';
+      this.context.lineWidth = 3;
+      this.context.strokeRect(tabX, tabY, tabWidth, tabHeight);
+      // 计算文本宽度并水平居中
+      const textWidth = this.context.measureText(tab.title).width;
+      const textX = tabX + (tabWidth - textWidth) / 2; // 水平居中
+      // 文本垂直居中
+      const textY = tabY + tabHeight / 2 + fontSize / 2; // 调整以实现垂直居中
+      // 绘制文本
+      this.context.fillStyle = 'black';
+      this.context.fillText(tab.title, textX, textY);
+    });
   }
   // 绘制选中的标签
   drawTabsContent() {
@@ -163,7 +135,6 @@ export default class Instruction {
     this.context.lineWidth = 3;
     this.context.strokeRect(contentX, contentY, contentWidth, contentHeight);
     // 设置剪切区域，确保文本只在矩形内显示
-    this.context.save();
     this.context.beginPath();
     this.context.rect(contentX, contentY, contentWidth, contentHeight);
     this.context.clip();
@@ -216,24 +187,15 @@ export default class Instruction {
     }
     // 绘制文本内容
     this.context.fillStyle = 'black';
-    if (isAndroid) {
-      lines.forEach((line, index) => {
-        const textX = contentX + contentWidth / 2; // 左右居中
-        const textY = contentY + padding + fontSize / 2 + (fontSize + 10) * index + 12;
-        this.context.fillText(line, textX, textY + this.scrollOffsetY);
-      });
-    } else {
-      lines.forEach((line, index) => {
-        const textWidth = this.context.measureText(line).width;
-        const textX = contentX + (contentWidth - textWidth) / 2; // 左右居中
-        const textY = contentY + padding + fontSize / 2 + (fontSize + 10) * index + 12;
-        this.context.fillText(line, textX, textY + this.scrollOffsetY);
-      });
-    }
-    // 恢复原始绘图状态，移除剪切区域
-    this.context.restore();
+    lines.forEach((line, index) => {
+      const textWidth = this.context.measureText(line).width;
+      const textX = contentX + (contentWidth - textWidth) / 2; // 左右居中
+      const textY = contentY + padding + fontSize / 2 + (fontSize + 10) * index + 12;
+      this.context.fillText(line, textX, textY + this.scrollOffsetY);
+    });
   }
   draw() {
+    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -242,6 +204,7 @@ export default class Instruction {
     this.drawTabs();
     // 绘制选中标签的内容
     this.drawTabsContent();
+    this.context.restore();
   }
   touchHandler(e) {
     const touch = e.touches[0];

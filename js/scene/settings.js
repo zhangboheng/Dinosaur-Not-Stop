@@ -4,16 +4,12 @@ import {
 } from '../../utils/button';
 import SoundManager from '../../utils/soundManager';
 import BackgroundMusic from '../../utils/backgroundMusic';
-let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 export default class Settings {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
-    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
-    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 创建BackgroundMusic实例
     this.backgroundMusic = new BackgroundMusic();
     // 创建SoundManager实例
@@ -21,6 +17,13 @@ export default class Settings {
     // 绘制背景
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
+    // 初始化触摸位置和滚动偏移量
+    this.touchStartY = 0;
+    this.scrollOffsetY = 0;
+    // 添加触摸事件监听器
+    wx.onTouchStart(this.handleTouchStart.bind(this));
+    wx.onTouchMove(this.handleTouchMove.bind(this));
+    wx.onTouchEnd(this.handleTouchEnd.bind(this));
     // 创建返回按钮
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
       this.game.switchScene(new this.game.startup(this.game));
@@ -126,7 +129,7 @@ export default class Settings {
       // 开关状态
       const isSwitchOn = wx.getStorageSync('musicEnabled') ? true : wx.getStorageSync('musicEnabled');
       const isBackMusicOn = wx.getStorageSync('backgroundMusicEnabled') ? true : wx.getStorageSync('backgroundMusicEnabled');
-      this.context.fillText('V 1.0.4', switchX + 26, textY);
+      this.context.fillText('V 1.0.5', switchX + 26, textY);
       // 绘制圆角矩形背景
       this.context.fillStyle = isSwitchOn ? '#4CAF50' : '#cccccc';
       drawRoundedRectNoStrike(this.context, switchX, switchY, switchWidth, switchHeight, borderRadius, '#000000', 3);
@@ -151,26 +154,31 @@ export default class Settings {
     } else if (this.selectedIndex === 1) {
       const fontSize = 16;
       this.context.font = `${fontSize}px Arial`;
-      const arr = ['版本 1.0.4', '修复PC端无法适配问题', '', '版本 1.0.3', '增加游戏开篇画面和音效', '增加小恐龙闯关失败后的失败状态', '', '版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
-      const list = ['2024-03-15', '', '', '2024-01-30', '', '', '','2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
+      const arr = ['版本 1.0.5', '优化精简程序运行', '逃出监牢增加明显终点标识', '','版本 1.0.5', '优化精简程序运行', '','版本 1.0.4', '修复PC端无法适配问题', '', '版本 1.0.3', '增加游戏开篇画面和音效', '增加小恐龙闯关失败后的失败状态', '', '版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
+      const list = ['2024-03-18', '', '', '', '2024-03-18', '', '', '2024-03-15', '', '', '2024-01-30', '', '', '','2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
       // 计算文本高度和总内容高度
       const textHeight = fontSize * 1.2;
       const contentHeight = arr.length * textHeight + 20;
       // 绘制矩形
+      const limitHeight = this.canvas.height - tabContentY - contentHeight <= tabContentY ? this.canvas.height - 2 * tabContentY : contentHeight
       this.context.fillStyle = '#f5d659';
       this.context.strokeStyle = 'black';
-      this.context.fillRect(tabX, tabContentY, tabWidth, contentHeight);
-      this.context.strokeRect(tabX, tabContentY, tabWidth, contentHeight);
+      this.context.fillRect(tabX, tabContentY, tabWidth, limitHeight);
+      this.context.strokeRect(tabX, tabContentY, tabWidth, limitHeight);
+      // 设置剪切区域，确保文本只在矩形内显示
+      this.context.beginPath();
+      this.context.rect(tabX, tabContentY, tabWidth, limitHeight);
+      this.context.clip();
       // 遍历数组并绘制文本
       this.context.fillStyle = '#000000';
       for (let i = 0; i < arr.length; i++) {
         const textY = tabContentY + 15 + textHeight * i + fontSize / 2;
         // 左侧文本
         this.context.textAlign = 'left';
-        this.context.fillText(arr[i], tabX + 10, textY);
+        this.context.fillText(arr[i], tabX + 10, textY + this.scrollOffsetY);
         // 右侧文本
         this.context.textAlign = 'right';
-        this.context.fillText(list[i], tabX + tabWidth - 10, textY);
+        this.context.fillText(list[i], tabX + tabWidth - 10, textY + this.scrollOffsetY);
       }
     } else if (this.selectedIndex === 2) {
       const fontSize = 16;
@@ -247,8 +255,7 @@ export default class Settings {
     }
   }
   draw() {
-    // 清除整个画布
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -257,6 +264,24 @@ export default class Settings {
     this.drawTabs();
     // 绘制选中标签的内容
     this.drawTabsContent();
+    this.context.restore();
+  }
+  // 记录触摸开始的位置
+  handleTouchStart(e) {
+    this.touchStartY = e.touches[0].clientY;
+  }
+  // 计算触摸移动的距离并更新滚动偏移量
+  handleTouchMove(e) {
+    const touchY = e.touches[0].clientY;
+    const deltaY = touchY - this.touchStartY;
+    if (deltaY < 0) {
+      this.scrollOffsetY += deltaY;
+      this.touchStartY = touchY;
+    }
+  }
+  // 触摸结束，可以在这里添加额外的逻辑
+  handleTouchEnd(e) {
+    this.scrollOffsetY = 0;
   }
   touchHandler(e) {
     const touch = e.touches[0];
@@ -312,12 +337,19 @@ export default class Settings {
   }
   // 页面销毁机制
   destroy() {
+    // 移除触摸事件监听器
+    wx.offTouchStart(this.handleTouchStart.bind(this));
+    wx.offTouchMove(this.handleTouchMove.bind(this));
+    wx.offTouchEnd(this.handleTouchEnd.bind(this));
     // 清理图像资源
     this.backButton.image.src = '';
     this.backgroundImage.src = '';
     this.iconVersion.src = '';
     this.iconImage.src = '';
     this.iconBack.src = '';
+    // 重置状态
+    this.scrollOffsetY = 0;
+    this.selectedTabIndex = 0;
   }
   // 管理音效状态
   toggleMusic() {

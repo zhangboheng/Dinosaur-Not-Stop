@@ -2,16 +2,12 @@ import {
   createBackButton,
   drawRoundedRect
 } from '../../utils/button';
-let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 export default class Tools {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
-    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
-    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 绘制背景
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
@@ -137,6 +133,7 @@ export default class Tools {
     }
   }
   draw() {
+    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -145,6 +142,7 @@ export default class Tools {
     this.drawTitle();
     // 绘制道具区域
     this.drawToolsArea();
+    this.context.restore();
   }
   touchHandler(e) {
     const touch = e.touches[0];

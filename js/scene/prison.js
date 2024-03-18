@@ -14,17 +14,12 @@ import SoundManager from '../../utils/soundManager';
 import BackgroundMusic from '../../utils/backgroundMusic';
 const soundManager = new SoundManager();
 const backgroundMusic = new BackgroundMusic();
-let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
-
 export default class Prison {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
-    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
-    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 加载背景音乐
     backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
     backgroundMusic.playBackgroundMusic();
@@ -47,7 +42,6 @@ export default class Prison {
     // 加载陷阱图片
     this.trapImages = [
       'image/woodenbox.png',
-      'image/woodenstackbox.png',
       'image/prisonbarrier.png',
       'image/barrier.png',
     ].map(src => {
@@ -132,7 +126,9 @@ export default class Prison {
     this.successTipsImage.src = 'image/gamecompletetips.png'
     // 加载失败图片
     this.failTipsImage = new Image();
-    this.failTipsImage.src = 'image/gameovertips.png'
+    this.failTipsImage.src = 'image/gameovertips.png';
+    // 终点显现速度
+    this.endSpeed = 0;
     // 游戏状态
     this.gameOver = false;
     // 游戏通关状态
@@ -274,7 +270,7 @@ export default class Prison {
       // 更新计时器
       this.trapTimer++;
       // 当计时器达到间隔时，生成新的陷阱
-      if (this.trapTimer >= this.trapInterval && this.score <= 5250) {
+      if (this.trapTimer >= this.trapInterval && this.score <= 5000) {
         const numberOfTraps = Math.floor(Math.random() * 6) + 1;
         let lastTrapX = this.canvas.width;
         for (let i = 0; i < numberOfTraps; i++) {
@@ -298,21 +294,48 @@ export default class Prison {
       this.traps = []; // 清空陷阱
     }
   }
+  // 绘制椭圆终点
+  drawEllipse() {
+    // 设置半椭圆的参数
+    const centerX = this.canvas.width + 150;
+    const centerY = this.canvas.height - this.groundHeight;
+    const radiusX = 150;
+    const radiusY = this.canvas.height - this.groundHeight;
+    const startAngle = Math.PI;
+    const endAngle = 2 * Math.PI;
+    // 绘制半椭圆
+    this.context.beginPath();
+    this.context.ellipse(centerX + this.endSpeed, centerY, radiusX, radiusY, 0, startAngle, endAngle);
+    this.context.closePath();
+    // 填充半椭圆（可选）
+    this.context.fillStyle = '#111111';
+    this.context.fill();
+    // 描边半椭圆（可选）
+    this.context.strokeStyle = 'black';
+    this.context.lineWidth = 2;
+    this.context.stroke();
+  }
+  // 更新椭圆终点
+  updateEllipse() {
+    if (this.score >= 5900 && this.score <= 6000) {
+      this.endSpeed -= this.roadSpeed;
+    }
+  }
   // 绘制小恐龙
   drawDino() {
     let dinoImg;
     if (this.gameOver) {
-        if (this.isLevelCompleted) {
-          if (!this.isOnGround) { 
-            dinoImg = this.isJumpingUp ? this.dinoJumpUpImage : this.dinoJumpDownImage;
-          } else {
-            dinoImg = this.dinoImages[this.currentDinoFrame];
-          }
-        }else{
-          dinoImg = this.dinoDeadImage
-        };
-    }else{
-      if (!this.isOnGround) { 
+      if (this.isLevelCompleted) {
+        if (!this.isOnGround) {
+          dinoImg = this.isJumpingUp ? this.dinoJumpUpImage : this.dinoJumpDownImage;
+        } else {
+          dinoImg = this.dinoImages[this.currentDinoFrame];
+        }
+      } else {
+        dinoImg = this.dinoDeadImage
+      };
+    } else {
+      if (!this.isOnGround) {
         dinoImg = this.isJumpingUp ? this.dinoJumpUpImage : this.dinoJumpDownImage;
       } else {
         dinoImg = this.dinoImages[this.currentDinoFrame];
@@ -321,7 +344,7 @@ export default class Prison {
     if (dinoImg.complete) {
       if (this.gameOver && !this.isLevelCompleted) {
         this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2)
-      } else{
+      } else {
         this.context.drawImage(dinoImg, this.circleX - dinoImg.width / 2, this.circleY - dinoImg.height / 2 - 20)
       }
     }
@@ -404,12 +427,12 @@ export default class Prison {
       };
       // 使用SAT检测碰撞
       if (doPolygonsIntersect(dinoPolygon, trapPolygon)) {
-        if(this.useDrug == false && this.score - this.distanceDrug >= 300){
+        if (this.useDrug == false && this.score - this.distanceDrug >= 300) {
           this.gameOver = true;
           backgroundMusic.stopBackgroundMusic();
           soundManager.play('crack');
           soundManager.play('end', 200);
-        }else{
+        } else {
           this.useDrug = false;
         }
       }
@@ -418,7 +441,7 @@ export default class Prison {
   // 绘制隐身药道具显示
   drawDrug() {
     if (this.useDrug == false && this.distanceDrug == 0 && typeof this.getDrugAccess != 'string' && this.getDrugAccess != 0) {
-      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 20, 120, 40, 10, '#f5d659', 'black', 3);
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 20, 100, 40, 10, '#f5d659', 'black', 3);
       if (this.drugImage.complete) {
         this.context.drawImage(this.drugImage, 10, this.canvas.height - this.roadHeight + 28, 24, 24);
       }
@@ -431,13 +454,13 @@ export default class Prison {
       } else {
         this.drugCount = this.getDrugAccess;
       }
-      this.context.fillText(this.drugCount, 100, this.canvas.height - this.roadHeight + 42);
+      this.context.fillText(this.drugCount, 80, this.canvas.height - this.roadHeight + 42);
     }
   }
   // 绘制月球药道具显示
   drawMoon() {
     if (this.useMoon == false && typeof this.getMoonAccess != 'string' && this.getMoonAccess != 0) {
-      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 70, 120, 40, 10, '#f5d659', 'black', 3);
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 70, 100, 40, 10, '#f5d659', 'black', 3);
       if (this.moonImage.complete) {
         this.context.drawImage(this.moonImage, 10, this.canvas.height - this.roadHeight + 78, 24, 24);
       }
@@ -450,13 +473,13 @@ export default class Prison {
       } else {
         this.moonCount = this.getMoonAccess;
       }
-      this.context.fillText(this.moonCount, 100, this.canvas.height - this.roadHeight + 92);
+      this.context.fillText(this.moonCount, 80, this.canvas.height - this.roadHeight + 92);
     }
   }
   // 绘制飞天翼道具显示
   drawWing() {
     if (this.score <= 800 && this.useWing == false && typeof this.getWingAccess != 'string' && this.getWingAccess != 0) {
-      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 120, 120, 40, 10, '#f5d659', 'black', 3);
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 120, 100, 40, 10, '#f5d659', 'black', 3);
       if (this.wingImage.complete) {
         this.context.drawImage(this.wingImage, 10, this.canvas.height - this.roadHeight + 128, 24, 24);
       }
@@ -469,7 +492,7 @@ export default class Prison {
       } else {
         this.wingCount = this.getWingAccess;
       }
-      this.context.fillText(this.wingCount, 100, this.canvas.height - this.roadHeight + 142);
+      this.context.fillText(this.wingCount, 80, this.canvas.height - this.roadHeight + 142);
     }
   }
   // 绘制消息提示
@@ -480,6 +503,7 @@ export default class Prison {
   }
   // 画面全部绘制
   draw() {
+    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -490,6 +514,8 @@ export default class Prison {
     this.drawRoad();
     // 绘制移动的陷阱
     this.drawTraps();
+    // 绘制椭圆终点
+    this.drawEllipse();
     // 绘制小恐龙
     this.drawDino();
     // 绘制隐身药道具
@@ -502,6 +528,7 @@ export default class Prison {
     this.drawMessageBox();
     // 绘制黑色遮罩
     this.drawBlackScreen();
+    this.context.restore();
   }
   // 游戏更新事件
   update() {
@@ -512,6 +539,8 @@ export default class Prison {
       this.updateRoad();
       // 更新陷阱变化
       this.updateTraps();
+      // 更新椭圆终点
+      this.updateEllipse();
       // 更新小恐龙图片切换
       this.updateDino();
       // 更新黑色遮罩
@@ -555,7 +584,7 @@ export default class Prison {
     } else {
       if (this.gameOver == false) {
         // 使用隐身药道具点击识别
-        if (touchX >= 0 && touchX <= 110 &&
+        if (touchX >= 0 && touchX <= 90 &&
           touchY >= this.canvas.height - this.roadHeight + 20 && touchY <= this.canvas.height - this.roadHeight + 60 && this.drugCount >= 1 && this.useDrug == false && this.distanceDrug == 0) {
           this.useDrug = true;
           this.distanceDrug = this.score;
@@ -564,7 +593,7 @@ export default class Prison {
           wx.setStorageSync('drugCount', this.drugCount);
         }
         // 使用月球药道具点击识别
-        if (touchX >= 0 && touchX <= 110 &&
+        if (touchX >= 0 && touchX <= 90 &&
           touchY >= this.canvas.height - this.roadHeight + 70 && touchY <= this.canvas.height - this.roadHeight + 110 && this.moonCount >= 1 && this.useMoon == false && this.distanceMoon == 0) {
           this.useMoon = true;
           this.gravity = this.gravity / 6;
@@ -574,7 +603,7 @@ export default class Prison {
           wx.setStorageSync('moonCount', this.moonCount)
         }
         // 使用天使翼道具点击识别
-        if (touchX >= 0 && touchX <= 110 &&
+        if (touchX >= 0 && touchX <= 90 &&
           touchY >= this.canvas.height - this.roadHeight + 120 && touchY <= this.canvas.height - this.roadHeight + 160 && this.wingCount >= 1 && this.useWing == false && this.distanceWing == 0) {
           this.useWing = true;
           this.distanceWing = this.score;
@@ -645,6 +674,8 @@ export default class Prison {
     // 游戏开始时
     backgroundMusic.playBackgroundMusic()
     this.isLevelCompleted = false;
+    // 终点显现速度
+    this.endSpeed = 0;
     // 重置定时
     this.trapTimer = 0;
   }

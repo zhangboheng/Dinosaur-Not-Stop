@@ -1,5 +1,6 @@
 // 带有描边的按钮公共方法
 export function drawRoundedRect(context, x, y, width, height, radius, fillColor, strokeColor, strokeWidth) {
+  context.save();
   context.beginPath();
   context.moveTo(x + radius, y);
   context.lineTo(x + width - radius, y);
@@ -20,8 +21,8 @@ export function drawRoundedRect(context, x, y, width, height, radius, fillColor,
     context.lineWidth = strokeWidth;
     context.stroke();
   }
+  context.restore();
 }
-
 // 图片返回按钮的公共方法
 export function createBackButton(context, x, y, imagePath, callback) {
   const image = new Image();
@@ -45,22 +46,26 @@ export function createBackButton(context, x, y, imagePath, callback) {
 }
 // 带有图标的返回按钮公共方法
 export function drawIconButton(context, text, x, y, callback) {
+  context.save();
   // 设置文本样式
   context.fillStyle = '#f5d659';
   context.strokeStyle = 'black';
   context.lineWidth = 3;
-  context.font = 'bold 20px';
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
   // 绘制文本背景
   const padding = 60; // 边距宽度
   const textWidth = context.measureText(text).width + padding * 2;
   const textHeight = 60; // 提示框的高度，可以根据需要调整
   context.fillRect(x - textWidth / 2, y - textHeight / 2, textWidth, textHeight);
   context.strokeRect(x - textWidth / 2, y - textHeight / 2, textWidth, textHeight);
-  // 绘制文本
+  context.restore();
+  // 绘制文本;
+  context.save();
+  context.font = '16px Arial';
   context.fillStyle = 'black';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
   context.fillText(text, x, y + 2);
+  context.restore();
   // 返回按钮尺寸信息
   return {
     x: x - (textWidth + padding * 2) / 2,
@@ -71,6 +76,7 @@ export function drawIconButton(context, text, x, y, callback) {
 }
 
 export function drawRoundedRectNoStrike(ctx, x, y, width, height, radius, strokeColor, strokeWidth) {
+  ctx.save();
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
   ctx.lineTo(x + width - radius, y);
@@ -85,9 +91,11 @@ export function drawRoundedRectNoStrike(ctx, x, y, width, height, radius, stroke
   ctx.strokeStyle = strokeColor;
   ctx.lineWidth = strokeWidth;
   ctx.stroke();
+  ctx.restore();
 }
 
 export function drawRoundedRectWithTail(context, x, y, width, height, borderRadius, tailWidth, tailHeight) {
+  context.save();
   // 绘制圆角矩形的基本部分
   context.beginPath();
   context.moveTo(x + borderRadius, y);
@@ -101,4 +109,5 @@ export function drawRoundedRectWithTail(context, x, y, width, height, borderRadi
   context.lineTo(x, y + borderRadius);
   context.arcTo(x, y, x + borderRadius, y, borderRadius);
   context.closePath();
+  context.restore();
 }

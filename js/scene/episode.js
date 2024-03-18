@@ -1,13 +1,10 @@
 import SoundManager from '../../utils/soundManager';
-let systemInfo = wx.getSystemInfoSync();
 const soundManager = new SoundManager();
 export default class Episode {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    this.canvas.width = systemInfo.screenWidth;
-    this.canvas.height = systemInfo.screenHeight;
     // 获取音效初始状态
     soundManager.setMusicState(wx.getStorageSync('musicEnabled'));
     // 绘制漫画集合
@@ -49,8 +46,10 @@ export default class Episode {
     }
   }
   draw() {
+    this.context.save();
     // 绘制背景
     this.drawBackground();
+    this.context.restore();
   }
   touchHandler(e) {
     console.info('点击了');

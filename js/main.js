@@ -5,12 +5,15 @@ import Prison from './scene/prison.js';
 import Infinite from './scene/infinite.js';
 import Instruction from './scene/instruction.js';
 import Settings from './scene/settings.js';
-import Tools from './scene/tools.js'
+import Tools from './scene/tools.js';
+let systemInfo = wx.getSystemInfoSync();
 export default class Game {
   constructor() {
     this.initSettings();
     this.canvas = wx.createCanvas();
     this.context = canvas.getContext('2d');
+    this.canvas.width = systemInfo.screenWidth;
+    this.canvas.height = systemInfo.screenHeight;
     this.episode = Episode;
     this.startup = StartUp;
     this.choose = Choose;

@@ -1,13 +1,15 @@
+let systemInfo = wx.getSystemInfoSync();
 // 带有描边的提示框
 export function drawDialog(context, text, options = {}) {
   const {
     width = 200, height = 100, backgroundColor = '#f5d659', borderColor = 'black', borderWidth = 3, textColor = 'black', fontSize = '20px', fontFamily = 'Arial', scores = [0,0,0,0,0,0,0,0,0,0]
   } = options;
-  const canvasWidth = context.canvas.width / devicePixelRatio;
-  const canvasHeight = context.canvas.height / devicePixelRatio;
+  const canvasWidth = context.canvas.width / systemInfo.devicePixelRatio;
+  const canvasHeight = context.canvas.height / systemInfo.devicePixelRatio;
   const dialogX = (canvasWidth - width) / 2;
   const dialogY = (canvasHeight - height) / 2;
   // 绘制背景
+  context.save();
   context.fillStyle = backgroundColor;
   context.strokeStyle = borderColor;
   context.lineWidth = borderWidth;
@@ -44,6 +46,7 @@ export function drawDialog(context, text, options = {}) {
   context.textAlign = 'center';
   context.font = `${closeButtonSize}px Arial`; // 设置关闭按钮的字体大小
   context.fillText('X', closeButtonX, closeButtonY + closeButtonSize);
+  context.restore();
 
   // 返回关闭按钮的坐标和尺寸信息，用于点击检测
   return {
@@ -55,6 +58,7 @@ export function drawDialog(context, text, options = {}) {
 
 // 矩形提示框
 export function showBoxMessage(context, message, x, y, backgroundColor = '#f5d659', strokeColor = 'black', fontSize = 'bold 20px') {
+  context.save();
   // 设置文本样式
   context.fillStyle = backgroundColor;
   context.strokeStyle = strokeColor;
@@ -71,4 +75,5 @@ export function showBoxMessage(context, message, x, y, backgroundColor = '#f5d65
   // 绘制文本
   context.fillStyle = 'black';
   context.fillText(message, x, y + 2);
+  context.restore();
 }

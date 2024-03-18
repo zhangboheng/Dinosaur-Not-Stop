@@ -4,8 +4,8 @@ import {
 import {
   drawDialog
 } from '../../utils/dialog';
-let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+let systemInfo = wx.getSystemInfoSync();
 export default class Startup {
   constructor(game) {
     this.game = game;
@@ -71,7 +71,7 @@ export default class Startup {
     this.context.fillStyle = 'black';
     this.context.font = 'bold 10px Arial';
     this.context.textAlign = 'center';
-    this.context.fillText('成绩榜', 26, menuButtonInfo.top + 40);
+    this.context.fillText('成绩榜', 26, menuButtonInfo.top + 42);
   }
   // 绘制道具屋图片
   drawToolsImage() {
@@ -81,9 +81,10 @@ export default class Startup {
     this.context.fillStyle = 'black';
     this.context.font = 'bold 10px Arial';
     this.context.textAlign = 'center';
-    this.context.fillText('道具屋', 26, menuButtonInfo.top + 90);  
+    this.context.fillText('道具屋', 26, menuButtonInfo.top + 92);
   }
   draw() {
+    this.context.save();
     // 绘制背景图片
     if (this.backgroundImage.complete) {
       this.context.drawImage(this.backgroundImage, 0, 0, this.canvas.width, this.canvas.height);
@@ -120,6 +121,7 @@ export default class Startup {
     });
     // 绘制排行
     this.drawRankDialog();
+    this.context.restore();
   }
   touchHandler(e) {
     const touch = e.touches[0];

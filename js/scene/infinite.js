@@ -15,17 +15,12 @@ import SoundManager from '../../utils/soundManager';
 import BackgroundMusic from '../../utils/backgroundMusic';
 const soundManager = new SoundManager();
 const backgroundMusic = new BackgroundMusic();
-let systemInfo = wx.getSystemInfoSync();
 let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
-
 export default class Infinite {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
-    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
-    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     // 加载背景音乐
     backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
     backgroundMusic.playBackgroundMusic();
@@ -250,7 +245,7 @@ export default class Infinite {
     this.context.fillStyle = 'black';
     this.context.textAlign = 'left'; // 文本左对齐
     this.context.textBaseline = 'middle';
-    this.context.fillText(this.score, scoreX, scoreY);
+    this.context.fillText(this.score + 6000, scoreX, scoreY);
   }
   // 绘制道路
   drawRoad() {
@@ -633,7 +628,7 @@ export default class Infinite {
   // 绘制隐身药道具显示
   drawDrug() {
     if (this.useDrug == false && this.distanceDrug == 0 && typeof this.getDrugAccess != 'string' && this.getDrugAccess != 0) {
-      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 20, 120, 40, 10, '#f5d659', 'black', 3);
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 20, 100, 40, 10, '#f5d659', 'black', 3);
       if (this.drugImage.complete) {
         this.context.drawImage(this.drugImage, 10, this.canvas.height - this.roadHeight + 28, 24, 24);
       }
@@ -646,13 +641,13 @@ export default class Infinite {
       } else {
         this.drugCount = this.getDrugAccess;
       }
-      this.context.fillText(this.drugCount, 100, this.canvas.height - this.roadHeight + 42);
+      this.context.fillText(this.drugCount, 80, this.canvas.height - this.roadHeight + 42);
     }
   }
   // 绘制月球药道具显示
   drawMoon() {
     if (this.useMoon == false && this.distanceMoon == 0 && typeof this.getMoonAccess != 'string' && this.getMoonAccess != 0) {
-      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 70, 120, 40, 10, '#f5d659', 'black', 3);
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 70, 100, 40, 10, '#f5d659', 'black', 3);
       if (this.moonImage.complete) {
         this.context.drawImage(this.moonImage, 10, this.canvas.height - this.roadHeight + 78, 24, 24);
       }
@@ -665,13 +660,13 @@ export default class Infinite {
       } else {
         this.moonCount = this.getMoonAccess;
       }
-      this.context.fillText(this.moonCount, 100, this.canvas.height - this.roadHeight + 92);
+      this.context.fillText(this.moonCount, 80, this.canvas.height - this.roadHeight + 92);
     }
   }
   // 绘制飞天翼道具显示
   drawWing() {
     if (this.score <= 800 && this.useWing == false && typeof this.getWingAccess != 'string' && this.getWingAccess != 0) {
-      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 120, 120, 40, 10, '#f5d659', 'black', 3);
+      drawRoundedRect(this.context, -10, this.canvas.height - this.roadHeight + 120, 100, 40, 10, '#f5d659', 'black', 3);
       if (this.wingImage.complete) {
         this.context.drawImage(this.wingImage, 10, this.canvas.height - this.roadHeight + 128, 24, 24);
       }
@@ -684,11 +679,12 @@ export default class Infinite {
       } else {
         this.wingCount = this.getWingAccess;
       }
-      this.context.fillText(this.wingCount, 100, this.canvas.height - this.roadHeight + 142);
+      this.context.fillText(this.wingCount, 80, this.canvas.height - this.roadHeight + 142);
     }
   }
   // 画面全部绘制
   draw() {
+    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -717,6 +713,7 @@ export default class Infinite {
     this.drawMessageBox();
     // 绘制黑色遮罩
     this.drawBlackScreen();
+    this.context.restore();
   }
   // 游戏更新事件
   update() {
@@ -762,7 +759,7 @@ export default class Infinite {
     }
     if (this.gameOver == false) {
       // 使用隐身药道具点击识别
-      if (touchX >= 0 && touchX <= 110 &&
+      if (touchX >= 0 && touchX <= 90 &&
         touchY >= this.canvas.height - this.roadHeight + 20 && touchY <= this.canvas.height - this.roadHeight + 60 && this.drugCount >= 1 && this.useDrug == false && this.distanceDrug == 0) {
         this.useDrug = true;
         this.distanceDrug = this.score;
@@ -771,7 +768,7 @@ export default class Infinite {
         wx.setStorageSync('drugCount', this.drugCount);
       }
       // 使用月球药道具点击识别
-      if (touchX >= 0 && touchX <= 110 &&
+      if (touchX >= 0 && touchX <= 90 &&
         touchY >= this.canvas.height - this.roadHeight + 70 && touchY <= this.canvas.height - this.roadHeight + 110 && this.moonCount >= 1 && this.useMoon == false && this.distanceMoon == 0) {
         this.useMoon = true;
         this.gravity = this.gravity / 6;
@@ -781,7 +778,7 @@ export default class Infinite {
         wx.setStorageSync('moonCount', this.moonCount)
       }
       // 使用天使翼道具点击识别
-      if (touchX >= 0 && touchX <= 110 &&
+      if (touchX >= 0 && touchX <= 90 &&
         touchY >= this.canvas.height - this.roadHeight + 120 && touchY <= this.canvas.height - this.roadHeight + 160 && this.wingCount >= 1 && this.useWing == false && this.distanceWing == 0) {
         this.useWing = true;
         this.distanceWing = this.score;
