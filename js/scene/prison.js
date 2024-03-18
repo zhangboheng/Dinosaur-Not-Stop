@@ -28,7 +28,7 @@ export default class Prison {
     // 加载背景音乐
     backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
     backgroundMusic.playBackgroundMusic();
-    this.groundHeight = menuButtonInfo.bottom + this.canvas.height * 0.2 - 29;
+    this.groundHeight = menuButtonInfo.bottom + this.canvas.height * 0.3 - 29;
     // 道路属性
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
@@ -224,7 +224,7 @@ export default class Prison {
       this.roadSpeed = 0; // 停止道路移动
       this.gameOver = true;
       this.isLevelCompleted = true;
-      backgroundMusic.pauseBackgroundMusic();
+      backgroundMusic.stopBackgroundMusic();
       soundManager.play('win');
     } else {
       this.score += this.roadSpeed;
@@ -406,7 +406,7 @@ export default class Prison {
       if (doPolygonsIntersect(dinoPolygon, trapPolygon)) {
         if(this.useDrug == false && this.score - this.distanceDrug >= 300){
           this.gameOver = true;
-          backgroundMusic.pauseBackgroundMusic();
+          backgroundMusic.stopBackgroundMusic();
           soundManager.play('crack');
           soundManager.play('end', 200);
         }else{
@@ -546,7 +546,7 @@ export default class Prison {
       this.gameOver = false;
       updateHighScores(this.score);
       // 游戏结束时
-      backgroundMusic.pauseBackgroundMusic()
+      backgroundMusic.stopBackgroundMusic()
       return
     }
     if (this.isLevelCompleted) {

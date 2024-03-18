@@ -140,12 +140,7 @@ export default class Startup {
     }
     // 判断点击是否在道具屋区域内
     if (touch.clientX >= imgX && touch.clientX <= imgX + imgWidth && touch.clientY >= imgY + 50 && touch.clientY <= imgY + 50 + imgHeight) {
-      wx.showToast({
-          title: '筹建中，敬请期待',
-          icon: 'none',
-          duration: 2000
-      })
-      // this.game.switchScene(new this.game.tools(this.game));
+      this.game.switchScene(new this.game.tools(this.game));
     }
     // 检测是否点击了第二个按钮
     if (touch.clientX >= this.secondButtonX && touch.clientX <= this.secondButtonX + this.secondButtonWidth &&

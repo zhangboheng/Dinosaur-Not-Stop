@@ -29,7 +29,7 @@ export default class Infinite {
     // 加载背景音乐
     backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
     backgroundMusic.playBackgroundMusic();
-    this.groundHeight = menuButtonInfo.bottom + this.canvas.height * 0.2 - 29;
+    this.groundHeight = menuButtonInfo.bottom + this.canvas.height * 0.3 - 29;
     // 道路属性
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
@@ -432,7 +432,7 @@ export default class Infinite {
             soundManager.play('crack');
             this.gameOver = true;
             // 游戏结束时
-            backgroundMusic.pauseBackgroundMusic();
+            backgroundMusic.stopBackgroundMusic();
             soundManager.play('end', 200);
           } else {
             this.useDrug = false;
@@ -464,7 +464,7 @@ export default class Infinite {
           if (this.useDrug == false && this.score - this.distanceDrug >= 300) {
             soundManager.play('crack');
             this.gameOver = true;
-            backgroundMusic.pauseBackgroundMusic();
+            backgroundMusic.stopBackgroundMusic();
             soundManager.play('end', 200);
           } else {
             this.useDrug = false;
@@ -757,7 +757,7 @@ export default class Infinite {
       this.gameOver = false;
       updateHighScores(6000 + this.score);
       // 游戏结束时
-      backgroundMusic.pauseBackgroundMusic();
+      backgroundMusic.stopBackgroundMusic();
       return
     }
     if (this.gameOver == false) {

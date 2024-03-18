@@ -65,7 +65,7 @@ export default class Tools {
     this.context.textBaseline = 'middle';
     this.context.fillText('道具列表', this.buttonX + this.buttonWidth / 2, this.buttonY + 20);
     this.context.font = '12px Arial';
-    this.context.fillText('通过观看广告兑换后，可在关卡中使用一次', this.buttonX + this.buttonWidth / 2, this.buttonY + 36);
+    this.context.fillText('限时免广告兑换后，可在关卡中使用一次', this.buttonX + this.buttonWidth / 2, this.buttonY + 36);
   }
   // 绘制道具区域
   drawToolsArea() {
@@ -163,6 +163,9 @@ export default class Tools {
       touchY >= this.buttonY + 70 && touchY <= this.buttonY + 150) {
       // 后续增加激励广告区域 
       this.wingCount++;
+      if (this.wingCount >= 1) {
+        this.wingCount = 1;
+      }
       this.getWingAccess = this.wingCount;
       wx.setStorageSync('wingCount', this.wingCount)
     }
@@ -171,6 +174,9 @@ export default class Tools {
       touchY >= this.buttonY + 160 && touchY <= this.buttonY + 240) {
       // 后续增加激励广告区域 
       this.moonCount++;
+      if (this.moonCount >= 1) {
+        this.moonCount = 1;
+      }
       this.getMoonAccess = this.moonCount;
       wx.setStorageSync('moonCount', this.moonCount)
     }
@@ -179,6 +185,9 @@ export default class Tools {
       touchY >= this.buttonY + 250 && touchY <= this.buttonY + 330) {
       // 后续增加激励广告区域 
       this.drugCount++;
+      if (this.drugCount >= 1) {
+        this.drugCount = 1;
+      }
       this.getDrugAccess = this.drugCount;
       wx.setStorageSync('drugCount', this.drugCount)
     }

@@ -73,7 +73,7 @@ export default class Choose {
   drawGameOne() {
     // 定义关卡布局参数
     const rectMargin = 10;
-    const rectHeightPercentage = 0.4; // 关卡占屏幕高度的比例
+    const rectHeightPercentage = 0.3; // 关卡占屏幕高度的比例
     const rectWidthPercentage = 1; // 关卡占屏幕宽度的比例
     // 计算关卡在当前屏幕尺寸下的实际大小
     const rectWidth = this.canvas.width * rectWidthPercentage - 2 * rectMargin;
@@ -107,7 +107,7 @@ export default class Choose {
   drawGameTwo() {
     // 定义关卡布局参数
     const rectMargin = 10;
-    const rectHeightPercentage = 0.4; // 关卡占屏幕高度的比例
+    const rectHeightPercentage = 0.3; // 关卡占屏幕高度的比例
     const rectWidthPercentage = 1; // 关卡占屏幕宽度的比例
     // 计算关卡在当前屏幕尺寸下的实际大小
     const rectWidth = this.canvas.width * rectWidthPercentage - 2 * rectMargin;
@@ -166,7 +166,7 @@ export default class Choose {
       return
     }
     const rectMargin = 10;
-    const rectHeightPercentage = 0.4; // 关卡占屏幕高度的比例
+    const rectHeightPercentage = 0.3; // 关卡占屏幕高度的比例
     const rectWidthPercentage = 1; // 关卡占屏幕宽度的比例
     const rectWidth = this.canvas.width * rectWidthPercentage - 2 * rectMargin;
     const rectHeight = this.canvas.height * rectHeightPercentage - 2 * rectMargin;
