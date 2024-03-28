@@ -1,0 +1,13 @@
+import SoundManager from './soundManager';
+import BackgroundMusic from './backgroundMusic';
+const soundManager = new SoundManager();
+const backgroundMusic = new BackgroundMusic();
+const systemInfo = wx.getSystemInfoSync();
+const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+const screenWidth = systemInfo.screenWidth;
+const screenHeight = systemInfo.screenHeight;
+const designWidth = 320;
+const designHeight = 568;
+const scaleX = screenWidth / designWidth;
+const scaleY = screenHeight / designHeight;
+export { soundManager, backgroundMusic, systemInfo, menuButtonInfo, scaleX, scaleY };

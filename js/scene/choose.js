@@ -2,7 +2,7 @@ import {
   createBackButton,
   drawRoundedRectWithTail
 } from '../../utils/button';
-let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+import { menuButtonInfo } from '../../utils/global';
 export default class Choose {
   constructor(game) {
     this.game = game;
@@ -11,6 +11,7 @@ export default class Choose {
     this.getGameTwoAccess = wx.getStorageSync('infiniteEnabled');
     // 设置提示关注
     this.showTips = wx.getStorageSync('showTips') !== false; // 如果没有设置，默认显示提示
+    /* 图片加载区域开始 */
     // 绘制背景
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
@@ -24,6 +25,7 @@ export default class Choose {
     // 绘制逃出乐园封面
     this.rectImageTwo = new Image();
     this.rectImageTwo.src = 'image/gametwo.jpg';
+    /* 图片加载区域结束 */
   }
   // 绘制背景
   drawBackground() {
@@ -52,6 +54,7 @@ export default class Choose {
     const tailHeight = 28; // 尾巴的高度
     const rectX = menuButtonInfo.right - menuButtonInfo.width - rectWidth - tailWidth;
     const rectY = menuButtonInfo.top; // 可以根据需要调整
+    this.context.save();
     // 绘制半透明矩形
     this.context.fillStyle = '#f5d659'; // 增加透明度
     drawRoundedRectWithTail(this.context, rectX, rectY, rectWidth, rectHeight, borderRadius, tailWidth, tailHeight, 'right');
@@ -66,6 +69,7 @@ export default class Choose {
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
     this.context.fillText('点击加入我的小程序', rectX + rectWidth / 2, rectY + rectHeight / 2 + 2);
+    this.context.restore();
   }
   drawGameOne() {
     // 定义关卡布局参数
@@ -80,6 +84,7 @@ export default class Choose {
     const rectX = (this.canvas.width - rectWidth) / 2;
     const rectY = menuButtonInfo.bottom + rectMargin;
     // 绘制关卡背景
+    this.context.save();
     this.context.fillStyle = '#f5d659';
     this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24);
     this.context.strokeStyle = 'black';
@@ -100,6 +105,7 @@ export default class Choose {
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
     this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight + rectMargin);
+    this.context.restore();
   }
   drawGameTwo() {
     // 定义关卡布局参数
@@ -113,6 +119,7 @@ export default class Choose {
     const rectX = (this.canvas.width - rectWidth) / 2;
     const rectY = rectHeight + menuButtonInfo.bottom + rectMargin * 2 + 24;
     // 绘制关卡背景
+    this.context.save();
     this.context.fillStyle = '#f5d659';
     this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24);
     this.context.strokeStyle = 'black';
@@ -137,9 +144,9 @@ export default class Choose {
       this.context.fillStyle = '#00000099';
       this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24);
     }
+    this.context.restore();
   }
   draw() {
-    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -150,7 +157,6 @@ export default class Choose {
     this.drawGameOne();
     // 绘制第二关
     this.drawGameTwo();
-    this.context.restore();
   }
   touchHandler(e) {
     const touch = e.touches[0];
@@ -189,5 +195,7 @@ export default class Choose {
   destroy() {
     // 清理资源，如图片
     this.backButton.image.src = '';
+    this.rectImage.src = '';
+    this.rectImageTwo.src = '';
   }
 }

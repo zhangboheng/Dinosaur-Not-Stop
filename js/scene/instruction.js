@@ -1,19 +1,17 @@
 import {
   createBackButton
 } from '../../utils/button';
-let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+import {
+  menuButtonInfo,
+  scaleX,
+  scaleY
+} from '../../utils/global';
 export default class Instruction {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    // 初始化触摸位置和滚动偏移量
-    this.touchStartY = 0;
-    this.scrollOffsetY = 0;
-    // 添加触摸事件监听器
-    wx.onTouchStart(this.handleTouchStart.bind(this));
-    wx.onTouchMove(this.handleTouchMove.bind(this));
-    wx.onTouchEnd(this.handleTouchEnd.bind(this));
+    /* 图片加载区域开始 */
     // 绘制背景
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
@@ -21,15 +19,12 @@ export default class Instruction {
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
       this.game.switchScene(new this.game.startup(this.game));
     });
-    // 加载角色图片
     this.characterImage = new Image();
     this.characterImage.src = 'image/dino_0.png';
-    // 加载道具图片
     this.improveBubble = new Image();
     this.improveBubble.src = 'image/improve-bubble.png'
     this.mushroom = new Image();
-    this.mushroom.src = 'image/mushroom.png'
-    // 加载障碍图片
+    this.mushroom.src = 'image/mushroom.png';
     this.packageBox = new Image();
     this.packageBox.src = 'image/woodenbox.png';
     this.packageStackBox = new Image();
@@ -44,9 +39,14 @@ export default class Instruction {
     this.cobblestoneImage.src = 'image/cobblestone.png';
     this.doublestoneImage = new Image();
     this.doublestoneImage.src = 'image/doublestone.png';
-    // 加载操作图片
     this.clickImage = new Image();
-    this.clickImage.src = 'image/click.png'
+    this.clickImage.src = 'image/click.png';
+    /* 图片加载区域结束 */
+    /* 事件监听区域开始 */
+    wx.onTouchStart(this.handleTouchStart.bind(this));
+    wx.onTouchMove(this.handleTouchMove.bind(this));
+    wx.onTouchEnd(this.handleTouchEnd.bind(this));
+    /* 事件监听区域结束 */
     // 定义标签和对应的内容
     this.tabs = [{
         title: "背景",
@@ -61,16 +61,14 @@ export default class Instruction {
         content: "名称：三级跳\n功效：可以连跳三次\n触发条件：随机\n\n\n名称：毒蘑菇\n功效：让小棘龙嗨起来\n副作用：跳老高了\n触发条件：随机"
       },
       {
-        title: "陷阱",
-        content: "木箱\n\n\n双层木箱\n\n\n拦路虎\n\n\n捕龙夹\n\n\n三角锥\n\n\n拦路石\n\n\n大型拦路石"
-      },
-      {
         title: "操作",
         content: "点击即可让小棘龙跳跃\n连点可使出独家秘技\n在陷阱间不落地时\n二级跳效果更好哦"
       }
     ];
     // 当前选中的标签索引
     this.selectedTabIndex = 0;
+    this.touchStartY = 0;
+    this.scrollOffsetY = 0;
   }
   // 绘制背景
   drawBackground() {
@@ -78,7 +76,6 @@ export default class Instruction {
     if (this.backgroundImage.complete) {
       this.context.drawImage(this.backgroundImage, 0, 0, this.canvas.width, this.canvas.height);
     }
-    // 带有透明度的白色背景
     this.context.fillStyle = '#00000099';
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
@@ -90,14 +87,15 @@ export default class Instruction {
   }
   // 绘制标签按钮
   drawTabs() {
-    const fontSize = 16;
-    this.context.font = `bold ${fontSize}px Arial`; // 设置字体
+    const fontSize = 16 * scaleX;
+    this.context.save();
+    this.context.font = `bold ${fontSize}px Arial`;
     this.tabs.forEach((tab, index) => {
       // 标签的尺寸和位置
       const tabX = 10;
-      const tabY = menuButtonInfo.top + 50 * index + 50;
+      const tabY = menuButtonInfo.top + 50 * index * scaleY + 50;
       const tabWidth = this.canvas.width / 4;
-      const tabHeight = 40;
+      const tabHeight = 40 * scaleY;
       // 绘制标签背景
       this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d659';
       this.context.fillRect(tabX, tabY, tabWidth, tabHeight);
@@ -108,25 +106,34 @@ export default class Instruction {
       // 计算文本宽度并水平居中
       const textWidth = this.context.measureText(tab.title).width;
       const textX = tabX + (tabWidth - textWidth) / 2; // 水平居中
+      // 使用 TextMetrics 获取文字高度
+      const textMetrics = this.context.measureText(tab.title);
+      const textHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
       // 文本垂直居中
-      const textY = tabY + tabHeight / 2 + fontSize / 2; // 调整以实现垂直居中
+      const textY = tabY + (tabHeight - textHeight) / 2 + textMetrics.actualBoundingBoxAscent; // 精确垂直居中
       // 绘制文本
       this.context.fillStyle = 'black';
       this.context.fillText(tab.title, textX, textY);
     });
+    this.context.restore();
   }
-  // 绘制选中的标签
+  // 绘制选中的内容
   drawTabsContent() {
-    const fontSize = 16; // 字体大小
-    const padding = 10; // 文本周围的内边距
+    const fontSize = 16 * scaleX; // 字体大小
+    const padding = 10 * scaleY; // 文本周围的内边距
+    this.context.save();
     this.context.font = `${fontSize}px Arial`; // 设置字体
     // 获取选中标签的内容并分割为行
     const lines = this.tabs[this.selectedTabIndex].content.split('\n');
     // 内容的位置和尺寸
-    let contentX = this.canvas.width / 4 + 20;
+    let contentX = this.canvas.width / 4 + 20 * scaleX;
     let contentY = menuButtonInfo.top + 50;
-    const contentWidth = this.canvas.width - contentX - 10;
-    const contentHeight = this.canvas.height - (menuButtonInfo.top + 50) * 2;
+    const contentWidth = this.canvas.width - contentX - 10 * scaleX;
+    const contentHeight = this.canvas.height - (menuButtonInfo.top + 50 * scaleY) * 2;
+    const imageWidth = 32 * scaleY; // 设置图片宽度
+    const imageHeight = 32 * scaleY; // 设置图片高度
+    const imageX = contentX + (contentWidth - imageWidth) / 2;
+    const imageY = contentY + 10 * scaleY;
     // 绘制内容背景
     this.context.fillStyle = '#f5d659';
     this.context.fillRect(contentX, contentY, contentWidth, contentHeight);
@@ -138,10 +145,6 @@ export default class Instruction {
     this.context.beginPath();
     this.context.rect(contentX, contentY, contentWidth, contentHeight);
     this.context.clip();
-    const imageWidth = 32; // 设置图片宽度
-    const imageHeight = 32; // 设置图片高度
-    const imageX = contentX + (contentWidth - imageWidth) / 2;
-    const imageY = contentY + 10;
     // 根据选中的标签决定是否绘制图片
     if (this.selectedTabIndex === 1) {
       if (this.characterImage.complete) {
@@ -153,33 +156,10 @@ export default class Instruction {
         this.context.drawImage(this.improveBubble, imageX, imageY + this.scrollOffsetY, imageWidth, imageHeight);
       }
       if (this.mushroom.complete) {
-        this.context.drawImage(this.mushroom, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 3 + 42 + this.scrollOffsetY, imageWidth, imageHeight);
+        this.context.drawImage(this.mushroom, imageX, contentY + padding * 2 + (fontSize + padding) * 4 + 10 * scaleY + this.scrollOffsetY, imageWidth, imageHeight);
       }
       contentY += imageHeight
     } else if (this.selectedTabIndex === 3) {
-      if (this.packageBox.complete) {
-        this.context.drawImage(this.packageBox, imageX, imageY + this.scrollOffsetY, imageWidth, imageHeight);
-      }
-      if (this.packageStackBox.complete) {
-        this.context.drawImage(this.packageStackBox, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 3 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
-      }
-      if (this.barrierCustom.complete) {
-        this.context.drawImage(this.barrierCustom, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 6 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
-      }
-      if (this.dinosaurBarrier.complete) {
-        this.context.drawImage(this.dinosaurBarrier, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 9 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
-      }
-      if (this.roadSpike.complete) {
-        this.context.drawImage(this.roadSpike, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 12 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
-      }
-      if (this.cobblestoneImage.complete) {
-        this.context.drawImage(this.cobblestoneImage, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 15 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
-      }
-      if (this.doublestoneImage.complete) {
-        this.context.drawImage(this.doublestoneImage, imageX, contentY + padding + fontSize / 2 + (fontSize + 10) * 18 - 10 + this.scrollOffsetY, imageWidth, imageHeight);
-      }
-      contentY += imageHeight
-    } else if (this.selectedTabIndex === 4) {
       if (this.clickImage.complete) {
         this.context.drawImage(this.clickImage, imageX, imageY + this.scrollOffsetY, imageWidth, imageHeight);
       }
@@ -190,12 +170,12 @@ export default class Instruction {
     lines.forEach((line, index) => {
       const textWidth = this.context.measureText(line).width;
       const textX = contentX + (contentWidth - textWidth) / 2; // 左右居中
-      const textY = contentY + padding + fontSize / 2 + (fontSize + 10) * index + 12;
+      const textY = contentY + padding * 2 + (fontSize + padding) * index + padding;
       this.context.fillText(line, textX, textY + this.scrollOffsetY);
     });
+    this.context.restore();
   }
   draw() {
-    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -204,7 +184,6 @@ export default class Instruction {
     this.drawTabs();
     // 绘制选中标签的内容
     this.drawTabsContent();
-    this.context.restore();
   }
   touchHandler(e) {
     const touch = e.touches[0];
@@ -221,9 +200,9 @@ export default class Instruction {
     // 检查是否触摸了标签
     this.tabs.forEach((tab, index) => {
       const tabX = 10;
-      const tabY = menuButtonInfo.top + 50 * index + 50;
+      const tabY = menuButtonInfo.top + 50 * index * scaleY + 50;
       const tabWidth = this.canvas.width / 4;
-      const tabHeight = 40;
+      const tabHeight = 40 * scaleY;
       if (touchX >= tabX && touchX <= tabX + tabWidth &&
         touchY >= tabY && touchY <= tabY + tabHeight) {
         // 更新选中的标签索引
@@ -250,10 +229,6 @@ export default class Instruction {
   }
   // 页面销毁机制
   destroy() {
-    // 移除触摸事件监听器
-    wx.offTouchStart(this.handleTouchStart.bind(this));
-    wx.offTouchMove(this.handleTouchMove.bind(this));
-    wx.offTouchEnd(this.handleTouchEnd.bind(this));
     // 清理图像资源
     this.backButton.image.src = '';
     this.backgroundImage.src = '';
@@ -268,7 +243,12 @@ export default class Instruction {
     this.cobblestoneImage.src = '';
     this.doublestoneImage.src = '';
     this.clickImage.src = '';
+    // 移除触摸事件监听器
+    wx.offTouchStart(this.handleTouchStart.bind(this));
+    wx.offTouchMove(this.handleTouchMove.bind(this));
+    wx.offTouchEnd(this.handleTouchEnd.bind(this));
     // 重置状态
+    this.touchStartY = 0;
     this.scrollOffsetY = 0;
     this.selectedTabIndex = 0;
   }

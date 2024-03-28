@@ -2,34 +2,20 @@ import {
   createBackButton,
   drawRoundedRectNoStrike
 } from '../../utils/button';
-import SoundManager from '../../utils/soundManager';
-import BackgroundMusic from '../../utils/backgroundMusic';
-let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+import { soundManager, backgroundMusic, menuButtonInfo, scaleX, scaleY } from '../../utils/global';
 export default class Settings {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
-    // 创建BackgroundMusic实例
-    this.backgroundMusic = new BackgroundMusic();
-    // 创建SoundManager实例
-    this.soundManager = new SoundManager();
+    /* 图片加载区域开始 */
     // 绘制背景
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
-    // 初始化触摸位置和滚动偏移量
-    this.touchStartY = 0;
-    this.scrollOffsetY = 0;
-    // 添加触摸事件监听器
-    wx.onTouchStart(this.handleTouchStart.bind(this));
-    wx.onTouchMove(this.handleTouchMove.bind(this));
-    wx.onTouchEnd(this.handleTouchEnd.bind(this));
     // 创建返回按钮
     this.backButton = createBackButton(this.context, 10, menuButtonInfo.top, 'image/reply.png', () => {
       this.game.switchScene(new this.game.startup(this.game));
     });
-    // 定义标签和对应的内容
-    this.tabs = ['设置', '历史', '团队', '关于', '产品'];
     // 加载左侧版本图标
     this.iconVersion = new Image();
     this.iconVersion.src = 'image/version.png'
@@ -39,8 +25,20 @@ export default class Settings {
     // 绘制左侧音乐图标
     this.iconBack = new Image();
     this.iconBack.src = 'image/bgm.png';
-    // 当前选中的标签索引
+    /* 图片加载区域结束 */
+    /* 事件监听区域开始 */
+    wx.onTouchStart(this.handleTouchStart.bind(this));
+    wx.onTouchMove(this.handleTouchMove.bind(this));
+    wx.onTouchEnd(this.handleTouchEnd.bind(this));
+    /* 事件监听区域结束 */
+    /* 变量区域开始 */
+    // 定义标签和对应的内容
+    this.tabs = ['设置', '历史', '团队', '关于', '产品'];
+    // 初始化触摸位置和滚动偏移量
+    this.touchStartY = 0;
+    this.scrollOffsetY = 0;
     this.selectedIndex = 0;
+    /* 变量区域结束 */
   }
   // 绘制背景
   drawBackground() {
@@ -48,7 +46,7 @@ export default class Settings {
     if (this.backgroundImage.complete) {
       this.context.drawImage(this.backgroundImage, 0, 0, this.canvas.width, this.canvas.height);
     }
-    // 带有透明度的白色背景
+    // 带有透明度的黑色背景
     this.context.fillStyle = '#00000099';
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
@@ -60,7 +58,7 @@ export default class Settings {
   }
   // 绘制标签按钮
   drawTabs() {
-    // 计算每个标签的宽度，考虑间距
+    this.context.save();
     const totalSpacing = (this.tabs.length + 1) * 10; // 所有间距的总和
     const tabWidth = (this.canvas.width - totalSpacing) / this.tabs.length;
     for (let i = 0; i < this.tabs.length; i++) {
@@ -77,14 +75,16 @@ export default class Settings {
       this.context.strokeRect(tabX, tabY, tabWidth, tabHeight);
       // 绘制标签文本
       this.context.fillStyle = '#000000';
-      this.context.font = '16px Arial';
+      this.context.font = `16px Arial`;
       this.context.textAlign = 'center';
       this.context.textBaseline = 'middle';
       this.context.fillText(this.tabs[i], tabX + tabWidth / 2, tabY + tabHeight / 2 + 2);
     }
+    this.context.restore();
   }
   // 绘制选中的标签
   drawTabsContent() {
+    this.context.save();
     const tabContentY = menuButtonInfo.top + 90; // 设置内容区域的Y坐标
     // 计算当前选中标签的位置和宽度
     const tabWidth = this.canvas.width - 20;
@@ -117,6 +117,8 @@ export default class Settings {
       const textY = iconY + iconSize / 2;
       this.context.fillStyle = '#000000';
       this.context.font = '16px Arial';
+      this.context.textAlign = 'center';
+      this.context.textBaseline = 'middle';
       this.context.fillText('版本', textX, textY);
       this.context.fillText('音效', textX, textY + 40);
       this.context.fillText('音乐', textX, textY + 80);
@@ -154,8 +156,8 @@ export default class Settings {
     } else if (this.selectedIndex === 1) {
       const fontSize = 16;
       this.context.font = `${fontSize}px Arial`;
-      const arr = ['版本 1.0.5', '优化精简程序运行', '逃出监牢增加明显终点标识', '','版本 1.0.5', '优化精简程序运行', '','版本 1.0.4', '修复PC端无法适配问题', '', '版本 1.0.3', '增加游戏开篇画面和音效', '增加小恐龙闯关失败后的失败状态', '', '版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
-      const list = ['2024-03-18', '', '', '', '2024-03-18', '', '', '2024-03-15', '', '', '2024-01-30', '', '', '','2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
+      const arr = ['版本 1.0.5', '优化程序稳定性', '逃出监牢增加明显终点标识', '优化精简程序运行', '','版本 1.0.4', '修复PC端无法适配问题', '', '版本 1.0.3', '增加游戏开篇画面和音效', '增加小恐龙闯关失败后的失败状态', '', '版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
+      const list = ['2024-03-18', '', '', '', '', '2024-03-15', '', '', '2024-01-30', '', '', '','2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
       // 计算文本高度和总内容高度
       const textHeight = fontSize * 1.2;
       const contentHeight = arr.length * textHeight + 20;
@@ -253,9 +255,9 @@ export default class Settings {
         this.context.fillText(list[i], tabX + tabWidth - 10, textY);
       }
     }
+    this.context.restore();
   }
   draw() {
-    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -264,7 +266,6 @@ export default class Settings {
     this.drawTabs();
     // 绘制选中标签的内容
     this.drawTabsContent();
-    this.context.restore();
   }
   // 记录触摸开始的位置
   handleTouchStart(e) {
@@ -337,28 +338,29 @@ export default class Settings {
   }
   // 页面销毁机制
   destroy() {
-    // 移除触摸事件监听器
-    wx.offTouchStart(this.handleTouchStart.bind(this));
-    wx.offTouchMove(this.handleTouchMove.bind(this));
-    wx.offTouchEnd(this.handleTouchEnd.bind(this));
     // 清理图像资源
     this.backButton.image.src = '';
     this.backgroundImage.src = '';
     this.iconVersion.src = '';
     this.iconImage.src = '';
     this.iconBack.src = '';
+    // 移除触摸事件监听器
+    wx.offTouchStart(this.handleTouchStart.bind(this));
+    wx.offTouchMove(this.handleTouchMove.bind(this));
+    wx.offTouchEnd(this.handleTouchEnd.bind(this));
     // 重置状态
+    this.touchStartY = 0;
     this.scrollOffsetY = 0;
     this.selectedTabIndex = 0;
   }
   // 管理音效状态
   toggleMusic() {
-    const currentMusicState = this.soundManager.getMusicState();
-    this.soundManager.setMusicState(!currentMusicState);
+    const currentMusicState = soundManager.getMusicState();
+    soundManager.setMusicState(!currentMusicState);
   }
   // 管理背景音乐状态
   toggleBackgroundMusic() {
-    const currentMusicState = this.backgroundMusic.getBackgroundMusicState();
-    this.backgroundMusic.setBackgroundMusicState(!currentMusicState);
+    const currentMusicState = backgroundMusic.getBackgroundMusicState();
+    backgroundMusic.setBackgroundMusicState(!currentMusicState);
   }
 }

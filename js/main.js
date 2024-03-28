@@ -6,7 +6,7 @@ import Infinite from './scene/infinite.js';
 import Instruction from './scene/instruction.js';
 import Settings from './scene/settings.js';
 import Tools from './scene/tools.js';
-let systemInfo = wx.getSystemInfoSync();
+import { systemInfo } from '../utils/global';
 export default class Game {
   constructor() {
     this.initSettings();
@@ -14,6 +14,9 @@ export default class Game {
     this.context = canvas.getContext('2d');
     this.canvas.width = systemInfo.screenWidth;
     this.canvas.height = systemInfo.screenHeight;
+    canvas.width = systemInfo.screenWidth * systemInfo.devicePixelRatio;
+    canvas.height = systemInfo.screenHeight * systemInfo.devicePixelRatio;
+    this.context.scale(systemInfo.devicePixelRatio, systemInfo.devicePixelRatio);
     this.episode = Episode;
     this.startup = StartUp;
     this.choose = Choose;
@@ -22,7 +25,7 @@ export default class Game {
     this.instruction = Instruction;
     this.settings = Settings;
     this.tools = Tools;
-    this.currentScene = new this.episode(this);
+    this.currentScene = new this.choose(this);
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
     });

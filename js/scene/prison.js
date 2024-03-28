@@ -10,11 +10,7 @@ import {
 import {
   showBoxMessage
 } from '../../utils/dialog';
-import SoundManager from '../../utils/soundManager';
-import BackgroundMusic from '../../utils/backgroundMusic';
-const soundManager = new SoundManager();
-const backgroundMusic = new BackgroundMusic();
-let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+import { soundManager, backgroundMusic, menuButtonInfo, scaleX, scaleY } from '../../utils/global';
 export default class Prison {
   constructor(game) {
     this.game = game;
@@ -23,13 +19,13 @@ export default class Prison {
     // 加载背景音乐
     backgroundMusic.setBackgroundMusicState(wx.getStorageSync('backgroundMusicEnabled'));
     backgroundMusic.playBackgroundMusic();
+    // 获取音效初始状态
+    soundManager.setMusicState(wx.getStorageSync('musicEnabled'));
     this.groundHeight = menuButtonInfo.bottom + this.canvas.height * 0.3 - 29;
     // 道路属性
     this.roadX = 0;
     this.roadWidth = this.canvas.width;
     this.roadSpeed = 2; // 道路每帧移动的像素数
-    // 获取音效初始状态
-    soundManager.setMusicState(wx.getStorageSync('musicEnabled'));
     // 加载背景图片
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/prisonback.jpg'; // 替换为你的背景图片路径

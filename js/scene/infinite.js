@@ -10,12 +10,8 @@ import {
 } from '../../utils/algorithm';
 import {
   showBoxMessage
-} from '../../utils/dialog'
-import SoundManager from '../../utils/soundManager';
-import BackgroundMusic from '../../utils/backgroundMusic';
-const soundManager = new SoundManager();
-const backgroundMusic = new BackgroundMusic();
-let menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+} from '../../utils/dialog';
+import { soundManager, backgroundMusic, systemInfo, menuButtonInfo } from '../../utils/global';
 export default class Infinite {
   constructor(game) {
     this.game = game;
