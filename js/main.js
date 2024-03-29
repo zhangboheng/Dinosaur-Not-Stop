@@ -25,7 +25,7 @@ export default class Game {
     this.instruction = Instruction;
     this.settings = Settings;
     this.tools = Tools;
-    this.currentScene = new this.choose(this);
+    this.currentScene = new this.startup(this);
     canvas.addEventListener('touchstart', (e) => {
       this.currentScene.touchHandler(e);
     });

@@ -97,7 +97,7 @@ export default class Instruction {
       const tabWidth = this.canvas.width / 4;
       const tabHeight = 40 * scaleY;
       // 绘制标签背景
-      this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d659';
+      this.context.fillStyle = this.selectedTabIndex === index ? '#f5ac11' : '#f5d65999';
       this.context.fillRect(tabX, tabY, tabWidth, tabHeight);
       // 绘制标签边框
       this.context.strokeStyle = 'black';
@@ -106,11 +106,7 @@ export default class Instruction {
       // 计算文本宽度并水平居中
       const textWidth = this.context.measureText(tab.title).width;
       const textX = tabX + (tabWidth - textWidth) / 2; // 水平居中
-      // 使用 TextMetrics 获取文字高度
-      const textMetrics = this.context.measureText(tab.title);
-      const textHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
-      // 文本垂直居中
-      const textY = tabY + (tabHeight - textHeight) / 2 + textMetrics.actualBoundingBoxAscent; // 精确垂直居中
+      const textY = tabY + tabHeight / 2 + 6 * scaleX; // 精确垂直居中
       // 绘制文本
       this.context.fillStyle = 'black';
       this.context.fillText(tab.title, textX, textY);

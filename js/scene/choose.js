@@ -2,15 +2,13 @@ import {
   createBackButton,
   drawRoundedRectWithTail
 } from '../../utils/button';
-import { menuButtonInfo } from '../../utils/global';
+import { menuButtonInfo, scaleX, scaleY } from '../../utils/global';
 export default class Choose {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
     this.getGameTwoAccess = wx.getStorageSync('infiniteEnabled');
-    // 设置提示关注
-    this.showTips = wx.getStorageSync('showTips') !== false; // 如果没有设置，默认显示提示
     /* 图片加载区域开始 */
     // 绘制背景
     this.backgroundImage = new Image();
@@ -43,34 +41,6 @@ export default class Choose {
       this.context.drawImage(this.backButton.image, this.backButton.x, this.backButton.y);
     }
   }
-  // 绘制加入我的小程序提示
-  drawTips() {
-    if (!this.showTips) return; // 如果用户选择不显示提示，则跳过
-    // 提示框属性
-    const rectWidth = 140;
-    const rectHeight = 30;
-    const borderRadius = 10;
-    const tailWidth = 20; // 尾巴的宽度
-    const tailHeight = 28; // 尾巴的高度
-    const rectX = menuButtonInfo.right - menuButtonInfo.width - rectWidth - tailWidth;
-    const rectY = menuButtonInfo.top; // 可以根据需要调整
-    this.context.save();
-    // 绘制半透明矩形
-    this.context.fillStyle = '#f5d659'; // 增加透明度
-    drawRoundedRectWithTail(this.context, rectX, rectY, rectWidth, rectHeight, borderRadius, tailWidth, tailHeight, 'right');
-    this.context.fill();
-    this.context.strokeStyle = 'black';
-    this.context.lineWidth = 3;
-    drawRoundedRectWithTail(this.context, rectX, rectY, rectWidth, rectHeight, borderRadius, tailWidth, tailHeight);
-    this.context.stroke();
-    // 绘制提示文本
-    this.context.fillStyle = 'black';
-    this.context.font = '14px Arial';
-    this.context.textAlign = 'center';
-    this.context.textBaseline = 'middle';
-    this.context.fillText('点击加入我的小程序', rectX + rectWidth / 2, rectY + rectHeight / 2 + 2);
-    this.context.restore();
-  }
   drawGameOne() {
     // 定义关卡布局参数
     const rectMargin = 10;
@@ -86,25 +56,25 @@ export default class Choose {
     // 绘制关卡背景
     this.context.save();
     this.context.fillStyle = '#f5d659';
-    this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24);
+    this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24 * scaleY);
     this.context.strokeStyle = 'black';
     this.context.lineWidth = 3;
-    this.context.strokeRect(rectX, rectY, rectWidth, rectHeight + 24);
+    this.context.strokeRect(rectX, rectY, rectWidth, rectHeight + 24 * scaleY);
     // 绘制关卡图像
-    const imageX = rectX + rectMargin;
-    const imageY = rectY + rectMargin;
-    const imageWidth = rectWidth - 2 * rectMargin;
-    const imageHeight = rectHeight - 2 * rectMargin;
+    const imageX = rectX + rectMargin * scaleX;
+    const imageY = rectY + rectMargin * scaleY;
+    const imageWidth = rectWidth - 2 * rectMargin * scaleX;
+    const imageHeight = rectHeight - 2 * rectMargin * scaleY;
     if (this.rectImage.complete) {
       this.context.drawImage(this.rectImage, imageX, imageY, imageWidth, imageHeight);
     }
     // 绘制关卡标题
     const text = '逃出监牢';
     this.context.fillStyle = 'black';
-    this.context.font = 'bold 16px Arial';
+    this.context.font = `bold ${16 * scaleX}px Arial`;
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
-    this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight + rectMargin);
+    this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight + rectMargin * scaleY);
     this.context.restore();
   }
   drawGameTwo() {
@@ -117,32 +87,32 @@ export default class Choose {
     const rectHeight = this.canvas.height * rectHeightPercentage - 2 * rectMargin;
     // 计算关卡在屏幕中的位置
     const rectX = (this.canvas.width - rectWidth) / 2;
-    const rectY = rectHeight + menuButtonInfo.bottom + rectMargin * 2 + 24;
+    const rectY = rectHeight + menuButtonInfo.bottom + rectMargin * 2 * scaleY + 24 * scaleY;
     // 绘制关卡背景
     this.context.save();
     this.context.fillStyle = '#f5d659';
-    this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24);
+    this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24 * scaleY);
     this.context.strokeStyle = 'black';
     this.context.lineWidth = 3;
-    this.context.strokeRect(rectX, rectY, rectWidth, rectHeight + 24);
+    this.context.strokeRect(rectX, rectY, rectWidth, rectHeight + 24 * scaleY);
     // 绘制关卡图像
-    const imageX = rectX + rectMargin;
-    const imageY = rectY + rectMargin;
-    const imageWidth = rectWidth - 2 * rectMargin;
-    const imageHeight = rectHeight - 2 * rectMargin;
+    const imageX = rectX + rectMargin * scaleX;
+    const imageY = rectY + rectMargin * scaleY;
+    const imageWidth = rectWidth - 2 * rectMargin * scaleX;
+    const imageHeight = rectHeight - 2 * rectMargin * scaleY;
     if (this.rectImageTwo.complete) {
       this.context.drawImage(this.rectImageTwo, imageX, imageY, imageWidth, imageHeight);
     }
     // 绘制关卡标题
     const text = '逃出乐园';
     this.context.fillStyle = 'black';
-    this.context.font = 'bold 16px Arial';
+    this.context.font = `bold ${16 * scaleX}px Arial`;
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
-    this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight + rectMargin);
+    this.context.fillText(text, this.canvas.width / 2, rectY + rectHeight + rectMargin * scaleY);
     if (this.getGameTwoAccess != 'access') {
       this.context.fillStyle = '#00000099';
-      this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24);
+      this.context.fillRect(rectX, rectY, rectWidth, rectHeight + 24 * scaleY);
     }
     this.context.restore();
   }
@@ -151,8 +121,6 @@ export default class Choose {
     this.drawBackground();
     // 绘制返回按钮
     this.drawBack();
-    // 绘制加入我的小程序提示
-    this.drawTips();
     // 绘制第一关
     this.drawGameOne();
     // 绘制第二关
@@ -179,14 +147,14 @@ export default class Choose {
     const rectY = menuButtonInfo.bottom + rectMargin;
     // 点击第二关卡
     if (touchX >= rectX && touchX <= rectX + rectWidth &&
-      touchY >= rectY && touchY <= rectY + rectHeight) {
+      touchY >= rectY && touchY <= rectY + rectHeight + 24 * scaleY) {
       this.game.switchScene(new this.game.prison(this.game));
       return;
     }
     // 点击第二关卡
-    const rectY2 = rectY + rectHeight + 2 * rectMargin + 24; // 第二关卡的Y坐标
+    const rectY2 = rectY + rectHeight + 2 * rectMargin + 24 * scaleY; // 第二关卡的Y坐标
     if (touchX >= rectX && touchX <= rectX + rectWidth &&
-      touchY >= rectY2 && touchY <= rectY2 + rectHeight && this.getGameTwoAccess == 'access') {
+      touchY >= rectY2 && touchY <= rectY2 + rectHeight + 24 * scaleY && this.getGameTwoAccess == 'access') {
       this.game.switchScene(new this.game.infinite(this.game));
       return;
     }

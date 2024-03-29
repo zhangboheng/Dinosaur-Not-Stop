@@ -97,14 +97,15 @@ export default class Startup {
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
     // 将文本的y坐标设置为按钮的垂直中心
-    this.context.fillText('开始游戏', this.buttonX + this.buttonWidth / 2, this.buttonY + this.buttonHeight / 2 + 2);
-    this.context.fillText('玩法说明', this.secondButtonX + this.secondButtonWidth / 2, this.secondButtonY + this.secondButtonHeight / 2 + 2);
-    this.context.fillText('游戏设置', this.thirdButtonX + this.thirdButtonWidth / 2, this.thirdButtonY + this.thirdButtonHeight / 2 + 2);
+    this.context.fillText('开始游戏', this.buttonX + this.buttonWidth / 2, this.buttonY + this.buttonHeight / 2 + 2 * scaleY);
+    this.context.fillText('玩法说明', this.secondButtonX + this.secondButtonWidth / 2, this.secondButtonY + this.secondButtonHeight / 2 + 2 * scaleY);
+    this.context.fillText('游戏设置', this.thirdButtonX + this.thirdButtonWidth / 2, this.thirdButtonY + this.thirdButtonHeight / 2 + 2 * scaleY);
     this.context.restore();
   }
   // 绘制健康游戏公告
   drawPublish() {
     this.context.save();
+    this.context.fillStyle = 'black';
     this.context.font = `${10 * scaleX}px Arial`;
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';

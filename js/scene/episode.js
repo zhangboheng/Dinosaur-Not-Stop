@@ -1,4 +1,4 @@
-import { soundManager } from '../../utils/global';
+import { soundManager, scaleX, scaleY } from '../../utils/global';
 export default class Episode {
   constructor(game) {
     this.game = game;
@@ -48,7 +48,7 @@ export default class Episode {
   // 绘制跳过文字，点击可跳过场动画
   drawSkipStage() {
     this.context.save();
-    this.context.font = '20px Arial';
+    this.context.font = `${20 * scaleX}px Arial`;
     this.context.fillStyle = '#ffffff99';
     this.context.textAlign = 'center';
     this.context.textAlign = 'center';
@@ -56,12 +56,10 @@ export default class Episode {
     this.context.restore();
   }
   draw() {
-    this.context.save();
     // 绘制背景
     this.drawBackground();
     // 绘制跳过文字，点击可跳过场动画
     this.drawSkipStage();
-    this.context.restore();
   }
   touchHandler(e) {
     const touch = e.touches[0];
@@ -70,8 +68,8 @@ export default class Episode {
     const touchY = touch.clientY - canvasRect.top;
     // 是否跳过
     if (
-      touchX >= this.canvas.width / 2 - 50 && touchX <= this.canvas.width / 2 + 50 &&
-      touchY >= this.canvas.height * 0.9 - 20 && touchY <= this.canvas.height * 0.9 + 20
+      touchX >= this.canvas.width / 2 - 40 * scaleX && touchX <= this.canvas.width / 2 + 40 * scaleX &&
+      touchY >= this.canvas.height * 0.9 - 20 * scaleY && touchY <= this.canvas.height * 0.9 + 20 * scaleY
     ) {
       clearInterval(this.timerId);
       this.game.switchScene(new this.game.startup(this.game));
