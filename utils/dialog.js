@@ -21,7 +21,7 @@ export function drawDialog(context, text, options = {}) {
   context.textAlign = 'center';
   context.textBaseline = 'middle';
   context.fillText(text, canvasWidth / 2, dialogY + 20 * scaleY);
-  let textY = dialogY + 60 * scaleY;
+  let textY = dialogY + 50 * scaleY;
   context.font = `bold ${16 * scaleX}px ${fontFamily}`;
   try {
     for (let i = 0; i < JSON.parse(scores).length; i++) {
@@ -73,7 +73,7 @@ export function showBoxMessage(context, message, x, y, backgroundColor = '#f5d65
   context.strokeRect(x - textWidth / 2, y - textHeight / 2, textWidth, textHeight);
   // 绘制文本
   context.fillStyle = 'black';
-  context.font = `${fontSize * scaleX}px Arial`;
+  context.font = `bold ${fontSize}px Arial`;
   context.textAlign = 'center';
   context.textBaseline = 'middle';
   context.fillText(message, x, y + 2);

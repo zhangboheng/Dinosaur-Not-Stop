@@ -133,8 +133,8 @@ export default class Settings {
       // 开关状态
       const isSwitchOn = wx.getStorageSync('musicEnabled') ? true : wx.getStorageSync('musicEnabled');
       const isBackMusicOn = wx.getStorageSync('backgroundMusicEnabled') ? true : wx.getStorageSync('backgroundMusicEnabled');
-      const textWidth = this.context.measureText('V 1.0.5').width;
-      this.context.fillText('V 1.0.5', switchX + switchWidth - textWidth / 2, iconY + iconSize / 2);
+      const textWidth = this.context.measureText('V 1.0.6').width;
+      this.context.fillText('V 1.0.6', switchX + switchWidth - textWidth / 2, iconY + iconSize / 2);
       // 绘制圆角矩形背景
       this.context.fillStyle = isSwitchOn ? '#4CAF50' : '#cccccc';
       drawRoundedRectNoStrike(this.context, switchX, switchY, switchWidth, switchHeight, borderRadius, '#000000', 3);

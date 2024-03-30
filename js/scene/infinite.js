@@ -125,8 +125,8 @@ export default class Infinite {
     this.powerUp = {
       x: this.canvas.width,
       y: this.canvas.height - this.road.height - 150 * scaleY,
-      width: 48 * scaleY,
-      height: 48 * scaleY,
+      width: 40 * scaleY,
+      height: 40 * scaleY,
       visible: false,
       obtained: false,
       speed: this.road.speed,
@@ -224,10 +224,11 @@ export default class Infinite {
   }
   // 绘制分数
   drawScore() {
-    const iconSize = 24; // 图标大小
+    const iconSize = 24 * scaleY; // 图标大小
     const iconPadding = 10; // 图标与分数之间的间距
     // 计算分数文本的宽度
-    this.context.font = '20px Arial'; // 确保设置的字体与绘制时相同
+    this.context.save();
+    this.context.font = `${20 * scaleX}px Arial`; // 确保设置的字体与绘制时相同
     const textWidth = this.context.measureText(this.score).width;
     // 计算总宽度（图标宽度 + 间距 + 文本宽度）
     const totalWidth = iconSize + iconPadding + textWidth;
@@ -235,8 +236,8 @@ export default class Infinite {
     const startX = (this.canvas.width - totalWidth) / 2;
     const iconX = startX;
     const scoreX = iconX + iconSize + iconPadding;
-    const iconY = menuButtonInfo.top + 6; // 图标的y坐标
-    const scoreY = menuButtonInfo.top + 20; // 分数的y坐标
+    const iconY = menuButtonInfo.top + 6 * scaleY; // 图标的y坐标
+    const scoreY = menuButtonInfo.top + 20 * scaleY; // 分数的y坐标
     // 绘制图标
     if (this.dinoFootprintImage.complete) {
       this.context.drawImage(this.dinoFootprintImage, iconX, iconY, iconSize, iconSize);
@@ -246,6 +247,7 @@ export default class Infinite {
     this.context.textAlign = 'left'; // 文本左对齐
     this.context.textBaseline = 'middle';
     this.context.fillText(this.score + 6000, scoreX, scoreY);
+    this.context.restore();
   }
   // 绘制道路
   drawRoad() {
@@ -312,11 +314,11 @@ export default class Infinite {
     this.trapInfo.trapTimer++;
     // 当计时器达到间隔时，生成新的陷阱
     if (this.trapInfo.trapTimer >= this.trapInfo.trapInterval) {
-      const numberOfTraps = Math.floor(Math.random() * 6) + 1;
+      const numberOfTraps = Math.floor(Math.random() * 3) + 1;
       let lastTrapX = this.canvas.width;
       for (let i = 0; i < numberOfTraps; i++) {
         // 为每个陷阱计算随机间隔
-        const gap = Math.floor(Math.random() * 60 * scaleX) + 150; // 间隔（50到200像素之间）
+        const gap = Math.floor(Math.random() * 60 * scaleX) + 200; // 间隔（50到200像素之间）
         lastTrapX += gap;
         const imageIndex = Math.floor(Math.random() * this.trapImages.length);
         const trapImg = this.trapImages[imageIndex];
@@ -483,9 +485,9 @@ export default class Infinite {
     // 检查小恐龙是否与毒蘑菇碰撞
     if (this.poisonMushroom.visible && !this.poisonMushroom.obtained) {
       if (this.dinoInfo.x < this.poisonMushroom.x + this.poisonMushroom.width &&
-        this.dinoInfo.x + this.dinoInfo.width > this.poisonMushroom.x &&
+        this.dinoInfo.x + this.dinoInfo.width / 2 > this.poisonMushroom.x &&
         this.dinoInfo.y < this.poisonMushroom.y + this.poisonMushroom.height &&
-        this.dinoInfo.y + this.dinoInfo.height > this.poisonMushroom.y) {
+        this.dinoInfo.y + this.dinoInfo.height > this.poisonMushroom.y + 5 * scaleY) {
         // 碰撞发生
         this.poisonMushroom.obtained = true;
         this.originalGravity = this.dinoInfo.gravity;
@@ -506,7 +508,7 @@ export default class Infinite {
     if (this.powerUp.powerUpCount > 0) {
       // 绘制道具图片
       if (this.powerUpImage.complete) {
-        this.context.drawImage(this.getPowerUpImage, menuButtonInfo.right - (24 * scaleY + 40) * scaleX, menuButtonInfo.bottom + 10 * scaleY, 24 * scaleY, 24 * scaleY);
+        this.context.drawImage(this.getPowerUpImage, menuButtonInfo.right - 24 * scaleY - 40 * scaleX, menuButtonInfo.bottom + 10 * scaleY, 24 * scaleY, 24 * scaleY);
       }
       // 绘制道具数量
       this.context.save();
@@ -543,7 +545,7 @@ export default class Infinite {
     if (this.poisonMushroom.poisonMushroomEffectDuration > 0) {
       // 绘制蘑菇图片
       if (this.poisonMushroomImage.complete) {
-        this.context.drawImage(this.poisonMushroomImage, menuButtonInfo.right - (24 * scaleY + 40) * scaleX, menuButtonInfo.bottom + 44 * scaleY, 24 * scaleY, 24 * scaleY);
+        this.context.drawImage(this.poisonMushroomImage, menuButtonInfo.right - 24 * scaleY - 40 * scaleX, menuButtonInfo.bottom + 44 * scaleY, 24 * scaleY, 24 * scaleY);
       }
       // 绘制道具数量
       this.context.save();
@@ -603,7 +605,7 @@ export default class Infinite {
   // 绘制消息提示
   drawMessageBox() {
     if (this.messageDisplayTime > 0) {
-      showBoxMessage(this.context, this.speedIncreaseMessage, this.canvas.width / 2, this.canvas.height / 2, '#f5d659', 'black', 16);
+      showBoxMessage(this.context, this.speedIncreaseMessage, this.canvas.width / 2, this.canvas.height / 2, '#f5d659', 'black', 16 * scaleX);
     }
   }
 
@@ -842,8 +844,8 @@ export default class Infinite {
     this.powerUp = {
       x: this.canvas.width, // 道具的初始横坐标
       y: this.canvas.height - this.road.height - 150 * scaleY, // 道具的初始纵坐标
-      width: 48 * scaleY,
-      height: 48 * scaleY,
+      width: 40 * scaleY,
+      height: 40 * scaleY,
       visible: false, // 道具是否可见
       obtained: false, // 道具是否已被获取
       speed: this.road.speed,

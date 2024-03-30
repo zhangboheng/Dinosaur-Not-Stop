@@ -189,11 +189,11 @@ export default class Prison {
   }
   // 绘制分数
   drawScore() {
-    const iconSize = 24; // 图标大小
+    const iconSize = 24 * scaleY; // 图标大小
     const iconPadding = 10; // 图标与分数之间的间距
     // 计算分数文本的宽度
     this.context.save();
-    this.context.font = '20px Arial'; // 确保设置的字体与绘制时相同
+    this.context.font = `${20 * scaleX}px Arial`; // 确保设置的字体与绘制时相同
     const textWidth = this.context.measureText(this.score).width;
     // 计算总宽度（图标宽度 + 间距 + 文本宽度）
     const totalWidth = iconSize + iconPadding + textWidth;
@@ -201,8 +201,8 @@ export default class Prison {
     const startX = (this.canvas.width - totalWidth) / 2;
     const iconX = startX;
     const scoreX = iconX + iconSize + iconPadding;
-    const iconY = menuButtonInfo.top + 6; // 图标的y坐标
-    const scoreY = menuButtonInfo.top + 20; // 分数的y坐标
+    const iconY = menuButtonInfo.top + 6 * scaleY; // 图标的y坐标
+    const scoreY = menuButtonInfo.top + 20 * scaleY; // 分数的y坐标
     // 绘制图标
     if (this.dinoFootprintImage.complete) {
       this.context.drawImage(this.dinoFootprintImage, iconX, iconY, iconSize, iconSize);
@@ -365,7 +365,7 @@ export default class Prison {
       this.dinoInfo.dinoFrameTimer = 0;
     }
     if (this.isLevelCompleted) {
-      this.dinoInfo.x += 1;
+      this.dinoInfo.x += 1 * scaleX;
     } else {
       if (this.score - this.distanceMoon > 1000 && this.useMoon) {
         this.dinoInfo.gravity = 0.4;
@@ -512,7 +512,7 @@ export default class Prison {
   // 绘制消息提示
   drawMessageBox() {
     if (this.messageDisplayTime > 0) {
-      showBoxMessage(this.context, this.speedIncreaseMessage, this.canvas.width / 2, this.canvas.height / 2, '#f5d659', 'black', 16);
+      showBoxMessage(this.context, this.speedIncreaseMessage, this.canvas.width / 2, this.canvas.height / 2, '#f5d659', 'black', 16 * scaleX);
     }
   }
   // 画面全部绘制

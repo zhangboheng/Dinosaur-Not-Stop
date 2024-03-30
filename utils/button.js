@@ -61,7 +61,7 @@ export function drawIconButton(context, text, x, y, callback) {
   context.restore();
   // 绘制文本;
   context.save();
-  context.font = `${16 * scaleX}px Arial`;
+  context.font = `bold ${16 * scaleX}px Arial`;
   context.fillStyle = 'black';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
