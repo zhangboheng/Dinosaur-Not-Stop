@@ -152,7 +152,7 @@ export default class Infinite {
       height: 32 * scaleY,
       speed: this.road.speed,
       visible: false,
-      amplitude: 3,
+      amplitude: 3 * scaleY,
       frequency: 0.1
     };
     // 初始化分数
@@ -161,6 +161,7 @@ export default class Infinite {
     this.speedIncreasedStageFirst = false;
     this.speedIncreasedStageSecond = false;
     this.speedIncreasedStageThird = false;
+    this.speedIncreasedStageFourth = false;
     // 屏幕变黑遮照标志
     this.screenDarkness = 0;
     this.isScreenDark = false;
@@ -182,7 +183,7 @@ export default class Infinite {
       this.context.drawImage(this.backgroundImage, this.backgroundInfo.x, 0, this.backgroundImage.width * scaleX, this.canvas.height);
       // 绘制第二张图片以实现循环滚动效果
       if (this.backgroundInfo.x < 0) {
-        this.context.drawImage(this.backgroundImage, this.backgroundInfo.x + this.backgroundImage.width * scaleX, 0, this.backgroundImage.width * scaleX, this.canvas.height);
+        this.context.drawImage(this.backgroundImage, this.backgroundInfo.x + this.backgroundImage.width * scaleX,  0, this.backgroundImage.width * scaleX, this.canvas.height);
       }
     }
   }
@@ -200,6 +201,7 @@ export default class Infinite {
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
   }
+  // 更新黑色遮罩
   updateDrawBlackScreen() {
     if (this.score > 7000 && this.score <= 7003) {
       soundManager.play('lightning', 200);
@@ -210,6 +212,17 @@ export default class Infinite {
     } else if (this.score >= 7300 && this.score < 7600) {
       this.screenDarkness = Math.max(1 - (this.score - 7300) / (7600 - 7300), 0);
     } else if (this.score >= 7600) {
+      this.screenDarkness = 0;
+    }
+    if (this.score > 35000 && this.score <= 35009) {
+      soundManager.play('lightning', 200);
+    }
+    if (this.score >= 35000 && this.score < 35500) {
+      this.isScreenDark = true;
+      this.screenDarkness = Math.min((this.score - 35000) / (35500 - 35000), 1);
+    } else if (this.score >= 35500 && this.score < 36000) {
+      this.screenDarkness = Math.max(1 - (this.score - 35500) / (36000 - 35500), 0);
+    } else if (this.score >= 36000) {
       this.screenDarkness = 0;
     }
   }
@@ -252,9 +265,9 @@ export default class Infinite {
   // 绘制道路
   drawRoad() {
     if (this.roadImage.complete) {
-      this.context.drawImage(this.roadImage, this.road.x, this.road.y);
+      this.context.drawImage(this.roadImage, this.road.x, this.road.y, this.road.width, this.road.height);
       if (this.road.x < 0) {
-        this.context.drawImage(this.roadImage, this.road.x + this.road.width, this.road.y);
+        this.context.drawImage(this.roadImage, this.road.x + this.road.width, this.road.y, this.road.width, this.road.height);
       }
     }
   }
@@ -268,19 +281,33 @@ export default class Infinite {
     // 检查分数是否达到6000分，并且尚未加速
     if (this.score >= 6000 && !this.speedIncreasedStageFirst) {
       this.road.speed += 1 * scaleX;
+      this.poisonMushroom.speed += 1 * scaleX;
+      this.powerUp.speed += 1 * scaleX;
       this.speedIncreasedStageFirst = true;
       this.messageDisplayTime = this.messageDuration;
     }
     // 检查分数是否达到10000分，并且尚未加速
     if (this.score >= 10000 && !this.speedIncreasedStageSecond) {
       this.road.speed += 1 * scaleX;
+      this.poisonMushroom.speed += 1 * scaleX;
+      this.powerUp.speed += 1 * scaleX;
       this.speedIncreasedStageSecond = true;
       this.messageDisplayTime = this.messageDuration;
     }
     // 检查分数是否达到18000分，并且尚未加速
     if (this.score >= 18000 && !this.speedIncreasedStageThird) {
       this.road.speed += 1 * scaleX;
+      this.poisonMushroom.speed += 1 * scaleX;
+      this.powerUp.speed += 1 * scaleX;
       this.speedIncreasedStageThird = true;
+      this.messageDisplayTime = this.messageDuration;
+    }
+    // 检查分数是否达到30000分，并且尚未加速
+    if (this.score >= 30000 && !this.speedIncreasedStageFourth) {
+      this.road.speed += 1 * scaleX;
+      this.poisonMushroom.speed += 1 * scaleX;
+      this.powerUp.speed += 1 * scaleX;
+      this.speedIncreasedStageFourth = true;
       this.messageDisplayTime = this.messageDuration;
     }
     // 如果消息正在显示，减少显示时间
@@ -314,11 +341,11 @@ export default class Infinite {
     this.trapInfo.trapTimer++;
     // 当计时器达到间隔时，生成新的陷阱
     if (this.trapInfo.trapTimer >= this.trapInfo.trapInterval) {
-      const numberOfTraps = Math.floor(Math.random() * 3) + 1;
+      const numberOfTraps = Math.floor(Math.random() * 4) + 1;
       let lastTrapX = this.canvas.width;
       for (let i = 0; i < numberOfTraps; i++) {
         // 为每个陷阱计算随机间隔
-        const gap = Math.floor(Math.random() * 60 * scaleX) + 200; // 间隔（50到200像素之间）
+        const gap = Math.floor(Math.random() * 90 * scaleX) + 200; // 间隔（50到200像素之间）
         lastTrapX += gap;
         const imageIndex = Math.floor(Math.random() * this.trapImages.length);
         const trapImg = this.trapImages[imageIndex];
@@ -474,8 +501,8 @@ export default class Infinite {
     if (this.powerUp.visible && !this.powerUp.obtained) {
       if (this.dinoInfo.x < this.powerUp.x + this.powerUp.width &&
         this.dinoInfo.x + this.dinoInfo.width > this.powerUp.x &&
-        this.dinoInfo.y < this.powerUp.y + this.powerUp.height &&
-        this.dinoInfo.y + this.dinoInfo.height > this.powerUp.y) {
+        this.dinoInfo.y - 20 * scaleY < this.powerUp.y + this.powerUp.height &&
+        this.dinoInfo.y + this.dinoInfo.height - 20 * scaleY > this.powerUp.y) {
         this.powerUp.obtained = true;
         this.powerUp.powerUpCount = 1; // 设置道具数量为1
         this.dinoInfo.canTripleJump = true; // 允许三级跳
@@ -486,8 +513,8 @@ export default class Infinite {
     if (this.poisonMushroom.visible && !this.poisonMushroom.obtained) {
       if (this.dinoInfo.x < this.poisonMushroom.x + this.poisonMushroom.width &&
         this.dinoInfo.x + this.dinoInfo.width / 2 > this.poisonMushroom.x &&
-        this.dinoInfo.y < this.poisonMushroom.y + this.poisonMushroom.height &&
-        this.dinoInfo.y + this.dinoInfo.height > this.poisonMushroom.y + 5 * scaleY) {
+        this.dinoInfo.y - 20 * scaleY < this.poisonMushroom.y + this.poisonMushroom.height &&
+        this.dinoInfo.y + this.dinoInfo.height - 20 * scaleY > this.poisonMushroom.y) {
         // 碰撞发生
         this.poisonMushroom.obtained = true;
         this.originalGravity = this.dinoInfo.gravity;
@@ -871,7 +898,7 @@ export default class Infinite {
       height: 32 * scaleY,
       speed: this.road.speed,
       visible: false,
-      amplitude: 3,
+      amplitude: 3 * scaleY,
       frequency: 0.1
     };
     this.useWing = false;
@@ -889,6 +916,7 @@ export default class Infinite {
     this.speedIncreasedStageFirst = false;
     this.speedIncreasedStageSecond = false;
     this.speedIncreasedStageThird = false;
+    this.speedIncreasedStageFourth = false;
     // 重新开始按钮
     this.buttonStartInfo = "";
     // 分享好友按钮
