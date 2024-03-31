@@ -10,6 +10,7 @@ export default class Startup {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
+    this.customAd = '';
     /* 图片加载区域开始 */
     this.backgroundImage = new Image();
     this.backgroundImage.src = 'image/background.jpg';
@@ -38,6 +39,22 @@ export default class Startup {
     this.thirdButtonY = this.buttonY + this.buttonHeight + this.secondButtonHeight + 20 * scaleY;
     /* 按钮设置结束 */
     this.closeButton = '';
+    this.drawAd();
+  }
+  // 绘制广告
+  drawAd() {
+    this.customAd = wx.createCustomAd({
+      adUnitId: 'adunit-ecbce173159921ea',
+      style: {
+          left: menuButtonInfo.right - 60,
+          top: menuButtonInfo.bottom + 10,
+          width: 60
+      }
+    });
+    this.customAd.show();
+    this.customAd.onError(err => {
+      console.error(err.errMsg)
+    });
   }
   // 绘制背景图
   drawBackground() {
@@ -176,6 +193,8 @@ export default class Startup {
   }
   // 页面销毁机制
   destroy() {
+    this.customAd.destroy();
+    this.customAd = '';
     this.backgroundImage.src = '';
     this.rankImage.src = '';
     this.storeImage.src = '';

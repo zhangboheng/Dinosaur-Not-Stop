@@ -8,6 +8,7 @@ export default class Settings {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
+    this.bannerAd = '';
     /* 图片加载区域开始 */
     // 绘制背景
     this.backgroundImage = new Image();
@@ -39,6 +40,26 @@ export default class Settings {
     this.scrollOffsetY = 0;
     this.selectedIndex = 0;
     /* 变量区域结束 */
+    this.drawAd();
+  }
+  // 绘制广告
+  drawAd() {
+    this.bannerAd = wx.createBannerAd({
+      adUnitId: 'adunit-516f17ab80e68280',
+      style: {
+          left: 10,
+          top: 0,
+          width: this.canvas.width - 20
+      }
+    });
+    this.bannerAd.show()
+    this.bannerAd.onResize(res => {
+      this.bannerAd.style.top = this.canvas.height - res.height - 10
+    })
+    // 监听 banner 广告错误事件
+    this.bannerAd.onError(err => {
+      console.error(err.errMsg)
+    });
   }
   // 绘制背景
   drawBackground() {
@@ -133,8 +154,8 @@ export default class Settings {
       // 开关状态
       const isSwitchOn = wx.getStorageSync('musicEnabled') ? true : wx.getStorageSync('musicEnabled');
       const isBackMusicOn = wx.getStorageSync('backgroundMusicEnabled') ? true : wx.getStorageSync('backgroundMusicEnabled');
-      const textWidth = this.context.measureText('V 1.0.7').width;
-      this.context.fillText('V 1.0.7', switchX + switchWidth - textWidth / 2, iconY + iconSize / 2);
+      const textWidth = this.context.measureText('V 1.0.8').width;
+      this.context.fillText('V 1.0.8', switchX + switchWidth - textWidth / 2, iconY + iconSize / 2);
       // 绘制圆角矩形背景
       this.context.fillStyle = isSwitchOn ? '#4CAF50' : '#cccccc';
       drawRoundedRectNoStrike(this.context, switchX, switchY, switchWidth, switchHeight, borderRadius, '#000000', 3);
@@ -159,8 +180,8 @@ export default class Settings {
     } else if (this.selectedIndex === 1) {
       const fontSize = 16 * scaleX;
       this.context.font = `${fontSize}px Arial`;
-      const arr = ['版本 1.0.7', '道具出现速度优化', '关卡中加速水平增加一种', '', '版本 1.0.6', '降低难度，延长可玩性', '优化运行稳定性', '修复 bugs', '', '版本 1.0.5', '优化程序稳定性', '逃出监牢增加明显终点标识', '优化精简程序运行', '','版本 1.0.4', '修复PC端无法适配问题', '', '版本 1.0.3', '增加游戏开篇画面和音效', '增加小恐龙闯关失败后的失败状态', '', '版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
-      const list = ['2024-03-31', '', '', '', '2024-03-29', '', '', '', '','2024-03-18', '', '', '', '', '2024-03-15', '', '', '2024-01-30', '', '', '','2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
+      const arr = ['版本 1.0.8', '增加广告', '解决一些小问题', '', '版本 1.0.7', '道具出现速度优化', '关卡中加速水平增加一种', '', '版本 1.0.6', '降低难度，延长可玩性', '优化运行稳定性', '修复 bugs', '', '版本 1.0.5', '优化程序稳定性', '逃出监牢增加明显终点标识', '优化精简程序运行', '','版本 1.0.4', '修复PC端无法适配问题', '', '版本 1.0.3', '增加游戏开篇画面和音效', '增加小恐龙闯关失败后的失败状态', '', '版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
+      const list = ['2024-03-31', '', '', '', '2024-03-31', '', '', '', '2024-03-29', '', '', '', '','2024-03-18', '', '', '', '', '2024-03-15', '', '', '2024-01-30', '', '', '','2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
       // 计算文本高度和总内容高度
       const textHeight = fontSize * 1.2;
       const contentHeight = arr.length * textHeight + 20 * scaleY;
@@ -341,7 +362,8 @@ export default class Settings {
   }
   // 页面销毁机制
   destroy() {
-    // 清理图像资源
+    this.bannerAd.hide();
+    this.bannerAd = '';
     this.backButton.image.src = '';
     this.backgroundImage.src = '';
     this.iconVersion.src = '';

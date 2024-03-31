@@ -162,6 +162,7 @@ export default class Infinite {
     this.speedIncreasedStageSecond = false;
     this.speedIncreasedStageThird = false;
     this.speedIncreasedStageFourth = false;
+    this.speedIncreasedStageFifth = false;
     // 屏幕变黑遮照标志
     this.screenDarkness = 0;
     this.isScreenDark = false;
@@ -308,6 +309,14 @@ export default class Infinite {
       this.poisonMushroom.speed += 1 * scaleX;
       this.powerUp.speed += 1 * scaleX;
       this.speedIncreasedStageFourth = true;
+      this.messageDisplayTime = this.messageDuration;
+    }
+    // 检查分数是否达到30000分，并且尚未加速
+    if (this.score >= 60000 && !this.speedIncreasedStageFifth) {
+      this.road.speed += 1 * scaleX;
+      this.poisonMushroom.speed += 1 * scaleX;
+      this.powerUp.speed += 1 * scaleX;
+      this.speedIncreasedStageFifth = true;
       this.messageDisplayTime = this.messageDuration;
     }
     // 如果消息正在显示，减少显示时间
@@ -766,7 +775,7 @@ export default class Infinite {
     if (touchX >= btn.x && touchX <= btn.x + btn.width &&
       touchY >= btn.y && touchY <= btn.y + btn.height) {
       this.gameOver = true;
-      updateHighScores(this.score);
+      updateHighScores(this.score + 6000);
       backgroundMusic.stopBackgroundMusic()
       btn.onClick();
       return
@@ -917,6 +926,7 @@ export default class Infinite {
     this.speedIncreasedStageSecond = false;
     this.speedIncreasedStageThird = false;
     this.speedIncreasedStageFourth = false;
+    this.speedIncreasedStageFifth = false;
     // 重新开始按钮
     this.buttonStartInfo = "";
     // 分享好友按钮

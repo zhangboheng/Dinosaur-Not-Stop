@@ -8,6 +8,7 @@ export default class Tools {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
+    this.videoAd = null;
     /* 图片加载区域开始 */
     // 绘制背景
     this.backgroundImage = new Image();
@@ -37,6 +38,21 @@ export default class Tools {
     this.drugCount = 0;
     this.getDrugAccess = wx.getStorageSync('drugCount');
     /* 道具区域结束 */
+    this.drawAd();
+  }
+  // 绘制广告
+  drawAd() {
+    if (wx.createRewardedVideoAd) {
+      this.videoAd = wx.createRewardedVideoAd({
+        adUnitId: 'adunit-34c5af2089cd54df'
+      })
+      this.videoAd.onLoad(() => {
+        console.log('激励视频 广告加载成功')
+      })
+      this.videoAd.onError((err) => {
+        console.error('激励视频光告加载失败', err)
+      });
+    }
   }
   // 绘制背景
   drawBackground() {
@@ -65,7 +81,7 @@ export default class Tools {
     this.context.textBaseline = 'middle';
     this.context.fillText('道具列表', this.buttonX + this.buttonWidth / 2, this.buttonY + 20 * scaleY);
     this.context.font = `${12 * scaleY}px Arial`;
-    this.context.fillText('限时免广告兑换后，可在关卡中使用一次', this.buttonX + this.buttonWidth / 2, this.buttonY + 36 * scaleY);
+    this.context.fillText('通过看广告兑换后，可在关卡中使用', this.buttonX + this.buttonWidth / 2, this.buttonY + 36 * scaleY);
     this.context.restore();
   }
   // 绘制道具区域
@@ -167,35 +183,71 @@ export default class Tools {
     // 点击飞天翼区域
     if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
       touchY >= this.buttonY + 60 * scaleY && touchY <= this.buttonY + 140 * scaleY) {
-      // 后续增加激励广告区域 
-      this.wingCount++;
-      if (this.wingCount >= 1) {
-        this.wingCount = 1;
-      }
-      this.getWingAccess = this.wingCount;
-      wx.setStorageSync('wingCount', this.wingCount)
+        if (this.videoAd) {
+          this.videoAd.show().catch(() => {
+            this.videoAd.load()
+              .then(() => this.videoAd.show())
+              .catch(err => {
+                console.error('激励视频 广告显示失败', err)
+              })
+          });
+          this.videoAd.onClose((res) => {
+            if (res && res.isEnded) {
+              this.wingCount++;
+              this.getWingAccess = this.wingCount;
+              wx.setStorageSync('wingCount', this.wingCount)
+            } else {
+              // 播放中途退出，不下发游戏奖励
+              console.info('用户放弃了领取道具');
+            }
+          })
+        }
     }
     // 点击月球药区域
     if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
       touchY >= this.buttonY + 150 * scaleY && touchY <= this.buttonY + 230 * scaleY) {
-      // 后续增加激励广告区域 
-      this.moonCount++;
-      if (this.moonCount >= 1) {
-        this.moonCount = 1;
-      }
-      this.getMoonAccess = this.moonCount;
-      wx.setStorageSync('moonCount', this.moonCount)
+        if (this.videoAd) {
+          this.videoAd.show().catch(() => {
+            this.videoAd.load()
+              .then(() => this.videoAd.show())
+              .catch(err => {
+                console.error('激励视频 广告显示失败', err)
+              })
+          });
+          this.videoAd.onClose((res) => {
+            if (res && res.isEnded) {
+              this.moonCount++;
+              this.getMoonAccess = this.moonCount;
+              wx.setStorageSync('moonCount', this.moonCount)
+            } else {
+              // 播放中途退出，不下发游戏奖励
+              console.info('用户放弃了领取道具');
+            }
+          })
+        }
     }
     // 点击隐身药区域
     if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
       touchY >= this.buttonY + 240 * scaleY && touchY <= this.buttonY + 320 * scaleY) {
-      // 后续增加激励广告区域 
-      this.drugCount++;
-      if (this.drugCount >= 1) {
-        this.drugCount = 1;
-      }
-      this.getDrugAccess = this.drugCount;
-      wx.setStorageSync('drugCount', this.drugCount)
+        if (this.videoAd) {
+          this.videoAd.show().catch(() => {
+            this.videoAd.load()
+              .then(() => this.videoAd.show())
+              .catch(err => {
+                console.error('激励视频 广告显示失败', err)
+              })
+          });
+          this.videoAd.onClose((res) => {
+            if (res && res.isEnded) {
+              this.drugCount++;
+              this.getDrugAccess = this.drugCount;
+              wx.setStorageSync('drugCount', this.drugCount)
+            } else {
+              // 播放中途退出，不下发游戏奖励
+              console.info('用户放弃了领取道具');
+            }
+          })
+        }
     }
   }
   // 页面销毁机制
