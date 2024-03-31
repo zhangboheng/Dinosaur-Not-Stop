@@ -163,6 +163,7 @@ export default class Choose {
   destroy() {
     // 清理资源，如图片
     this.backButton.image.src = '';
+    this.backgroundImage.src = '';
     this.rectImage.src = '';
     this.rectImageTwo.src = '';
   }
