@@ -2,13 +2,19 @@ import {
   createBackButton,
   drawRoundedRect
 } from '../../utils/button';
-import { menuButtonInfo, scaleX, scaleY } from '../../utils/global';
+import {
+  menuButtonInfo,
+  scaleX,
+  scaleY
+} from '../../utils/global';
 export default class Tools {
   constructor(game) {
     this.game = game;
     this.canvas = game.canvas;
     this.context = game.context;
     this.videoAd = null;
+    this.bannerAd = null; // 底部广告
+    this.clickWhat = '';
     /* 图片加载区域开始 */
     // 绘制背景
     this.backgroundImage = new Image();
@@ -32,13 +38,13 @@ export default class Tools {
     /* 按钮区域结束 */
     /* 道具区域开始 */
     this.wingCount = 0;
-    this.getWingAccess = wx.getStorageSync('wingCount');
+    this.getWingAccess = '';
     this.moonCount = 0;
-    this.getMoonAccess = wx.getStorageSync('moonCount');
+    this.getMoonAccess = '';
     this.drugCount = 0;
-    this.getDrugAccess = wx.getStorageSync('drugCount');
+    this.getDrugAccess = '';
     /* 道具区域结束 */
-    this.drawAd();
+    this.drawBottomAd();
   }
   // 绘制广告
   drawAd() {
@@ -53,6 +59,47 @@ export default class Tools {
         console.error('激励视频光告加载失败', err)
       });
     }
+    if (this.videoAd) {
+      this.videoAd.show().catch(() => {
+        this.videoAd.load()
+          .then(() => this.videoAd.show())
+          .catch(err => {
+            console.error('激励视频 广告显示失败', err)
+          })
+      });
+    }
+    if (this.videoAd) {
+      this.videoAd.onClose((res) => {
+        if (res && res.isEnded || res === undefined) {
+          if (this.clickWhat == 'wing') {
+            wx.setStorageSync('wingCount', this.wingCount + 1);
+          } else if (this.clickWhat == 'moon') {
+            wx.setStorageSync('moonCount', this.moonCount + 1);
+          } else if (this.clickWhat == 'drug') {
+            wx.setStorageSync('drugCount', this.drugCount + 1);
+          }
+        }
+      })
+    }
+  }
+  // 绘制底部广告
+  drawBottomAd() {
+    this.bannerAd = wx.createBannerAd({
+      adUnitId: 'adunit-516f17ab80e68280',
+      style: {
+          left: 10,
+          top: 0,
+          width: this.canvas.width - 20
+      }
+    });
+    this.bannerAd.show()
+    this.bannerAd.onResize(res => {
+      this.bannerAd.style.top = this.canvas.height - res.height - 10
+    })
+    // 监听 banner 广告错误事件
+    this.bannerAd.onError(err => {
+      console.error(err.errMsg)
+    });
   }
   // 绘制背景
   drawBackground() {
@@ -84,78 +131,85 @@ export default class Tools {
     this.context.fillText('通过看广告兑换后，可在关卡中使用', this.buttonX + this.buttonWidth / 2, this.buttonY + 36 * scaleY);
     this.context.restore();
   }
-  // 绘制道具区域
-  drawToolsArea() {
-    this.context.save();
+  // 绘制飞天翼道具区
+  drawWingArea() {
     drawRoundedRect(this.context, this.buttonX, this.buttonY + 60 * scaleY, this.buttonWidth, 80 * scaleY, 10, '#f5d659', 'black', 3);
     if (this.wingImage.complete) {
       this.context.drawImage(this.wingImage, this.buttonX + 10, this.buttonY + 68 * scaleY, 64 * scaleY, 64 * scaleY);
-      this.context.fillStyle = 'black';
-      this.context.font = `bold ${16 * scaleX}px Arial`;
-      this.context.textAlign = 'left';
-      this.context.textBaseline = 'middle';
-      if (typeof this.getWingAccess == 'string'){
-        this.wingCount = 0;
-      } else {
-        this.wingCount = this.getWingAccess;
-      }
-      this.context.fillText(`x${this.wingCount}`,  this.buttonX + this.wingImage.width * scaleY + 20, this.buttonY + 80 * scaleY);
-      this.context.textAlign = 'right';
-      this.context.textBaseline = 'middle';
-      this.context.fillText('飞天翼',  this.buttonWidth, this.buttonY + 60 * scaleY + this.wingImage.height * scaleY/2);
-      this.context.font = `${12 * scaleX}px Arial`;
-      this.context.textAlign = 'right';
-      this.context.textBaseline = 'middle';
-      this.context.fillText('无限连跳，开局施放可连跳2000米',  this.buttonWidth, this.buttonY + 80 * scaleY + this.wingImage.height * scaleY/2);
     }
-    this.context.restore();
     this.context.save();
-    // 月球药道具绘制
+    this.context.fillStyle = 'black';
+    this.context.font = `bold ${16 * scaleX}px Arial`;
+    this.context.textAlign = 'left';
+    this.context.textBaseline = 'middle';
+    this.getWingAccess = wx.getStorageSync('wingCount');
+    if (typeof this.getWingAccess == 'string') {
+      this.wingCount = 0;
+    } else {
+      this.wingCount = this.getWingAccess;
+    }
+    this.context.fillText(`x${this.wingCount}`, this.buttonX + this.wingImage.width * scaleY + 20, this.buttonY + 80 * scaleY);
+    this.context.textAlign = 'right';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('飞天翼', this.buttonWidth, this.buttonY + 60 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.font = `${12 * scaleX}px Arial`;
+    this.context.textAlign = 'right';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('无限连跳，开局施放可连跳2000米', this.buttonWidth, this.buttonY + 80 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.restore();
+  }
+  // 绘制月球药道具绘制
+  drawMoonArea() {
     drawRoundedRect(this.context, this.buttonX, this.buttonY + 150 * scaleY, this.buttonWidth, 80 * scaleY, 10, '#f5d659', 'black', 3);
     if (this.moonImage.complete) {
       this.context.drawImage(this.moonImage, this.buttonX + 10, this.buttonY + 158 * scaleY, 64 * scaleY, 64 * scaleY);
-      this.context.fillStyle = 'black';
-      this.context.font = `bold ${16 * scaleX}px Arial`;
-      this.context.textAlign = 'left';
-      this.context.textBaseline = 'middle';
-      if (typeof this.getMoonAccess == 'string'){
-        this.moonCount = 0;
-      } else {
-        this.moonCount = this.getMoonAccess;
-      }
-      this.context.fillText(`x${this.moonCount}`,  this.buttonX + this.moonImage.width * scaleY + 20, this.buttonY + 170 * scaleY);
-      this.context.textAlign = 'right';
-      this.context.textBaseline = 'middle';
-      this.context.fillText('月球药',  this.buttonWidth, this.buttonY + 150 * scaleY + this.wingImage.height * scaleY/2);
-      this.context.font = `${12 * scaleX}px Arial`;
-      this.context.textAlign = 'right';
-      this.context.textBaseline = 'middle';
-      this.context.fillText('得到地球重力的1/6，1000步内有效',  this.buttonWidth, this.buttonY + 170 * scaleY + this.wingImage.height * scaleY/2);
     }
-    this.context.restore();
     this.context.save();
-    // 隐身药道具绘制
+    this.context.fillStyle = 'black';
+    this.context.font = `bold ${16 * scaleX}px Arial`;
+    this.context.textAlign = 'left';
+    this.context.textBaseline = 'middle';
+    this.getMoonAccess = wx.getStorageSync('moonCount');
+    if (typeof this.getMoonAccess == 'string') {
+      this.moonCount = 0;
+    } else {
+      this.moonCount = this.getMoonAccess;
+    }
+    this.context.fillText(`x${this.moonCount}`, this.buttonX + this.moonImage.width * scaleY + 20, this.buttonY + 170 * scaleY);
+    this.context.textAlign = 'right';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('月球药', this.buttonWidth, this.buttonY + 150 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.font = `${12 * scaleX}px Arial`;
+    this.context.textAlign = 'right';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('得到地球重力的1/6，1000步内有效', this.buttonWidth, this.buttonY + 170 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.restore();
+  }
+  // 绘制道具区域
+  drawToolsArea() {
     drawRoundedRect(this.context, this.buttonX, this.buttonY + 240 * scaleY, this.buttonWidth, 80 * scaleY, 10, '#f5d659', 'black', 3);
     if (this.drugImage.complete) {
       this.context.drawImage(this.drugImage, this.buttonX + 10, this.buttonY + 248 * scaleY, 64 * scaleY, 64 * scaleY);
-      this.context.fillStyle = 'black';
-      this.context.font = `bold ${16 * scaleX}px Arial`;
-      this.context.textAlign = 'left';
-      this.context.textBaseline = 'middle';
-      if (typeof this.getDrugAccess == 'string'){
-        this.drugCount = 0;
-      } else {
-        this.drugCount = this.getDrugAccess;
-      }
-      this.context.fillText(`x${this.drugCount}`,  this.buttonX + this.drugImage.width * scaleY + 20, this.buttonY + 260 * scaleY);
-      this.context.textAlign = 'right';
-      this.context.textBaseline = 'middle';
-      this.context.fillText('隐身药',  this.buttonWidth, this.buttonY + 240 * scaleY + this.wingImage.height * scaleY/2);
-      this.context.font = '12px Arial';
-      this.context.textAlign = 'right';
-      this.context.textBaseline = 'middle';
-      this.context.fillText('得到隐身能力，可规避一次撞击',  this.buttonWidth, this.buttonY + 260 * scaleY + this.wingImage.height * scaleY/2);
     }
+    this.context.save();
+    this.context.fillStyle = 'black';
+    this.context.font = `bold ${16 * scaleX}px Arial`;
+    this.context.textAlign = 'left';
+    this.context.textBaseline = 'middle';
+    this.getDrugAccess = wx.getStorageSync('drugCount');
+    if (typeof this.getDrugAccess == 'string') {
+      this.drugCount = 0;
+    } else {
+      this.drugCount = this.getDrugAccess;
+    }
+    this.context.fillText(`x${this.drugCount}`, this.buttonX + this.drugImage.width * scaleY + 20, this.buttonY + 260 * scaleY);
+    this.context.textAlign = 'right';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('隐身药', this.buttonWidth, this.buttonY + 240 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.font = `${12 * scaleX}px Arial`;
+    this.context.textAlign = 'right';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('得到隐身能力，可规避一次撞击', this.buttonWidth, this.buttonY + 260 * scaleY + this.wingImage.height * scaleY / 2);
     this.context.restore();
   }
   draw() {
@@ -165,7 +219,11 @@ export default class Tools {
     this.drawBack();
     // 绘制标题
     this.drawTitle();
-    // 绘制道具区域
+    // 绘制飞天翼道具区
+    this.drawWingArea();
+    // 绘制月球药道具绘制
+    this.drawMoonArea();
+    // 绘制隐身药绘制
     this.drawToolsArea();
   }
   touchHandler(e) {
@@ -183,75 +241,26 @@ export default class Tools {
     // 点击飞天翼区域
     if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
       touchY >= this.buttonY + 60 * scaleY && touchY <= this.buttonY + 140 * scaleY) {
-        if (this.videoAd) {
-          this.videoAd.show().catch(() => {
-            this.videoAd.load()
-              .then(() => this.videoAd.show())
-              .catch(err => {
-                console.error('激励视频 广告显示失败', err)
-              })
-          });
-          this.videoAd.onClose((res) => {
-            if (res && res.isEnded) {
-              this.wingCount++;
-              this.getWingAccess = this.wingCount;
-              wx.setStorageSync('wingCount', this.wingCount)
-            } else {
-              // 播放中途退出，不下发游戏奖励
-              console.info('用户放弃了领取道具');
-            }
-          })
-        }
+      this.clickWhat = 'wing';
+      this.drawAd();
     }
     // 点击月球药区域
     if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
       touchY >= this.buttonY + 150 * scaleY && touchY <= this.buttonY + 230 * scaleY) {
-        if (this.videoAd) {
-          this.videoAd.show().catch(() => {
-            this.videoAd.load()
-              .then(() => this.videoAd.show())
-              .catch(err => {
-                console.error('激励视频 广告显示失败', err)
-              })
-          });
-          this.videoAd.onClose((res) => {
-            if (res && res.isEnded) {
-              this.moonCount++;
-              this.getMoonAccess = this.moonCount;
-              wx.setStorageSync('moonCount', this.moonCount)
-            } else {
-              // 播放中途退出，不下发游戏奖励
-              console.info('用户放弃了领取道具');
-            }
-          })
-        }
+      this.clickWhat = 'moon';
+      this.drawAd();
     }
     // 点击隐身药区域
     if (touchX >= this.buttonX && touchX <= this.buttonX + this.buttonWidth &&
       touchY >= this.buttonY + 240 * scaleY && touchY <= this.buttonY + 320 * scaleY) {
-        if (this.videoAd) {
-          this.videoAd.show().catch(() => {
-            this.videoAd.load()
-              .then(() => this.videoAd.show())
-              .catch(err => {
-                console.error('激励视频 广告显示失败', err)
-              })
-          });
-          this.videoAd.onClose((res) => {
-            if (res && res.isEnded) {
-              this.drugCount++;
-              this.getDrugAccess = this.drugCount;
-              wx.setStorageSync('drugCount', this.drugCount)
-            } else {
-              // 播放中途退出，不下发游戏奖励
-              console.info('用户放弃了领取道具');
-            }
-          })
-        }
+      this.clickWhat = 'drug';
+      this.drawAd();
     }
   }
   // 页面销毁机制
   destroy() {
+    this.bannerAd.hide();
+    this.bannerAd = '';
     // 清理图像资源
     this.backButton.image.src = '';
     this.backgroundImage.src = '';
