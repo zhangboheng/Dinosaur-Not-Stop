@@ -54,7 +54,7 @@ export function drawIconButton(context, text, x, y, callback) {
   context.lineWidth = 3;
   // 绘制文本背景
   const padding = 60 * scaleX; // 边距宽度
-  const boxWidth = context.measureText(text).width * scaleX + padding * 2;
+  const boxWidth = context.measureText(text).width + padding * 2;
   const boxHeight = 60 * scaleY; // 提示框的高度，可以根据需要调整
   context.fillRect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight);
   context.strokeRect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight);
