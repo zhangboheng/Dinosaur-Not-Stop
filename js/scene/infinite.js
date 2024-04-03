@@ -116,6 +116,7 @@ export default class Infinite {
       currentDinoFrame: 0,
       dinoFrameInterval: 5,
       dinoFrameTimer: 0,
+      groundY: 0, // 视角追踪Y坐标
     }
     this.trapInfo = {
       list: [],
@@ -181,10 +182,10 @@ export default class Infinite {
   // 绘制背景
   drawBackground() {
     if (this.backgroundImage.complete) {
-      this.context.drawImage(this.backgroundImage, this.backgroundInfo.x, 0, this.backgroundImage.width * scaleX, this.canvas.height);
+      this.context.drawImage(this.backgroundImage, this.backgroundInfo.x, this.dinoInfo.groundY, this.backgroundImage.width * scaleX, this.canvas.height);
       // 绘制第二张图片以实现循环滚动效果
       if (this.backgroundInfo.x < 0) {
-        this.context.drawImage(this.backgroundImage, this.backgroundInfo.x + this.backgroundImage.width * scaleX,  0, this.backgroundImage.width * scaleX, this.canvas.height);
+        this.context.drawImage(this.backgroundImage, this.backgroundInfo.x + this.backgroundImage.width * scaleX, this.dinoInfo.groundY, this.backgroundImage.width * scaleX, this.canvas.height);
       }
     }
   }
@@ -195,11 +196,16 @@ export default class Infinite {
       this.backgroundInfo.x = 0;
     }
   }
+  // 绘制蓝色遮罩
+  drawBlueScreen() {
+    this.context.fillStyle = `#4db6ed`;
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height + this.dinoInfo.groundY);
+  }
   // 绘制黑色遮罩
   drawBlackScreen() {
     if (this.isScreenDark) {
       this.context.fillStyle = `rgba(0, 0, 0, ${this.screenDarkness * 0.8})`;
-      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.context.fillRect(0, this.dinoInfo.groundY, this.canvas.width, this.canvas.height);
     }
   }
   // 更新黑色遮罩
@@ -266,9 +272,9 @@ export default class Infinite {
   // 绘制道路
   drawRoad() {
     if (this.roadImage.complete) {
-      this.context.drawImage(this.roadImage, this.road.x, this.road.y, this.road.width, this.road.height);
+      this.context.drawImage(this.roadImage, this.road.x, this.road.y + this.dinoInfo.groundY, this.road.width, this.road.height);
       if (this.road.x < 0) {
-        this.context.drawImage(this.roadImage, this.road.x + this.road.width, this.road.y, this.road.width, this.road.height);
+        this.context.drawImage(this.roadImage, this.road.x + this.road.width, this.road.y + this.dinoInfo.groundY, this.road.width, this.road.height);
       }
     }
   }
@@ -330,7 +336,7 @@ export default class Infinite {
       const trapImg = this.trapImages[trap.imageIndex];
       // 绘制陷阱图片
       if (trapImg.complete) {
-        this.context.drawImage(trapImg, trap.x, trap.y - trap.height + 5 * scaleY, trap.width, trap.height);
+        this.context.drawImage(trapImg, trap.x, trap.y - trap.height + 5 * scaleY + this.dinoInfo.groundY, trap.width, trap.height);
       }
     });
   }
@@ -385,14 +391,20 @@ export default class Infinite {
     }
     if (dinoImg.complete) {
       if (this.gameOver) {
-        this.context.drawImage(dinoImg, this.dinoInfo.x, this.dinoInfo.y, this.dinoInfo.width, this.dinoInfo.height)
+        this.context.drawImage(dinoImg, this.dinoInfo.x, this.dinoInfo.y + this.dinoInfo.groundY, this.dinoInfo.width, this.dinoInfo.height)
       } else {
-        this.context.drawImage(dinoImg, this.dinoInfo.x, this.dinoInfo.y - 20 * scaleY, this.dinoInfo.width, this.dinoInfo.height)
+        this.context.drawImage(dinoImg, this.dinoInfo.x, this.dinoInfo.y - 20 * scaleY + this.dinoInfo.groundY, this.dinoInfo.width, this.dinoInfo.height)
       }
     }
   }
   // 更新小恐龙
   updateDino() {
+    // 更新 Y 视角
+    if (this.dinoInfo.y < this.groundHeight) {
+      this.dinoInfo.groundY = this.groundHeight - this.dinoInfo.y
+    } else {
+      this.dinoInfo.groundY = 0;
+    }
     this.dinoInfo.dinoFrameTimer++;
     if (this.dinoInfo.dinoFrameTimer >= this.dinoInfo.dinoFrameInterval) {
       this.dinoInfo.currentDinoFrame = (this.dinoInfo.currentDinoFrame + 1) % this.dinoImages.length;
@@ -538,7 +550,7 @@ export default class Infinite {
     if (this.score > 500 && !this.powerUp.obtained) {
       this.powerUp.visible = true;
       if (this.powerUpImage.complete && this.powerUp.visible) {
-        this.context.drawImage(this.powerUpImage, this.powerUp.x, this.powerUp.y, this.powerUp.width, this.powerUp.height);
+        this.context.drawImage(this.powerUpImage, this.powerUp.x, this.powerUp.y + this.dinoInfo.groundY, this.powerUp.width, this.powerUp.height);
       }
     }
     if (this.powerUp.powerUpCount > 0) {
@@ -575,7 +587,7 @@ export default class Infinite {
     if (this.score >= 1000 && !this.poisonMushroom.obtained) {
       this.poisonMushroom.visible = true;
       if (this.poisonMushroomImage.complete) {
-        this.context.drawImage(this.poisonMushroomImage, this.poisonMushroom.x, this.poisonMushroom.y + 5 * scaleY, this.poisonMushroom.width, this.poisonMushroom.height);
+        this.context.drawImage(this.poisonMushroomImage, this.poisonMushroom.x, this.poisonMushroom.y + 5 * scaleY + this.dinoInfo.groundY, this.poisonMushroom.width, this.poisonMushroom.height);
       }
     }
     if (this.poisonMushroom.poisonMushroomEffectDuration > 0) {
@@ -619,7 +631,7 @@ export default class Infinite {
   // 绘制 UFO
   drawUFO() {
     if (this.ufoImage.complete) {
-      this.context.drawImage(this.ufoImage, this.ufoflying.x, this.ufoflying.y, this.ufoflying.width, this.ufoflying.height);
+      this.context.drawImage(this.ufoImage, this.ufoflying.x, this.ufoflying.y + this.dinoInfo.groundY, this.ufoflying.width, this.ufoflying.height);
     }
   }
   // 更新 UFO 显示位置
@@ -710,6 +722,8 @@ export default class Infinite {
   }
   // 画面全部绘制
   draw() {
+    // 绘制蓝色遮罩
+    this.drawBlueScreen();
     // 绘制背景
     this.drawBackground();
     // 绘制返回按钮
@@ -871,6 +885,7 @@ export default class Infinite {
       currentDinoFrame: 0,
       dinoFrameInterval: 5,
       dinoFrameTimer: 0,
+      groundY: 0, // 视角追踪Y坐标
     }
     this.trapInfo = {
       list: [],
