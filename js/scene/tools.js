@@ -148,14 +148,14 @@ export default class Tools {
     } else {
       this.wingCount = this.getWingAccess;
     }
-    this.context.fillText(`x${this.wingCount}`, this.buttonX + this.wingImage.width * scaleY + 20, this.buttonY + 80 * scaleY);
+    this.context.fillText(`x${this.wingCount}`, this.buttonX + 64 * scaleY + 20, this.buttonY + 80 * scaleY);
     this.context.textAlign = 'right';
     this.context.textBaseline = 'middle';
-    this.context.fillText('飞天翼', this.buttonWidth, this.buttonY + 60 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.fillText('飞天翼', this.buttonWidth, this.buttonY + 60 * scaleY + 64 * scaleY / 2);
     this.context.font = `${12 * scaleX}px Arial`;
     this.context.textAlign = 'right';
     this.context.textBaseline = 'middle';
-    this.context.fillText('无限连跳，开局施放可连跳2000米', this.buttonWidth, this.buttonY + 80 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.fillText('无限连跳，开局施放可连跳2000米', this.buttonWidth, this.buttonY + 80 * scaleY + 64 * scaleY / 2);
     this.context.restore();
   }
   // 绘制月球药道具绘制
@@ -175,14 +175,14 @@ export default class Tools {
     } else {
       this.moonCount = this.getMoonAccess;
     }
-    this.context.fillText(`x${this.moonCount}`, this.buttonX + this.moonImage.width * scaleY + 20, this.buttonY + 170 * scaleY);
+    this.context.fillText(`x${this.moonCount}`, this.buttonX + 64 * scaleY + 20, this.buttonY + 170 * scaleY);
     this.context.textAlign = 'right';
     this.context.textBaseline = 'middle';
-    this.context.fillText('月球药', this.buttonWidth, this.buttonY + 150 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.fillText('月球药', this.buttonWidth, this.buttonY + 150 * scaleY + 64 * scaleY / 2);
     this.context.font = `${12 * scaleX}px Arial`;
     this.context.textAlign = 'right';
     this.context.textBaseline = 'middle';
-    this.context.fillText('得到地球重力的1/6，1000步内有效', this.buttonWidth, this.buttonY + 170 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.fillText('得到地球重力的1/6，1000步内有效', this.buttonWidth, this.buttonY + 170 * scaleY + 64 * scaleY / 2);
     this.context.restore();
   }
   // 绘制道具区域
@@ -202,14 +202,14 @@ export default class Tools {
     } else {
       this.drugCount = this.getDrugAccess;
     }
-    this.context.fillText(`x${this.drugCount}`, this.buttonX + this.drugImage.width * scaleY + 20, this.buttonY + 260 * scaleY);
+    this.context.fillText(`x${this.drugCount}`, this.buttonX + 64 * scaleY + 20, this.buttonY + 260 * scaleY);
     this.context.textAlign = 'right';
     this.context.textBaseline = 'middle';
-    this.context.fillText('隐身药', this.buttonWidth, this.buttonY + 240 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.fillText('隐身药', this.buttonWidth, this.buttonY + 240 * scaleY + 64 * scaleY / 2);
     this.context.font = `${12 * scaleX}px Arial`;
     this.context.textAlign = 'right';
     this.context.textBaseline = 'middle';
-    this.context.fillText('得到隐身能力，可规避一次撞击', this.buttonWidth, this.buttonY + 260 * scaleY + this.wingImage.height * scaleY / 2);
+    this.context.fillText('得到隐身能力，可规避一次撞击', this.buttonWidth, this.buttonY + 260 * scaleY + 64 * scaleY / 2);
     this.context.restore();
   }
   draw() {

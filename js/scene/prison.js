@@ -162,7 +162,7 @@ export default class Prison {
   drawBlackScreen() {
     if (this.isScreenDark) {
       this.context.fillStyle = `rgba(0, 0, 0, ${this.screenDarkness * 0.8})`;
-      this.context.fillRect(0,  this.dinoInfo.groundY, this.canvas.width, this.canvas.height);
+      this.context.fillRect(0,  0, this.canvas.width, this.canvas.height);
     }
   }
   // 更新黑色遮罩
@@ -290,8 +290,8 @@ export default class Prison {
             x: lastTrapX,
             y: this.canvas.height - this.groundHeight,
             imageIndex: imageIndex,
-            width: trapImg.width * scaleX, // 为陷阱设置宽度
-            height: trapImg.height * scaleY // 为陷阱设置高度
+            width: 32 * scaleX, // 为陷阱设置宽度
+            height: (trapImg.height / 8) * scaleY // 为陷阱设置高度
           });
         }
         // 重置计时器
@@ -360,8 +360,9 @@ export default class Prison {
   }
   // 更新小恐龙
   updateDino() {
+    let getTrackView = wx.getStorageSync('trackView');
     // 更新 Y 视角
-    if (this.dinoInfo.y < this.groundHeight) {
+    if (this.dinoInfo.y < this.groundHeight && getTrackView) {
       this.dinoInfo.groundY = this.groundHeight - this.dinoInfo.y
     } else {
       this.dinoInfo.groundY = 0;
@@ -375,7 +376,7 @@ export default class Prison {
       this.dinoInfo.x += 1 * scaleX;
     } else {
       if (this.score - this.distanceMoon > 1000 && this.useMoon) {
-        this.dinoInfo.gravity = 0.4;
+        this.dinoInfo.gravity = 0.4 * scaleY;
         this.useMoon = false;
       }
       if (this.score - this.distanceWing >= 2000 && this.useWing) {
@@ -442,7 +443,7 @@ export default class Prison {
       };
       // 使用SAT检测碰撞
       if (doPolygonsIntersect(dinoPolygon, trapPolygon)) {
-        if (this.useDrug == false && this.score - this.distanceDrug >= 300) {
+        if (!this.useDrug && this.score - this.distanceDrug >= 300) {
           this.gameOver = true;
           backgroundMusic.stopBackgroundMusic();
           soundManager.play('crack');
@@ -455,7 +456,7 @@ export default class Prison {
   }
   // 绘制隐身药道具显示
   drawDrug() {
-    if (this.useDrug == false && this.distanceDrug == 0 && typeof this.getDrugAccess != 'string' && this.getDrugAccess != 0) {
+    if (!this.useDrug && this.distanceDrug == 0 && typeof this.getDrugAccess != 'string' && this.getDrugAccess != 0) {
       drawRoundedRect(this.context, -10 * scaleX, this.canvas.height - this.road.height + 20 * scaleY, 100 * scaleX, 40 * scaleY, 10 * scaleY, '#f5d659', 'black', 3);
       if (this.drugImage.complete) {
         this.context.drawImage(this.drugImage, 10, this.canvas.height - this.road.height + 28 * scaleY, 24 * scaleY, 24 * scaleY);
@@ -476,7 +477,7 @@ export default class Prison {
   }
   // 绘制月球药道具显示
   drawMoon() {
-    if (this.useMoon == false && typeof this.getMoonAccess != 'string' && this.getMoonAccess != 0) {
+    if (!this.useMoon && typeof this.getMoonAccess != 'string' && this.getMoonAccess != 0 && this.distanceMoon == 0) {
       drawRoundedRect(this.context, -10 * scaleX, this.canvas.height - this.road.height + 70 * scaleY, 100 * scaleX, 40 * scaleY, 10 * scaleY, '#f5d659', 'black', 3);
       if (this.moonImage.complete) {
         this.context.drawImage(this.moonImage, 10, this.canvas.height - this.road.height + 78 * scaleY, 24 * scaleY, 24 * scaleY);
@@ -497,7 +498,7 @@ export default class Prison {
   }
   // 绘制飞天翼道具显示
   drawWing() {
-    if (this.score <= 800 && this.useWing == false && typeof this.getWingAccess != 'string' && this.getWingAccess != 0) {
+    if (this.score <= 800 && !this.useWing && typeof this.getWingAccess != 'string' && this.getWingAccess != 0) {
       drawRoundedRect(this.context, -10 * scaleX, this.canvas.height - this.road.height + 120 * scaleY, 100 * scaleX, 40 * scaleY, 10 * scaleY, '#f5d659', 'black', 3);
       if (this.wingImage.complete) {
         this.context.drawImage(this.wingImage, 10, this.canvas.height - this.road.height + 128 * scaleY, 24 * scaleY, 24 * scaleY);
@@ -603,7 +604,7 @@ export default class Prison {
       if (!this.gameOver) {
         // 使用隐身药道具点击识别
         if (touchX >= 0 && touchX <= 90 * scaleX &&
-          touchY >= this.canvas.height - this.road.height + 20 * scaleY && touchY <= this.canvas.height - this.road.height + 60 * scaleY && this.drugCount >= 1 && this.useDrug == false && this.distanceDrug == 0) {
+          touchY >= this.canvas.height - this.road.height + 20 * scaleY && touchY <= this.canvas.height - this.road.height + 60 * scaleY && this.drugCount >= 1 && !this.useDrug && this.distanceDrug == 0) {
           this.useDrug = true;
           this.distanceDrug = this.score;
           this.drugCount--;
@@ -612,7 +613,7 @@ export default class Prison {
         }
         // 使用月球药道具点击识别
         if (touchX >= 0 && touchX <= 90 * scaleX &&
-          touchY >= this.canvas.height - this.road.height + 70 * scaleY && touchY <= this.canvas.height - this.road.height + 110 * scaleY && this.moonCount >= 1 && this.useMoon == false && this.distanceMoon == 0) {
+          touchY >= this.canvas.height - this.road.height + 70 * scaleY && touchY <= this.canvas.height - this.road.height + 110 * scaleY && this.moonCount >= 1 && !this.useMoon && this.distanceMoon == 0) {
           this.useMoon = true;
           this.dinoInfo.gravity = this.dinoInfo.gravity / 6;
           this.distanceMoon = this.score;
@@ -622,7 +623,7 @@ export default class Prison {
         }
         // 使用天使翼道具点击识别
         if (touchX >= 0 && touchX <= 90 * scaleX &&
-          touchY >= this.canvas.height - this.road.height + 120 * scaleY && touchY <= this.canvas.height - this.road.height + 160 * scaleY && this.wingCount >= 1 && this.useWing == false && this.distanceWing == 0) {
+          touchY >= this.canvas.height - this.road.height + 120 * scaleY && touchY <= this.canvas.height - this.road.height + 160 * scaleY && this.wingCount >= 1 && !this.useWing && this.distanceWing == 0) {
           this.useWing = true;
           this.distanceWing = this.score;
           this.wingCount--;
@@ -633,7 +634,7 @@ export default class Prison {
         if (this.dinoInfo.isOnGround || this.dinoInfo.canDoubleJump) {
           this.dinoInfo.velocityY = this.dinoInfo.jumpHeight;
           if (!this.dinoInfo.isOnGround) {
-            if (this.dinoInfo.canDoubleJump && this.useWing == false) {
+            if (this.dinoInfo.canDoubleJump && !this.useWing) {
               this.dinoInfo.canDoubleJump = false; // 标记二段跳已使用
             }
           }

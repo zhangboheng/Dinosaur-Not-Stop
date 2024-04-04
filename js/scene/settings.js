@@ -26,6 +26,9 @@ export default class Settings {
     // 绘制左侧音乐图标
     this.iconBack = new Image();
     this.iconBack.src = 'image/bgm.png';
+    // 绘制左侧追踪图标
+    this.trackImage = new Image();
+    this.trackImage.src = 'image/track.png';
     /* 图片加载区域结束 */
     /* 事件监听区域开始 */
     wx.onTouchStart(this.handleTouchStart.bind(this));
@@ -121,7 +124,7 @@ export default class Settings {
       const iconX = tabX + 10 * scaleX; // 根据需要调整
       const iconY = tabContentY + 10 * scaleY; // 根据需要调整
       const iconSize = 30 * scaleY; // 图标的大小
-      const contentHeight = 80 * scaleY + iconSize + 20 * scaleY; // 设置内容区域的高度，可以根据需要调整
+      const contentHeight = 120 * scaleY + iconSize + 20 * scaleY; // 设置内容区域的高度，可以根据需要调整
       this.context.fillRect(tabX, tabContentY, tabWidth, contentHeight);
       this.context.strokeRect(tabX, tabContentY, tabWidth, contentHeight);
       // 绘制版本左侧图标
@@ -136,15 +139,20 @@ export default class Settings {
       if (this.iconBack.complete) {
         this.context.drawImage(this.iconBack, iconX, iconY + 80 * scaleY, iconSize, iconSize);
       }
+      // 绘制视角追踪左侧图标
+      if (this.trackImage.complete) {
+        this.context.drawImage(this.trackImage, iconX, iconY + 120 * scaleY, iconSize, iconSize);
+      }
       // 绘制音效左侧文字
-      const textX = iconX + iconSize + 30 * scaleX;
+      const textX = iconX + iconSize + 10 * scaleX;
       this.context.fillStyle = '#000000';
       this.context.font = `${16 * scaleX}px Arial`;
-      this.context.textAlign = 'center';
+      this.context.textAlign = 'left';
       this.context.textBaseline = 'middle';
       this.context.fillText('版本', textX, iconY + iconSize / 2);
       this.context.fillText('音效', textX, iconY + 40 * scaleY + iconSize / 2);
       this.context.fillText('音乐', textX, iconY + 80 * scaleY + iconSize / 2);
+      this.context.fillText('视角追踪', textX, iconY + 120 * scaleY + iconSize / 2);
       const switchWidth = 50 * scaleX; // 开关宽度
       const switchHeight = 25 * scaleY; // 开关高度
       const borderRadius = 12.5 * scaleY; // 圆角半径
@@ -154,14 +162,19 @@ export default class Settings {
       // 开关状态
       const isSwitchOn = wx.getStorageSync('musicEnabled') ? true : wx.getStorageSync('musicEnabled');
       const isBackMusicOn = wx.getStorageSync('backgroundMusicEnabled') ? true : wx.getStorageSync('backgroundMusicEnabled');
-      const textWidth = this.context.measureText('V 1.0.9').width;
-      this.context.fillText('V 1.0.9', switchX + switchWidth - textWidth / 2, iconY + iconSize / 2);
+      const isTrackView = wx.getStorageSync('trackView') ? true : wx.getStorageSync('trackView');
+      const textWidth = this.context.measureText('V 1.1.0').width;
+      this.context.textAlign = 'center';
+      this.context.fillText('V 1.1.0', switchX + switchWidth - textWidth / 2, iconY + iconSize / 2);
       // 绘制圆角矩形背景
       this.context.fillStyle = isSwitchOn ? '#4CAF50' : '#cccccc';
       drawRoundedRectNoStrike(this.context, switchX, switchY, switchWidth, switchHeight, borderRadius, '#000000', 3);
       this.context.fill();
       this.context.fillStyle = isBackMusicOn ? '#4CAF50' : '#cccccc';
       drawRoundedRectNoStrike(this.context, switchX, switchY + 40 * scaleY, switchWidth, switchHeight, borderRadius, '#000000', 3);
+      this.context.fill();
+      this.context.fillStyle = isTrackView ? '#4CAF50' : '#cccccc';
+      drawRoundedRectNoStrike(this.context, switchX, switchY + 80 * scaleY, switchWidth, switchHeight, borderRadius, '#000000', 3);
       this.context.fill();
       // 绘制音效开关滑块
       const sliderX = isSwitchOn ? switchX + switchWidth - switchHeight : switchX;
@@ -177,11 +190,18 @@ export default class Settings {
       this.context.arc(MusicX + switchHeight / 2, switchY + switchHeight / 2 + 40 * scaleY, switchHeight / 2, 0, Math.PI * 2);
       this.context.closePath();
       this.context.fill();
+      // 绘制视角追踪按钮
+      const TrackX = isTrackView ? switchX + switchWidth - switchHeight : switchX;
+      this.context.fillStyle = '#FFFFFF';
+      this.context.beginPath();
+      this.context.arc(TrackX + switchHeight / 2, switchY + switchHeight / 2 + 80 * scaleY, switchHeight / 2, 0, Math.PI * 2);
+      this.context.closePath();
+      this.context.fill();
     } else if (this.selectedIndex === 1) {
       const fontSize = 16 * scaleX;
       this.context.font = `${fontSize}px Arial`;
-      const arr = ['版本 1.0.9', '修复道具屋获取道具数量错误', '', '版本 1.0.8', '增加广告', '解决一些小问题', '', '版本 1.0.7', '道具出现速度优化', '关卡中加速水平增加一种', '', '版本 1.0.6', '降低难度，延长可玩性', '优化运行稳定性', '修复 bugs', '', '版本 1.0.5', '优化程序稳定性', '逃出监牢增加明显终点标识', '优化精简程序运行', '','版本 1.0.4', '修复PC端无法适配问题', '', '版本 1.0.3', '增加游戏开篇画面和音效', '增加小恐龙闯关失败后的失败状态', '', '版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
-      const list = ['2024-04-01', '', '', '2024-03-31', '', '', '', '2024-03-31', '', '', '', '2024-03-29', '', '', '', '','2024-03-18', '', '', '', '', '2024-03-15', '', '', '2024-01-30', '', '', '','2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
+      const arr = ['版本 1.1.0', '优化 UI 显示', '增加追踪视角', '解决了道具显示问题', '', '版本 1.0.9', '修复道具屋获取道具数量错误', '', '版本 1.0.8', '增加广告', '解决一些小问题', '', '版本 1.0.7', '道具出现速度优化', '关卡中加速水平增加一种', '', '版本 1.0.6', '降低难度，延长可玩性', '优化运行稳定性', '修复 bugs', '', '版本 1.0.5', '优化程序稳定性', '逃出监牢增加明显终点标识', '优化精简程序运行', '','版本 1.0.4', '修复PC端无法适配问题', '', '版本 1.0.3', '增加游戏开篇画面和音效', '增加小恐龙闯关失败后的失败状态', '', '版本 1.0.2', '增加道具屋，通过看广告兑换道具', '', '版本 1.0.1', '关卡增加障碍物种类和黑夜变换', '增加历史成绩榜', '', '版本 1.0.0', 'Demo 版本发布'];
+      const list = ['2024-04-01', '', '', '', '', '2024-04-01', '', '', '2024-03-31', '', '', '', '2024-03-31', '', '', '', '2024-03-29', '', '', '', '','2024-03-18', '', '', '', '', '2024-03-15', '', '', '2024-01-30', '', '', '','2024-01-27', '', '', '2024-01-22', '', '', '', '2024-01-08', ''];
       // 计算文本高度和总内容高度
       const textHeight = fontSize * 1.2;
       const contentHeight = arr.length * textHeight + 20 * scaleY;
@@ -359,16 +379,25 @@ export default class Settings {
       this.draw();
       return;
     }
+    // 检查是否触摸了视角追踪按钮
+    if (touchX >= switchX && touchX <= switchX + switchWidth &&
+      touchY >= switchY + 80 * scaleY && touchY <= switchY + switchHeight + 80 * scaleY && this.selectedIndex === 0) {
+      this.toggleIsTrackView();
+      // 重新绘制以显示更新后的开关状态
+      this.draw();
+      return;
+    }
   }
   // 页面销毁机制
   destroy() {
     this.bannerAd.hide();
     this.bannerAd = '';
-    this.backButton.image.src = '';
+    this.backButton = '';
     this.backgroundImage.src = '';
     this.iconVersion.src = '';
     this.iconImage.src = '';
     this.iconBack.src = '';
+    this.trackImage.src = '';
     // 移除触摸事件监听器
     wx.offTouchStart(this.handleTouchStart.bind(this));
     wx.offTouchMove(this.handleTouchMove.bind(this));
@@ -387,5 +416,14 @@ export default class Settings {
   toggleBackgroundMusic() {
     const currentMusicState = backgroundMusic.getBackgroundMusicState();
     backgroundMusic.setBackgroundMusicState(!currentMusicState);
+  }
+  // 管理视角追踪状态
+  toggleIsTrackView() {
+    const trackViewStatue = wx.getStorageSync('trackView');
+    if (!trackViewStatue) {
+      wx.setStorageSync('trackView', true);
+    }else{
+      wx.setStorageSync('trackView', false);
+    }
   }
 }

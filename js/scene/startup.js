@@ -80,25 +80,25 @@ export default class Startup {
   // 绘制历史成绩图片
   drawRankImage() {
     if (this.rankImage.complete) {
-      this.context.drawImage(this.rankImage, 10, menuButtonInfo.top, this.rankImage.width * scaleX, this.rankImage.height * scaleY);
+      this.context.drawImage(this.rankImage, 10, menuButtonInfo.top, 32 * scaleX, 32 * scaleY);
     }
     this.context.save();
     this.context.fillStyle = 'black';
     this.context.font = `bold ${10 * scaleX}px Arial`;
     this.context.textAlign = 'center';
-    this.context.fillText('成绩榜', 10 + (this.rankImage.width * scaleX) / 2, menuButtonInfo.top + this.rankImage.height * scaleY + 10 * scaleX);
+    this.context.fillText('成绩榜', 10 + (32 * scaleX) / 2, menuButtonInfo.top + 32 * scaleY + 10 * scaleX);
     this.context.restore();
   }
   // 绘制道具屋图片
   drawToolsImage() {
     if (this.storeImage.complete) {
-      this.context.drawImage(this.storeImage, 10, menuButtonInfo.top + this.storeImage.height * scaleY + 20 * scaleX, this.storeImage.width * scaleX, this.storeImage.height * scaleY);
+      this.context.drawImage(this.storeImage, 10, menuButtonInfo.top + 32 * scaleY + 20 * scaleX, 32 * scaleX, 32 * scaleY);
     }
     this.context.save();
     this.context.fillStyle = 'black';
     this.context.font = `bold ${10 * scaleX}px Arial`;
     this.context.textAlign = 'center';
-    this.context.fillText('道具屋', 10 + (this.storeImage.width * scaleX) / 2,  menuButtonInfo.top + this.storeImage.height * scaleY * 2 + 30 * scaleX);
+    this.context.fillText('道具屋', 10 + (32 * scaleX) / 2,  menuButtonInfo.top + 32 * scaleY * 2 + 30 * scaleX);
     this.context.restore();
   }
   // 绘制按钮

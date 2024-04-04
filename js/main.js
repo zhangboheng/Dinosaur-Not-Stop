@@ -6,7 +6,7 @@ import Infinite from './scene/infinite.js';
 import Instruction from './scene/instruction.js';
 import Settings from './scene/settings.js';
 import Tools from './scene/tools.js';
-import { systemInfo } from '../utils/global';
+import { systemInfo, scaleX, scaleY } from '../utils/global';
 export default class Game {
   constructor() {
     this.initSettings();
@@ -58,17 +58,21 @@ export default class Game {
   initSettings() {
     let getMusicState = wx.getStorageSync('musicEnabled');
     let getBackgroundMusic = wx.getStorageSync('backgroundMusicEnabled');
-    let getHistoryRank = wx.getStorageSync('historyRank')
+    let getHistoryRank = wx.getStorageSync('historyRank');
+    let getTrackView = wx.getStorageSync('trackView');
     if (getMusicState == ''){
-      wx.setStorageSync('musicEnabled', true)
+      wx.setStorageSync('musicEnabled', true);
     }
     if (getBackgroundMusic == ''){
-      wx.setStorageSync('backgroundMusicEnabled', true)  
+      wx.setStorageSync('backgroundMusicEnabled', true);
     }
     if (getHistoryRank == ''){
-      let scores = JSON.stringify([0,0,0,0,0,0,0,0,0,0])
-      wx.setStorageSync('historyRank', scores)
-    } 
+      let scores = JSON.stringify([0,0,0,0,0,0,0,0,0,0]);
+      wx.setStorageSync('historyRank', scores);
+    }
+    if (getTrackView == '') {
+      wx.setStorageSync('trackView', false);
+    }
   }
   loop() {
     // 清除整个画布

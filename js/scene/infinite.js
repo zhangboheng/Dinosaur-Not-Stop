@@ -108,6 +108,7 @@ export default class Infinite {
       width: 93 * scaleX,
       height: 65 * scaleY,
       gravity: 0.4 * scaleY,
+      originalGravity: 0.4 * scaleY,
       jumpHeight: -10 * scaleY,
       velocityY: 0,
       isOnGround: true,
@@ -182,17 +183,17 @@ export default class Infinite {
   // 绘制背景
   drawBackground() {
     if (this.backgroundImage.complete) {
-      this.context.drawImage(this.backgroundImage, this.backgroundInfo.x, this.dinoInfo.groundY, this.backgroundImage.width * scaleX, this.canvas.height);
+      this.context.drawImage(this.backgroundImage, this.backgroundInfo.x, this.dinoInfo.groundY, this.backgroundImage.width / 2, this.canvas.height);
       // 绘制第二张图片以实现循环滚动效果
       if (this.backgroundInfo.x < 0) {
-        this.context.drawImage(this.backgroundImage, this.backgroundInfo.x + this.backgroundImage.width * scaleX, this.dinoInfo.groundY, this.backgroundImage.width * scaleX, this.canvas.height);
+        this.context.drawImage(this.backgroundImage, this.backgroundInfo.x + this.backgroundImage.width / 2, this.dinoInfo.groundY, this.backgroundImage.width / 2, this.canvas.height);
       }
     }
   }
   // 更新背景状态
   updateBackground() {
     this.backgroundInfo.x -= this.backgroundInfo.speed;
-    if (this.backgroundInfo.x <= -this.backgroundImage.width * scaleX) {
+    if (this.backgroundInfo.x <= -this.backgroundImage.width / 2) {
       this.backgroundInfo.x = 0;
     }
   }
@@ -205,7 +206,7 @@ export default class Infinite {
   drawBlackScreen() {
     if (this.isScreenDark) {
       this.context.fillStyle = `rgba(0, 0, 0, ${this.screenDarkness * 0.8})`;
-      this.context.fillRect(0, this.dinoInfo.groundY, this.canvas.width, this.canvas.height);
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
   }
   // 更新黑色遮罩
@@ -369,8 +370,8 @@ export default class Infinite {
           x: lastTrapX,
           y: this.canvas.height - this.groundHeight,
           imageIndex: imageIndex,
-          width: trapImg.width * scaleX, // 为陷阱设置宽度
-          height: trapImg.height * scaleY // 为陷阱设置高度
+          width: 32 * scaleX, // 为陷阱设置宽度
+          height: (trapImg.height / 8) * scaleY // 为陷阱设置高度
         });
       }
       // 重置计时器
@@ -399,8 +400,9 @@ export default class Infinite {
   }
   // 更新小恐龙
   updateDino() {
+    let getTrackView = wx.getStorageSync('trackView');
     // 更新 Y 视角
-    if (this.dinoInfo.y < this.groundHeight) {
+    if (this.dinoInfo.y < this.groundHeight && getTrackView) {
       this.dinoInfo.groundY = this.groundHeight - this.dinoInfo.y
     } else {
       this.dinoInfo.groundY = 0;
@@ -413,7 +415,7 @@ export default class Infinite {
     this.dinoInfo.velocityY += this.dinoInfo.gravity;
     this.dinoInfo.y += this.dinoInfo.velocityY;
     if (this.score - this.distanceMoon > 1000 && this.useMoon) {
-      this.dinoInfo.gravity = 0.4;
+      this.dinoInfo.gravity = 0.4 * scaleY;
       this.useMoon = false;
     }
     if (this.score - this.distanceWing >= 2000 && this.useWing) {
@@ -474,7 +476,7 @@ export default class Infinite {
         };
         // 检查小恐龙是否与三角形的每条边发生碰撞
         if (doPolygonsIntersect(dinoPolygon, trapTriangle)) {
-          if (this.useDrug == false && this.score - this.distanceDrug >= 300) {
+          if (!this.useDrug && this.score - this.distanceDrug >= 300) {
             soundManager.play('crack');
             this.gameOver = true;
             // 游戏结束时
@@ -507,7 +509,7 @@ export default class Infinite {
         };
         // 使用SAT检测碰撞
         if (doPolygonsIntersect(dinoPolygon, trapPolygon)) {
-          if (this.useDrug == false && this.score - this.distanceDrug >= 300) {
+          if (!this.useDrug && this.score - this.distanceDrug >= 300) {
             soundManager.play('crack');
             this.gameOver = true;
             backgroundMusic.stopBackgroundMusic();
@@ -538,8 +540,7 @@ export default class Infinite {
         this.dinoInfo.y + this.dinoInfo.height - 20 * scaleY > this.poisonMushroom.y) {
         // 碰撞发生
         this.poisonMushroom.obtained = true;
-        this.originalGravity = this.dinoInfo.gravity;
-        this.dinoInfo.gravity /= 2;
+        this.dinoInfo.gravity = 0.4 * scaleY / 2;
         this.poisonMushroom.poisonMushroomEffectDuration = 300;
         soundManager.play('get');
       }
@@ -618,7 +619,7 @@ export default class Infinite {
     if (this.poisonMushroom.poisonMushroomEffectDuration > 0) {
       this.poisonMushroom.poisonMushroomEffectDuration--;
       if (this.poisonMushroom.poisonMushroomEffectDuration === 0) {
-        this.dinoInfo.gravity = this.originalGravity;
+        this.dinoInfo.gravity = 0.4 * scaleY;
       }
     }
     if (Math.random() < 0.382 && this.score - this.poisonMushroom.lastMushroomScore >= 4000) {
@@ -659,7 +660,7 @@ export default class Infinite {
 
   // 绘制隐身药道具显示
   drawDrug() {
-    if (this.useDrug == false && this.distanceDrug == 0 && typeof this.getDrugAccess != 'string' && this.getDrugAccess != 0) {
+    if (!this.useDrug && this.distanceDrug == 0 && typeof this.getDrugAccess != 'string' && this.getDrugAccess != 0) {
       drawRoundedRect(this.context, -10 * scaleX, this.canvas.height - this.road.height + 20 * scaleY, 100 * scaleX, 40 * scaleY, 10 * scaleY, '#f5d659', 'black', 3);
       if (this.drugImage.complete) {
         this.context.drawImage(this.drugImage, 10, this.canvas.height - this.road.height + 28 * scaleY, 24 * scaleY, 24 * scaleY);
@@ -680,7 +681,7 @@ export default class Infinite {
   }
   // 绘制月球药道具显示
   drawMoon() {
-    if (this.useMoon == false && typeof this.getMoonAccess != 'string' && this.getMoonAccess != 0) {
+    if (!this.useMoon && typeof this.getMoonAccess != 'string' && this.getMoonAccess != 0 && this.distanceMoon == 0) {
       drawRoundedRect(this.context, -10 * scaleX, this.canvas.height - this.road.height + 70 * scaleY, 100 * scaleX, 40 * scaleY, 10 * scaleY, '#f5d659', 'black', 3);
       if (this.moonImage.complete) {
         this.context.drawImage(this.moonImage, 10, this.canvas.height - this.road.height + 78 * scaleY, 24 * scaleY, 24 * scaleY);
@@ -701,7 +702,7 @@ export default class Infinite {
   }
   // 绘制飞天翼道具显示
   drawWing() {
-    if (this.score <= 800 && this.useWing == false && typeof this.getWingAccess != 'string' && this.getWingAccess != 0) {
+    if (this.score <= 800 && !this.useWing && typeof this.getWingAccess != 'string' && this.getWingAccess != 0) {
       drawRoundedRect(this.context, -10 * scaleX, this.canvas.height - this.road.height + 120 * scaleY, 100 * scaleX, 40 * scaleY, 10 * scaleY, '#f5d659', 'black', 3);
       if (this.wingImage.complete) {
         this.context.drawImage(this.wingImage, 10, this.canvas.height - this.road.height + 128 * scaleY, 24 * scaleY, 24 * scaleY);
@@ -797,7 +798,7 @@ export default class Infinite {
     if (!this.gameOver) {
       // 使用隐身药道具点击识别
       if (touchX >= 0 && touchX <= 90 * scaleX &&
-        touchY >= this.canvas.height - this.road.height + 20 * scaleY && touchY <= this.canvas.height - this.road.height + 60 * scaleY && this.drugCount >= 1 && this.useDrug == false && this.distanceDrug == 0) {
+        touchY >= this.canvas.height - this.road.height + 20 * scaleY && touchY <= this.canvas.height - this.road.height + 60 * scaleY && this.drugCount >= 1 && !this.useDrug && this.distanceDrug == 0) {
         this.useDrug = true;
         this.distanceDrug = this.score;
         this.drugCount--;
@@ -806,7 +807,7 @@ export default class Infinite {
       }
       // 使用月球药道具点击识别
       if (touchX >= 0 && touchX <= 90 * scaleX &&
-        touchY >= this.canvas.height - this.road.height + 70 * scaleY && touchY <= this.canvas.height - this.road.height + 110 * scaleY && this.moonCount >= 1 && this.useMoon == false && this.distanceMoon == 0) {
+        touchY >= this.canvas.height - this.road.height + 70 * scaleY && touchY <= this.canvas.height - this.road.height + 110 * scaleY && this.moonCount >= 1 && !this.useMoon && this.distanceMoon == 0) {
         this.useMoon = true;
         this.dinoInfo.gravity = this.dinoInfo.gravity / 6;
         this.distanceMoon = this.score;
@@ -816,7 +817,7 @@ export default class Infinite {
       }
       // 使用天使翼道具点击识别
       if (touchX >= 0 && touchX <= 90 * scaleX &&
-        touchY >= this.canvas.height - this.road.height + 120 * scaleY && touchY <= this.canvas.height - this.road.height + 160 * scaleY && this.wingCount >= 1 && this.useWing == false && this.distanceWing == 0) {
+        touchY >= this.canvas.height - this.road.height + 120 * scaleY && touchY <= this.canvas.height - this.road.height + 160 * scaleY && this.wingCount >= 1 && !this.useWing && this.distanceWing == 0) {
         this.useWing = true;
         this.distanceWing = this.score;
         this.wingCount--;
@@ -827,9 +828,9 @@ export default class Infinite {
       if (this.dinoInfo.isOnGround || this.dinoInfo.canDoubleJump || (this.dinoInfo.canTripleJump && !this.dinoInfo.isOnGround)) {
         this.dinoInfo.velocityY = this.dinoInfo.jumpHeight;
         if (!this.dinoInfo.isOnGround) {
-          if (this.dinoInfo.canDoubleJump && this.useWing == false) {
+          if (this.dinoInfo.canDoubleJump && !this.useWing) {
             this.dinoInfo.canDoubleJump = false; // 标记二段跳已使用
-          } else if (this.dinoInfo.canTripleJump && this.useWing == false) {
+          } else if (this.dinoInfo.canTripleJump && !this.useWing) {
             this.dinoInfo.canTripleJump = false; // 标记三段跳已使用
             this.powerUp.powerUpCount = 0; // 使用后将道具数量设为0
             this.powerUp.obtained = false; // 获得道具
@@ -877,6 +878,7 @@ export default class Infinite {
       width: 93 * scaleX,
       height: 65 * scaleY,
       gravity: 0.4 * scaleY,
+      originalGravity: 0.4 * scaleY,
       jumpHeight: -10 * scaleY,
       velocityY: 0,
       isOnGround: true,

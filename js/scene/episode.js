@@ -49,7 +49,7 @@ export default class Episode {
   drawSkipStage() {
     this.context.save();
     this.context.font = `${20 * scaleX}px Arial`;
-    this.context.fillStyle = '#ffffff99';
+    this.context.fillStyle = '#00000099';
     this.context.textAlign = 'center';
     this.context.textAlign = 'center';
     this.context.fillText('跳过 >>', this.canvas.width / 2, this.canvas.height * 0.9);
