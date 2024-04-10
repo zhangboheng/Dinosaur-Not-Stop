@@ -174,7 +174,7 @@ export default class Prison {
       this.isScreenDark = true;
       this.screenDarkness = Math.min((this.score - 3000) / (3300 - 3000), 1);
     } else if (this.score >= 3350 && this.score < 3650) {
-      this.screenDarkness = Math.max(1 - (this.score - 3350) / (3650 - 335), 0);
+      this.screenDarkness = Math.max(1 - (this.score - 3350) / (3650 - 3350), 0);
     } else if (this.score >= 3650) {
       this.screenDarkness = 0;
     }

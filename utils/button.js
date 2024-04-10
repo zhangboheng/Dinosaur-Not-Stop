@@ -1,4 +1,4 @@
-import { scaleX, scaleY } from './global';
+import { menuButtonInfo, scaleX, scaleY } from './global';
 // 带有描边的按钮公共方法
 export function drawRoundedRect(context, x, y, width, height, radius, fillColor, strokeColor, strokeWidth) {
   context.save();
@@ -96,20 +96,29 @@ export function drawRoundedRectNoStrike(ctx, x, y, width, height, radius, stroke
   ctx.restore();
 }
 
-export function drawRoundedRectWithTail(context, x, y, width, height, borderRadius, tailWidth, tailHeight) {
+// 图标下面的文字
+export function drawImageBtn(context, rankImage, x = 10, y = menuButtonInfo.top, scaleX, scaleY, text = '成绩榜') {
+  const imageSize = {
+    width: 32 * scaleY,
+    height: 32 * scaleY
+  };
+
+  if (rankImage.complete) {
+    context.drawImage(rankImage, x, y, imageSize.width, imageSize.height);
+  }
   context.save();
-  // 绘制圆角矩形的基本部分
-  context.beginPath();
-  context.moveTo(x + borderRadius, y);
-  context.lineTo(x + width - borderRadius, y);
-  context.lineTo(x + width - 4, y + height / 2 - tailHeight / 2);
-  context.lineTo(x + width + tailWidth - 4, y + height / 2);
-  context.lineTo(x + width, y + height - borderRadius);
-  context.lineTo(x + width - 4, y + height / 2 + tailHeight / 2);
-  context.lineTo(x + borderRadius, y + height);
-  context.arcTo(x, y + height, x, y + height - borderRadius, borderRadius);
-  context.lineTo(x, y + borderRadius);
-  context.arcTo(x, y, x + borderRadius, y, borderRadius);
-  context.closePath();
+  context.fillStyle = 'black';
+  context.font = `bold ${10 * scaleX}px Arial`;
+  context.textAlign = 'center';
+  context.fillText(text, x + (imageSize.width) / 2, y + imageSize.height + 10 * scaleX);
   context.restore();
+
+  const imagePosition = {
+    x: x,
+    y: y,
+    width: imageSize.width,
+    height: imageSize.height
+  };
+
+  return imagePosition;
 }

@@ -735,6 +735,12 @@ export default class Infinite {
     this.drawRoad();
     // 绘制移动的陷阱
     this.drawTraps();
+    // 绘制道具显示
+    this.drawProps();
+    // 绘制毒蘑菇
+    this.drawMushroom();
+    // 绘制 UFO
+    this.drawUFO();
     // 绘制小恐龙
     this.drawDino();
     // 绘制隐身药道具
@@ -743,12 +749,6 @@ export default class Infinite {
     this.drawMoon();
     // 绘制飞天翼道具
     this.drawWing();
-    // 绘制道具显示
-    this.drawProps();
-    // 绘制毒蘑菇
-    this.drawMushroom();
-    // 绘制 UFO
-    this.drawUFO()
     // 如果消息需要显示
     this.drawMessageBox();
     // 绘制黑色遮罩

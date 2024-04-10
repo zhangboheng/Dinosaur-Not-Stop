@@ -1,6 +1,5 @@
 import {
   createBackButton,
-  drawRoundedRectWithTail
 } from '../../utils/button';
 import { menuButtonInfo, scaleX, scaleY } from '../../utils/global';
 export default class Choose {

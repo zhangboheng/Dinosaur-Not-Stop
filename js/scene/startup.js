@@ -1,5 +1,6 @@
 import {
-  drawRoundedRect
+  drawRoundedRect,
+  drawImageBtn
 } from '../../utils/button';
 import {
   drawDialog
@@ -20,23 +21,22 @@ export default class Startup {
     // 道具屋子图片
     this.storeImage = new Image();
     this.storeImage.src = 'image/primitive.png';
+    // 设置图片
+    this.settingsImage = new Image();
+    this.settingsImage.src = 'image/settings.png';
+    // 玩法说明
+    this.planningImage = new Image();
+    this.planningImage.src = 'image/planning.png';
     /* 图片加载区域结束 */
     /* 按钮设置开始 */
-    // 设置开始按钮的基础设置
+    this.rankBtn = '';
+    this.toolBtn = '';
+    this.insBtn = '';
+    this.settingsBtn = '';
     this.buttonWidth = 180 * scaleX;
     this.buttonHeight = 50 * scaleY;
     this.buttonX = (this.canvas.width - this.buttonWidth) / 2;
-    this.buttonY = this.canvas.height - 240 * scaleY;
-    // 设置玩法说明按钮的基础设置
-    this.secondButtonWidth = this.buttonWidth;
-    this.secondButtonHeight = this.buttonHeight;
-    this.secondButtonX = this.buttonX;
-    this.secondButtonY = this.buttonY + this.buttonHeight + 10 * scaleY;
-    // 设置游戏设置按钮的基础设置
-    this.thirdButtonWidth = this.buttonWidth;
-    this.thirdButtonHeight = this.buttonHeight;
-    this.thirdButtonX = this.buttonX;
-    this.thirdButtonY = this.buttonY + this.buttonHeight + this.secondButtonHeight + 20 * scaleY;
+    this.buttonY = this.canvas.height - 120 * scaleY;
     /* 按钮设置结束 */
     this.closeButton = '';
     this.drawAd();
@@ -79,44 +79,31 @@ export default class Startup {
   }
   // 绘制历史成绩图片
   drawRankImage() {
-    if (this.rankImage.complete) {
-      this.context.drawImage(this.rankImage, 10, menuButtonInfo.top, 32 * scaleX, 32 * scaleY);
-    }
-    this.context.save();
-    this.context.fillStyle = 'black';
-    this.context.font = `bold ${10 * scaleX}px Arial`;
-    this.context.textAlign = 'center';
-    this.context.fillText('成绩榜', 10 + (32 * scaleX) / 2, menuButtonInfo.top + 32 * scaleY + 10 * scaleX);
-    this.context.restore();
+    this.rankBtn = drawImageBtn(this.context, this.rankImage, 10, menuButtonInfo.top, scaleX, scaleY, '成绩榜');
   }
   // 绘制道具屋图片
   drawToolsImage() {
-    if (this.storeImage.complete) {
-      this.context.drawImage(this.storeImage, 10, menuButtonInfo.top + 32 * scaleY + 20 * scaleX, 32 * scaleX, 32 * scaleY);
-    }
-    this.context.save();
-    this.context.fillStyle = 'black';
-    this.context.font = `bold ${10 * scaleX}px Arial`;
-    this.context.textAlign = 'center';
-    this.context.fillText('道具屋', 10 + (32 * scaleX) / 2,  menuButtonInfo.top + 32 * scaleY * 2 + 30 * scaleX);
-    this.context.restore();
+    this.toolBtn = drawImageBtn(this.context, this.storeImage, 10, menuButtonInfo.top + 42 * scaleY + 10 * scaleX, scaleX, scaleY, '道具屋');
+  }
+  // 绘制玩法说明
+  drawInstruction() {
+    this.insBtn = drawImageBtn(this.context, this.planningImage, 10, menuButtonInfo.top + 84 * scaleY + 20 * scaleX, scaleX, scaleY, '说明');
+  }
+  // 游戏设置说明
+  drawSettings() {
+    this.settingsBtn = drawImageBtn(this.context, this.settingsImage, 10, menuButtonInfo.top + 126 * scaleY + 30 * scaleX, scaleX, scaleY, '设置');
   }
   // 绘制按钮
   drawStartBtn() {
     this.context.save();
     // 开始按钮
-    drawRoundedRect(this.context, this.buttonX, this.buttonY, this.buttonWidth, this.buttonHeight, 10, '#f5d659', 'black', 3);
-    drawRoundedRect(this.context, this.secondButtonX, this.secondButtonY, this.secondButtonWidth, this.secondButtonHeight, 10, '#f5d659', 'black', 3);
-    drawRoundedRect(this.context, this.thirdButtonX, this.thirdButtonY, this.thirdButtonWidth, this.thirdButtonHeight, 10, '#f5d659', 'black', 3);
+    drawRoundedRect(this.context, this.buttonX, this.buttonY, this.buttonWidth, this.buttonHeight, 10, '#f5d65999', 'black', 3);
     // 按钮文字
     this.context.fillStyle = 'black';
     this.context.font = `bold ${16 * scaleX}px Arial`;
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
-    // 将文本的y坐标设置为按钮的垂直中心
     this.context.fillText('开始游戏', this.buttonX + this.buttonWidth / 2, this.buttonY + this.buttonHeight / 2 + 2 * scaleY);
-    this.context.fillText('玩法说明', this.secondButtonX + this.secondButtonWidth / 2, this.secondButtonY + this.secondButtonHeight / 2 + 2 * scaleY);
-    this.context.fillText('游戏设置', this.thirdButtonX + this.thirdButtonWidth / 2, this.thirdButtonY + this.thirdButtonHeight / 2 + 2 * scaleY);
     this.context.restore();
   }
   // 绘制健康游戏公告
@@ -148,6 +135,10 @@ export default class Startup {
     this.drawRankImage();
     // 绘制道具屋图片
     this.drawToolsImage();
+    // 绘制玩法说明
+    this.drawInstruction();
+    // 游戏设置说明
+    this.drawSettings();
     // 绘制按钮
     this.drawStartBtn();
     // 绘制健康游戏公告
@@ -157,46 +148,43 @@ export default class Startup {
   }
   touchHandler(e) {
     const touch = e.touches[0];
+    // 点击开始按钮
     if (touch.clientX >= this.buttonX && touch.clientX <= this.buttonX + this.buttonWidth &&
       touch.clientY >= this.buttonY && touch.clientY <= this.buttonY + this.buttonHeight && !this.showDialogOrNot) {
       this.game.switchScene(new this.game.choose(this.game));
     }
-    // 获取成绩榜图片的位置和尺寸
-    let imgX = 10;
-    let imgY = menuButtonInfo.top;
-    let imgWidth = 32 * scaleX;
-    let imgHeight = 42 * scaleY;
     // 判断点击是否在成绩榜区域内
-    if (touch.clientX >= imgX && touch.clientX <= imgX + imgWidth && touch.clientY >= imgY && touch.clientY <= imgY + imgHeight && !this.showDialogOrNot) {
+    if (touch.clientX >= this.rankBtn.x && touch.clientX <= this.rankBtn.x + this.rankBtn.width && touch.clientY >= this.rankBtn.y && touch.clientY <= this.rankBtn.y + this.rankBtn.height && !this.showDialogOrNot) {
       this.showDialogOrNot = true;
       // 点击在图片区域内
       this.drawRankDialog();
-    }
-    // 判断点击是否在道具屋区域内
-    if (touch.clientX >= imgX && touch.clientX <= imgX + imgWidth && touch.clientY >= imgY + imgHeight + 20 * scaleX && touch.clientY <= imgY + imgHeight * 2 + 20 * scaleX && !this.showDialogOrNot) {
-      this.game.switchScene(new this.game.tools(this.game));
-    }
-    // 检测是否点击了第二个按钮
-    if (touch.clientX >= this.secondButtonX && touch.clientX <= this.secondButtonX + this.secondButtonWidth &&
-      touch.clientY >= this.secondButtonY && touch.clientY <= this.secondButtonY + this.secondButtonHeight && !this.showDialogOrNot) {
-      this.game.switchScene(new this.game.instruction(this.game));
-    }
-    // 检测是否点击了第三个按钮
-    if (touch.clientX >= this.thirdButtonX && touch.clientX <= this.thirdButtonX + this.thirdButtonWidth &&
-      touch.clientY >= this.thirdButtonY && touch.clientY <= this.thirdButtonY + this.thirdButtonHeight && !this.showDialogOrNot) {
-      this.game.switchScene(new this.game.settings(this.game));
     }
     // 点击关闭按钮
     if (touch.clientX >= this.closeButton.closeButtonX - this.closeButton.closeButtonSize && touch.clientX <= this.closeButton.closeButtonX && touch.clientY >= this.closeButton.closeButtonY && touch.clientY <= this.closeButton.closeButtonY + this.closeButton.closeButtonSize) {
       this.showDialogOrNot = false;
     }
+    // 判断点击是否在道具屋区域内
+    if (touch.clientX >= this.toolBtn.x && touch.clientX <= this.toolBtn.x + this.toolBtn.width && touch.clientY >= this.toolBtn.y && touch.clientY <= this.toolBtn.y + this.toolBtn.height && !this.showDialogOrNot) {
+      this.game.switchScene(new this.game.tools(this.game));
+    }
+    // 判断是否点击了玩法说明
+    if (touch.clientX >= this.insBtn.x && touch.clientX <= this.insBtn.x + this.insBtn.width && touch.clientY >= this.insBtn.y && touch.clientY <= this.insBtn.y + this.insBtn.height && !this.showDialogOrNot) {
+      this.game.switchScene(new this.game.instruction(this.game));
+    }
+    // 判断是否点击了设置玩法说明
+    if (touch.clientX >= this.settingsBtn.x && touch.clientX <= this.settingsBtn.x + this.settingsBtn.width && touch.clientY >= this.settingsBtn.y && touch.clientY <= this.settingsBtn.y + this.settingsBtn.height && !this.showDialogOrNot){
+      this.game.switchScene(new this.game.settings(this.game));
+    }
+    //
   }
   // 页面销毁机制
   destroy() {
     this.customAd.destroy();
     this.customAd = '';
     this.backgroundImage.src = '';
-    this.rankImage.src = '';
-    this.storeImage.src = '';
+    this.rankBtn = '';
+    this.toolBtn = '';
+    this.insBtn = '';
+    this.settingsBtn = '';
   }
 }
