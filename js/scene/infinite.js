@@ -786,11 +786,6 @@ export default class Infinite {
       }
       this.buttonStartInfo = drawIconButton(this.context, "重新开始", this.canvas.width / 2, this.canvas.height / 2 + 40 * scaleY);
       this.buttonShareInfo = drawIconButton(this.context, "分享好友", this.canvas.width / 2, this.canvas.height / 2 + 110 * scaleY);
-      if (this.interstitialAd) {
-        this.interstitialAd.show().catch((err) => {
-          console.error('插屏广告显示失败', err)
-        })
-      }
     }
   }
   touchHandler(e) {
@@ -858,6 +853,11 @@ export default class Infinite {
         touchY >= this.buttonStartInfo.y && touchY <= this.buttonStartInfo.y + this.buttonStartInfo.height) {
         updateHighScores(6000 + this.score);
         this.resetGame();
+        if (this.interstitialAd) {
+          this.interstitialAd.show().catch((err) => {
+            console.error('插屏广告显示失败', err)
+          })
+        }
       }
       if (touchX >= this.buttonShareInfo.x && touchX <= this.buttonShareInfo.x + this.buttonShareInfo.width &&
         touchY >= this.buttonShareInfo.y && touchY <= this.buttonShareInfo.y + this.buttonShareInfo.height) {
